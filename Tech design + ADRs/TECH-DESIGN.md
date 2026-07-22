@@ -1,9 +1,10 @@
 # Technical Design Document: PCE — Sistema de Puesto de Comando y Administración de Emergencias
 
 **Tipo de proyecto:** Greenfield.
-**Design.md disponible:** No, en formato Markdown — pero se usó `wireflame 0.1.pptx` (5 slides, 4
-flujos: activación, vista COE, mapa geoespacial, relevo de mando, cada uno con 3 variantes de
-exploración visual) como equivalente, extraído y analizado como insumo de diseño junto con el PRD.
+**Design.md disponible:** Sí — 4 flujos (Activación, Vista COE, Mapa geoespacial, Relevo de mando),
+cada uno con la variante de wireframe elegida por Renzo y sus huecos de diseño ya resueltos
+(2026-07-21). El modelo de datos de este documento se deriva de `Design.md`, no ya del
+`wireflame 0.1.pptx` crudo.
 
 ## Resumen
 
@@ -18,10 +19,13 @@ componentes, el modelo de datos y la estrategia de resiliencia descritas abajo.
 ## Arquitectura de componentes
 
 - **Cliente PMM** — PWA offline-first (React + Vite, `vite-plugin-pwa`) para tablet GETAC. Guarda
-  localmente y encola escrituras (evaluación inicial, relevo de mando, marcador de incidente)
-  cuando no hay señal.
+  localmente y encola escrituras (activación con tipo de incidente, evaluación inicial, relevo de
+  mando, marcador de incidente) cuando no hay señal.
 - **Cliente COE** — web app liviana (React + Vite), siempre online, sin lógica de almacenamiento
-  local. Actualiza su dashboard por polling cada 5 segundos sobre el backend.
+  local. Actualiza su dashboard por polling cada 5 segundos sobre el backend. Navegación según
+  `Design.md`: pestañas **Resumen / Mapa / Unidades / Comunicaciones / Cadena de mando**, menú
+  aparte del header para **Pre-PAI** y **Reportes**, y acciones rápidas persistentes (**Relevo**,
+  **Desactivar**).
 - **Backend (API principal)** — FastAPI (Python), expone la API REST/JSON que consumen ambos
   clientes: activaciones, convocatorias, unidades, Pre-PAI, relevos, marcadores de incidente,
   reportes de cierre.
@@ -50,22 +54,29 @@ Cliente COE (online, polling)─┘                              ↑
 
 ## Modelo de datos
 
-Entidades principales, derivadas del PRD y del wireframe (ADR 2):
+Entidades principales, derivadas de `Design.md` (ADR 2):
 
 - **Activacion** — tipo de emergencia (aeronáutica/epidemiológica/estructural/MATPEL), nivel de
-  alerta (I/II/III, o campo `tipo_alerta` 1-10 solo para aeronáutica), hora de activación, estado.
+  alerta (I/II/III, o campo `tipo_alerta` 1-10 solo para aeronáutica), **tipo de incidente**
+  (capturado en este paso, Flujo A — `Design.md`), hora de activación, estado.
 - **ConvocatoriaMiembro** — miembro convocado (COE o PMM), rol, activación asociada, hora de
   confirmación.
-- **EvaluacionInicial** — tipo de incidente, magnitud, riesgos secundarios, activación asociada,
-  registrada por el CI.
+- **EvaluacionInicial** — magnitud, riesgos secundarios, activación asociada, registrada por el CI.
+  El tipo de incidente ya no vive acá: se hereda de `Activacion` (Flujo B, `Design.md`).
 - **RelevoMando** — instancia (COE o PMM/CI), responsable saliente, responsable entrante, hora.
+  Listado histórico consultable desde la pestaña "Cadena de mando" del cliente COE (Flujo D,
+  `Design.md`).
 - **Unidad** — identificador (R1, R2, R8-R13, CR9), estado (OK / F.S. / N.A.), última actualización.
-- **MarcadorIncidente** — coordenada de cuadrícula, tipo de incidente, riesgo, hora, activación
-  asociada.
+- **MarcadorIncidente** — coordenada de cuadrícula, tipo de incidente, riesgo, hora, capa a la que
+  pertenece (Cuadrícula / Incidente / Accesos / Unidades-fase 2), **estado de sincronización**
+  (sincronizado / pendiente, mostrado como badge junto al marcador — Flujo C, `Design.md`),
+  activación asociada.
 - **PrePAI** — plantilla por escenario (sector, riesgos, contactos de emergencia, recursos,
-  estrategias de control, plano/acceso).
+  estrategias de control, plano/acceso). Accesible desde el menú aparte del cliente COE, no desde
+  las pestañas principales (`Design.md`).
 - **ReporteCierre** — snapshot exportable de una activación cerrada, con esquema de columnas
-  equivalente al de los 4 Excel actuales (mismas columnas, mismo orden, por categoría).
+  equivalente al de los 4 Excel actuales (mismas columnas, mismo orden, por categoría). Accesible
+  desde el mismo menú aparte que Pre-PAI.
 - **LogAuditoria** — registro append-only de todo cambio relevante (quién, cuándo, sobre qué
   entidad), independiente de las tablas de negocio.
 
@@ -73,8 +84,8 @@ Entidades principales, derivadas del PRD y del wireframe (ADR 2):
 
 ### Activación de emergencia (Alerta I/II/III)
 
-- [ ] Registrar una activación exige nivel de alerta y tipo/magnitud antes de notificar (según el
-      flujo de 3 pasos del wireframe: nivel → tipo → notificar).
+- [ ] Registrar una activación exige nivel de alerta, tipo de incidente y la convocatoria dividida
+      en columnas COE/PMM antes de notificar (Flujo A, variante 1c de `Design.md`).
 - [ ] Alerta II o III convoca automáticamente a los miembros de COE y PMM que corresponden según el
       Plan de Emergencia (sección 5 del PRD), sin que el usuario los seleccione manualmente uno por
       uno.
@@ -83,15 +94,17 @@ Entidades principales, derivadas del PRD y del wireframe (ADR 2):
 
 ### Evaluación inicial y transmisión al COE
 
-- [ ] El CI puede registrar tipo, magnitud y riesgos secundarios desde el cliente PMM, incluso sin
-      conexión (se encola localmente).
-- [ ] Una vez sincronizada, la evaluación inicial aparece en el dashboard COE en un máximo de 5
-      segundos (ADR 5).
+- [ ] El CI puede registrar magnitud y riesgos secundarios desde el cliente PMM, incluso sin
+      conexión (se encola localmente) — el tipo de incidente ya quedó fijado en la activación y no
+      se vuelve a pedir.
+- [ ] Una vez sincronizada, la evaluación inicial aparece en el dashboard COE (pestaña Resumen) en
+      un máximo de 5 segundos (ADR 5).
 
 ### Biblioteca de Pre-PAI
 
 - [ ] Los Pre-PAI existentes (mínimo: aeronáutico, GLP, médico) están disponibles y activables desde
-      el sistema en menos de 30 segundos (criterio ya fijado en el PRD, sección 4).
+      el menú aparte del cliente COE en menos de 30 segundos (criterio ya fijado en el PRD, sección
+      4; ubicación confirmada en `Design.md`).
 - [ ] Activar un Pre-PAI precarga sector, riesgos, contactos, recursos y estrategias de control sin
       que el usuario deba re-ingresarlos.
 
@@ -99,8 +112,10 @@ Entidades principales, derivadas del PRD y del wireframe (ADR 2):
 
 - [ ] Registrar un relevo (COE o PMM/CI) exige responsable saliente, entrante y hora, y queda
       inmutable una vez confirmado (ADR 2, ADR 6).
-- [ ] El relevo rápido es alcanzable en 1 clic desde cualquier pantalla del dashboard COE (según la
-      variante 1l del wireframe).
+- [ ] El relevo rápido es alcanzable en 1 clic desde cualquier pantalla del dashboard COE (Flujo D,
+      variante 1l de `Design.md`).
+- [ ] El historial completo de relevos (COE y PMM/CI, con hora, saliente y entrante) es consultable
+      en la pestaña dedicada "Cadena de mando" del cliente COE.
 
 ### Panel de estado de unidades
 
@@ -110,16 +125,20 @@ Entidades principales, derivadas del PRD y del wireframe (ADR 2):
 ### Mapa geoespacial — marcador de incidente
 
 - [ ] El CI puede marcar la ubicación del incidente sobre el mapa cuadriculado desde el cliente PMM
-      incluso sin señal; el marcador queda guardado localmente con indicador visible de "sin
-      sincronizar" hasta reconectar (según el estado "SIN SEÑAL" del wireframe, flujo C).
-- [ ] Al reconectar, el marcador se sincroniza automáticamente sin intervención manual del usuario.
+      incluso sin señal; el marcador queda guardado localmente con un badge visible de "sin
+      sincronizar" junto al marcador hasta reconectar (Flujo C, variante 1i de `Design.md`).
+- [ ] Al reconectar, el marcador se sincroniza automáticamente y el badge desaparece, sin
+      intervención manual del usuario.
+- [ ] Las capas del mapa (Cuadrícula, Incidente, Accesos, Unidades-fase 2) se activan/desactivan
+      independientemente sin recargar la pantalla.
 - [ ] 100% de los incidentes Alerta II/III quedan con ubicación marcada en el mapa (criterio ya
       fijado en el PRD, sección 4).
 
 ### Modo offline (PMM)
 
-- [ ] Perder conectividad no bloquea ninguna de las acciones críticas del PMM (evaluación inicial,
-      relevo de mando, marcador de incidente) — todas quedan encoladas localmente (PRD, sección 7).
+- [ ] Perder conectividad no bloquea ninguna de las acciones críticas del PMM (activación con tipo
+      de incidente, evaluación inicial, relevo de mando, marcador de incidente) — todas quedan
+      encoladas localmente (PRD, sección 7).
 - [ ] Los registros generados offline se sincronizan como inserciones nuevas, nunca sobrescriben un
       registro existente (ADR 6).
 
@@ -128,6 +147,8 @@ Entidades principales, derivadas del PRD y del wireframe (ADR 2):
 - [ ] El reporte exportado de una activación cerrada reproduce las mismas columnas y el mismo orden
       que el Excel actual de su categoría (Aeronáutica, Epidemiológica, Estructural/Incidentes o
       MATPEL), confirmado con Renzo el 2026-07-21.
+- [ ] El reporte es accesible desde el menú aparte del cliente COE (`Design.md`), no desde las
+      pestañas principales del dashboard en vivo.
 
 ## Riesgos técnicos abiertos
 
