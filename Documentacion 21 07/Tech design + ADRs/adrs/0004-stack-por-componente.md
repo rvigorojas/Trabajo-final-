@@ -9,14 +9,14 @@ Aceptado
 El equipo que construye el PCE es pequeño (1-3 personas), con experiencia previa en backend fuera
 del ecosistema JS (Python) y en frontend web estándar. El frontend queda forzado a JavaScript/
 TypeScript por ser la única opción viable para una PWA offline-first en navegador (cliente PMM,
-ADR 1) más el cliente COE. El backend y el servicio de sincronización (ADR 1) se construyen en
+ADR 1) más el cliente COE. El backend, incluido su módulo de sincronización (ADR 1), se construye en
 Python para aprovechar el conocimiento ya existente del equipo y evitar sumar un segundo lenguaje
 de servidor a mantener con un equipo chico.
 
 ## Decisión
 
-- **Backend (API principal + servicio de sync):** FastAPI (Python), asíncrono nativo, tipado con
-  Pydantic.
+- **Backend (API principal, incluido el módulo de sincronización):** FastAPI (Python), asíncrono
+  nativo, tipado con Pydantic.
 - **Frontend (cliente PMM y cliente COE):** React + Vite, con soporte PWA vía `vite-plugin-pwa`
   (Workbox) para el cliente PMM offline-first.
 
@@ -24,8 +24,9 @@ de servidor a mantener con un equipo chico.
 
 - **Django + DRF** — incluiría ORM, panel de admin y auth listos de fábrica, útil para gestionar
   internamente catálogos como Unidades SSEI o la biblioteca de Pre-PAI sin construir un panel a
-  medida. No se eligió porque es más pesado y síncrono por defecto, lo que complica el servicio de
-  sync si necesita manejar concurrencia alta de reintentos de clientes offline reconectando.
+  medida. No se eligió porque es más pesado y síncrono por defecto, lo que complica el módulo de
+  sincronización si necesita manejar concurrencia alta de reintentos de clientes offline
+  reconectando.
 - **Flask** — daría control máximo sobre cada pieza (routing, ORM, auth elegidos aparte). No se
   eligió porque, con un equipo chico y sin batería de librerías incluida, cablear cada componente a
   mano ralentiza el arranque y aumenta el riesgo de inconsistencias frente a un framework más
@@ -41,9 +42,17 @@ de servidor a mantener con un equipo chico.
 
 ## Consecuencias
 
-- El equipo reutiliza el conocimiento de Python que ya tiene para el backend y el servicio de sync,
-  y React + Vite da acceso al ecosistema más maduro de PWA/service workers y de librerías de mapas
-  (relevante para el flujo de marcador geoespacial, sección 6 del PRD).
+- El equipo reutiliza el conocimiento de Python que ya tiene para el backend (incluido su módulo de
+  sincronización), y React + Vite da acceso al ecosistema más maduro de PWA/service workers y de
+  librerías de mapas (relevante para el flujo de marcador geoespacial, sección 6 del PRD).
 - FastAPI no trae panel de administración ni auth de fábrica como Django: habrá que construir (o
   adoptar una librería externa para) la gestión de catálogos internos (Unidades SSEI, Pre-PAI) y el
   control de acceso por rol que exige el PRD (sección 7), en vez de heredarlo del framework.
+- **Versionado del PWA (resuelve hueco detectado en revisión adversarial, 2026-07-21):** con
+  tablets que pueden pasar horas offline (el escenario central del proyecto, ADR 1), el service
+  worker de Workbox (`vite-plugin-pwa`) debe configurarse para avisar activamente cuando hay una
+  versión nueva disponible al reconectar (patrón "actualización disponible, reiniciar para
+  aplicar"), en vez de servir la caché vieja indefinidamente sin que el usuario lo note. El
+  contrato de la API (ADR 3) para los payloads de escritura offline debe mantenerse
+  retrocompatible entre versiones del cliente — un cliente PMM desactualizado que sincroniza contra
+  un backend ya evolucionado no debe fallar el envío de su cola pendiente.

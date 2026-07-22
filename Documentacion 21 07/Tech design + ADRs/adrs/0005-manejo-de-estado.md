@@ -10,14 +10,16 @@ El cliente PMM (offline-first, ADR 1) escribe localmente y sincroniza después �
 eventual por diseño. El cliente COE, en cambio, está siempre online y el wireframe (flujo B) muestra
 un dashboard que se actualiza en vivo: cronómetro de alerta, línea de tiempo de eventos y contador
 de convocados. Falta decidir cómo el cliente COE se entera de cambios generados por otras fuentes
-(el CI en el PMM, la reconciliación del servicio de sync) sin que esas fuentes tengan que empujar
+(el CI en el PMM, la reconciliación offline en el backend) sin que esas fuentes tengan que empujar
 activamente cada actualización.
 
 ## Decisión
 
 El cliente COE consulta el backend mediante polling periódico sobre los mismos endpoints REST ya
-definidos (ADR 3), con un intervalo de 5 segundos para las vistas activas del dashboard (línea de
-tiempo, convocatoria, estado de unidades).
+definidos (ADR 3), con un intervalo de **3 segundos** para las vistas activas del dashboard (línea
+de tiempo, convocatoria, estado de unidades). *(Ajustado de 5s a 3s en la revisión adversarial de
+2026-07-21: con intervalo = umbral del criterio de aceptación "máximo 5 segundos", el caso peor ya
+consumía el presupuesto completo antes de sumar latencia de red — 3s deja margen real.)*
 
 ## Alternativas consideradas
 

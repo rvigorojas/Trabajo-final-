@@ -7,8 +7,8 @@ Aceptado
 ## Contexto
 
 Con el sistema dividido en tres componentes (cliente PMM offline-first, cliente COE online, y
-servicio de sincronización — ADR 1), hay que definir la forma del contrato entre los clientes y el
-backend. El requisito crítico es que el cliente PMM debe poder encolar peticiones cuando pierde
+backend — que incluye el módulo de sincronización, ADR 1), hay que definir la forma del contrato
+entre los clientes y el backend. El requisito crítico es que el cliente PMM debe poder encolar peticiones cuando pierde
 señal en pista y reenviarlas automáticamente al reconectar (PRD, sección 7), sin bloquear el flujo
 operativo del Comandante de Incidente.
 
@@ -25,10 +25,10 @@ principal.
   conectividad limitada. No se eligió porque suma complejidad de servidor (resolvers, schema) y
   porque las mutaciones offline encoladas por un service worker son menos naturales de modelar que
   con verbos HTTP estándar (POST/PUT idempotentes por recurso).
-- **RPC binario (gRPC)** — eficiente en payload, buena opción para comunicación interna backend ↔
-  servicio de sync. No se eligió como contrato cliente-facing porque el soporte en navegadores/PWA
+- **RPC binario (gRPC)** — eficiente en payload. No se eligió porque el soporte en navegadores/PWA
   es pobre (requeriría gRPC-web más un proxy adicional), un mal ajuste para tablets GETAC con
-  conectividad inestable en pista.
+  conectividad inestable en pista, y con el módulo de sincronización viviendo dentro del mismo
+  backend (ADR 1) no hay un segundo servicio interno que se beneficie de un protocolo binario aparte.
 
 ## Consecuencias
 

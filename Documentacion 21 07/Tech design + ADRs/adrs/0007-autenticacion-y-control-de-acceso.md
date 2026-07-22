@@ -20,6 +20,17 @@ localmente en el cliente. El rol y los permisos del usuario viajan como claims d
 que permite al cliente PMM validar localmente qué acciones puede encolar mientras está offline, sin
 depender de una consulta al servidor.
 
+**Token "blando" durante offline prolongado (resuelve conflicto detectado en revisión adversarial,
+2026-07-21):** la expiración corta por sí sola bloquearía al CI en pleno incidente si el dispositivo
+permanece sin señal más tiempo del que dura el token — exactamente el escenario que ADR-1 obliga a
+soportar. Para evitarlo: el cliente PMM sigue aceptando y encolando acciones localmente aunque el
+token ya haya expirado, siempre que el dispositivo siga sin conexión (no hay forma de renovarlo de
+todas formas). Al reconectar, el módulo de sincronización del backend acepta sin objeción las acciones ya encoladas
+durante la sesión que fue válida al momento de crearlas. Si, además, la desconexión superó una
+**ventana máxima de sesión offline `[Propuesto: 12 horas, equivalente a un turno operativo — a
+confirmar con Renzo]`**, el cliente exige relogin antes de permitir encolar *nuevas* acciones
+posteriores a la reconexión (las ya encoladas dentro de la ventana no se pierden ni se bloquean).
+
 ## Alternativas consideradas
 
 - **Sesiones server-side (cookies + store)** — daría revocación inmediata de acceso. No se eligió
@@ -38,3 +49,8 @@ depender de una consulta al servidor.
   inmediato: el usuario conserva los permisos codificados en su token hasta que este expira. La
   expiración debe elegirse deliberadamente corta para acotar esta ventana, balanceando seguridad
   contra la necesidad de no forzar reautenticaciones frecuentes en pista.
+- El token "blando" (arriba) amplía esa ventana de revocación tardía hasta el largo de la ventana
+  máxima de sesión offline propuesta (`[Propuesto: 12h]`) en el peor caso — un usuario revocado que
+  quedó sin señal justo antes de la revocación puede seguir encolando acciones válidas hasta
+  reconectar o hasta agotar esa ventana. Se acepta explícitamente frente a la alternativa (bloquear
+  al CI en pleno incidente), pero es un trade-off de seguridad real, no gratuito.

@@ -22,32 +22,33 @@ componentes, el modelo de datos y la estrategia de resiliencia descritas abajo.
   localmente y encola escrituras (activación con tipo de incidente, evaluación inicial, relevo de
   mando, marcador de incidente) cuando no hay señal.
 - **Cliente COE** — web app liviana (React + Vite), siempre online, sin lógica de almacenamiento
-  local. Actualiza su dashboard por polling cada 5 segundos sobre el backend. Navegación según
+  local. Actualiza su dashboard por polling cada 3 segundos sobre el backend (ADR 5, ajustado de 5s
+  a 3s en la revisión adversarial de 2026-07-21 para dejar margen real bajo el criterio de
+  aceptación de "máximo 5 segundos"). Navegación según
   `Design.md`: pestañas **Resumen / Mapa / Unidades / Comunicaciones / Cadena de mando**, menú
   aparte del header para **Pre-PAI** y **Reportes**, y acciones rápidas persistentes (**Relevo**,
   **Desactivar**).
-- **Backend (API principal)** — FastAPI (Python), expone la API REST/JSON que consumen ambos
-  clientes: activaciones, convocatorias, unidades, Pre-PAI, relevos, marcadores de incidente,
-  reportes de cierre.
-- **Servicio de sincronización/cola** — pieza dedicada (también FastAPI) que recibe, encola y
-  reconcilia los registros generados offline por el cliente PMM al reconectar.
+- **Backend (API principal + módulo de sincronización)** — FastAPI (Python), expone la API
+  REST/JSON que consumen ambos clientes: activaciones, convocatorias, unidades, Pre-PAI, relevos,
+  marcadores de incidente, reportes de cierre. Incluye, como router/módulo interno (no como
+  servicio desplegable aparte — ver ADR-1, revisado 2026-07-21), la reconciliación de los registros
+  generados offline por el cliente PMM al reconectar.
 
 ```
 Cliente PMM (offline-first) ──┐
-                               ├──> Servicio de sync ──> Backend/API ──> Base de datos relacional
-Cliente COE (online, polling)─┘                              ↑
-                                                   Cliente COE consulta directo
+                               ├──> Backend/API (incl. sync) ──> Base de datos relacional
+Cliente COE (online, polling)─┘
 ```
 
 ## Decisiones de arquitectura
 
 | # | Decisión | Estado |
 |---|---|---|
-| [ADR-0001](adrs/0001-componentes-y-repos.md) | División de componentes: PMM offline-first / COE online / servicio de sync | Aceptado |
+| [ADR-0001](adrs/0001-componentes-y-repos.md) | División de componentes: PMM offline-first / COE online / backend (incl. sync) | Aceptado |
 | [ADR-0002](adrs/0002-modelo-de-datos-enfoque.md) | Modelo relacional normalizado con auditoría | Aceptado |
 | [ADR-0003](adrs/0003-contratos-de-api.md) | REST sobre HTTP/JSON | Aceptado |
-| [ADR-0004](adrs/0004-stack-por-componente.md) | FastAPI (backend/sync) + React/Vite (frontend) | Aceptado |
-| [ADR-0005](adrs/0005-manejo-de-estado.md) | Polling periódico (5s) para el dashboard COE | Aceptado |
+| [ADR-0004](adrs/0004-stack-por-componente.md) | FastAPI (backend, incl. sync) + React/Vite (frontend) | Aceptado |
+| [ADR-0005](adrs/0005-manejo-de-estado.md) | Polling periódico (3s) para el dashboard COE | Aceptado |
 | [ADR-0006](adrs/0006-resiliencia-sync-offline.md) | Registros offline solo por inserción, nunca update | Aceptado |
 | [ADR-0007](adrs/0007-autenticacion-y-control-de-acceso.md) | JWT de expiración corta para auth/RBAC offline-capable | Aceptado |
 | [ADR-0008](adrs/0008-estrategia-de-despliegue.md) | Despliegue managed/serverless con autoscaling | Aceptado |
@@ -57,27 +58,52 @@ Cliente COE (online, polling)─┘                              ↑
 Entidades principales, derivadas de `Design.md` (ADR 2):
 
 - **Activacion** — tipo de emergencia (aeronáutica/epidemiológica/estructural/MATPEL), nivel de
-  alerta (I/II/III, o campo `tipo_alerta` 1-10 solo para aeronáutica), **tipo de incidente**
-  (capturado en este paso, Flujo A — `Design.md`), hora de activación, estado. El nivel de alerta se
-  deriva de un campo de clasificación propio por categoría (PRD, sección 8, confirmado 2026-07-21):
-  triaje EMERGENCIA/URGENCIA/CONSULTA en Epidemiológica, campo Incidente/Estructural en
-  Estructural/Incidentes, y Clasificación MATPEL de 9 categorías en MATPEL (esta última sin mapeo a
-  nivel de activación, se registra tal cual).
-- **ConvocatoriaMiembro** — miembro convocado (COE o PMM), rol, activación asociada, hora de
-  confirmación.
+  alerta (I/II/III — las 4 categorías) y, **solo para Aeronáutica, además y en paralelo**, el campo
+  `tipo_alerta` (1-10) como clasificación operativa granular (PRD, sección 3: ambos sistemas
+  coexisten, no son alternativos — corrige una redacción previa de este documento que los presentaba
+  como mutuamente excluyentes), **tipo de incidente** (capturado en este paso, Flujo A —
+  `Design.md`), `hora_evento`/`hora_recepcion` (ADR 2), estado. El nivel de alerta se deriva de un campo de clasificación
+  propio por categoría (PRD, sección 8, confirmado 2026-07-21): triaje EMERGENCIA/URGENCIA/CONSULTA
+  en Epidemiológica, campo Incidente/Estructural en Estructural/Incidentes, y Clasificación MATPEL de
+  9 categorías en MATPEL. **MATPEL — `nivel_alerta` = activación general, siempre `[Propuesto,
+  2026-07-21, pendiente de confirmar con el Jefe de Rescate]`:** el PRD confirma que la Clasificación
+  MATPEL (9 categorías UN) no tiene mapeo real a nivel de activación, y la planilla MATPEL 2026 está
+  vacía (PRD sección 10) — no hay incidentes reales de donde derivar una escala diferenciada por
+  clase con el mismo rigor usado en Epidemiológica/Estructural. Se adopta un criterio conservador
+  fijo en vez de inventar una escala de severidad sin datos: toda activación MATPEL, sin importar la
+  clase UN registrada, dispara convocatoria automática general (equivalente a Alerta III) — materiales
+  peligrosos ameritan por defecto la respuesta más amplia disponible. Revisar este criterio si en
+  producción se junta suficiente historial real de incidentes MATPEL para justificar una escala
+  diferenciada.
+- **Usuario** — persona con cuenta en el sistema: nombre, rol (uno de los roles del Plan de
+  Emergencia listados en PRD sección 5: Gerente de Seguridad, Gerente Operaciones Aeroportuarias,
+  Duty Manager, Jefe de Rescate, Sup. Gral. de Rescate, Supervisor de Rescate, M4, M7, SGO, etc.),
+  instancia principal (COE / PMM), contacto, credenciales de acceso, estado (activo/inactivo).
+  Entidad requerida por ADR-7 (login/JWT) y por la convocatoria automática de Flujo A (el sistema
+  necesita saber quién ocupa cada rol para convocarlo) — no estaba modelada en una versión anterior
+  de este documento.
+- **ConvocatoriaMiembro** — miembro convocado (COE o PMM), referencia al `Usuario` convocado, rol,
+  activación asociada, hora de confirmación.
 - **EvaluacionInicial** — magnitud, riesgos secundarios, activación asociada, registrada por el CI.
   El tipo de incidente ya no vive acá: se hereda de `Activacion` (Flujo B, `Design.md`).
-- **RelevoMando** — instancia (COE o PMM/CI), responsable saliente, responsable entrante, hora.
-  Listado histórico consultable desde la pestaña "Cadena de mando" del cliente COE (Flujo D,
-  `Design.md`).
-- **Unidad** — identificador (R1, R2, R8-R13, CR9), estado (OK / F.S. / N.A.), última actualización.
-- **MarcadorIncidente** — coordenada de cuadrícula, tipo de incidente, riesgo, hora, capa a la que
-  pertenece (Cuadrícula / Incidente / Accesos / Unidades-fase 2), **estado de sincronización**
+- **RelevoMando** — instancia (COE o PMM/CI), responsable saliente, responsable entrante,
+  `hora_evento`/`hora_recepcion` (ADR 2). Listado histórico consultable desde la pestaña "Cadena de
+  mando" del cliente COE (Flujo D, `Design.md`).
+- **Unidad** — identificador (R1, R2, R8-R13, CR9), estado (OK / F.S. / N.A.), última actualización
+  (`hora_recepcion` — es el campo mutable que usa last-write-wins, ADR 6, por eso no lleva
+  `hora_evento` propio).
+- **MarcadorIncidente** — coordenada de cuadrícula, tipo de incidente, riesgo,
+  `hora_evento`/`hora_recepcion` (ADR 2), capa a la que pertenece (Cuadrícula / Incidente / Accesos /
+  Unidades-fase 2), **estado de sincronización**
   (sincronizado / pendiente, mostrado como badge junto al marcador — Flujo C, `Design.md`),
   activación asociada.
-- **PrePAI** — plantilla por escenario (sector, riesgos, contactos de emergencia, recursos,
-  estrategias de control, plano/acceso). Accesible desde el menú aparte del cliente COE, no desde
-  las pestañas principales (`Design.md`).
+- **PrePAI** — plantilla por escenario: nombre del escenario, sector, **tipo de emergencia**,
+  **caracterización**, riesgos, contactos de emergencia, recursos logísticos/humanos, estrategias de
+  control, plano del lugar/acceso al equipo, **dimensiones del escenario** (campos completados en la
+  revisión adversarial de 2026-07-21 — la versión anterior de esta entidad no cubría todos los
+  campos que el PRD, sección 3, ya documenta como parte de la estructura estandarizada de los Pre-PAI
+  existentes). Accesible desde el menú aparte del cliente COE, no desde las pestañas principales
+  (`Design.md`).
 - **ReporteCierre** — snapshot exportable de una activación cerrada, con esquema de columnas
   equivalente al de los 4 Excel actuales (mismas columnas, mismo orden, por categoría). Accesible
   desde el mismo menú aparte que Pre-PAI.
@@ -102,7 +128,7 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
       conexión (se encola localmente) — el tipo de incidente ya quedó fijado en la activación y no
       se vuelve a pedir.
 - [ ] Una vez sincronizada, la evaluación inicial aparece en el dashboard COE (pestaña Resumen) en
-      un máximo de 5 segundos (ADR 5).
+      un máximo de 5 segundos (ADR 5 — polling cada 3s deja margen real bajo ese máximo).
 
 ### Biblioteca de Pre-PAI
 
@@ -124,7 +150,8 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
 ### Panel de estado de unidades
 
 - [ ] El estado de cada unidad (OK/F.S./N.A.) se refleja en el cliente COE en un máximo de 5
-      segundos desde que cambia en el backend (ADR 5).
+      segundos desde que cambia en el backend (ADR 5 — polling cada 3s deja margen real bajo ese
+      máximo).
 
 ### Mapa geoespacial — marcador de incidente
 
@@ -162,3 +189,10 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
 - No se definió aún el proveedor cloud concreto para el despliegue managed/serverless (ADR 8) ni el
   motor de base de datos relacional específico (ADR 2) — quedan como decisiones de implementación a
   cerrar antes de empezar a construir.
+- **[Propuesto, pendiente de confirmar con el Jefe de Rescate]** La convocatoria automática de
+  MATPEL se fijó como "siempre activación general" a falta de datos reales para una escala
+  diferenciada (ver Modelo de datos, `Activacion`). Revisar con el Jefe de Rescate en cuanto sea
+  posible; no bloquea el desarrollo porque el criterio conservador es seguro por defecto.
+- **[Propuesto, pendiente de confirmar con Renzo]** La ventana máxima de sesión offline del token
+  "blando" (ADR 7) se fijó en 12 horas como valor por defecto (un turno operativo). Ajustar si el
+  Plan de Emergencia define turnos de otra duración.

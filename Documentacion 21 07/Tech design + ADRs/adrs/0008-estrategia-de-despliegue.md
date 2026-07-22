@@ -13,9 +13,9 @@ una carga operativa de infraestructura que ese equipo no puede sostener.
 
 ## Decisión
 
-Despliegue managed/serverless con autoscaling (ej. Cloud Run / App Runner) para el backend y el
-servicio de sync, donde el proveedor cloud gestiona el reinicio automático de instancias caídas y el
-escalado, sin que el equipo administre servidores directamente.
+Despliegue managed/serverless con autoscaling (ej. Cloud Run / App Runner) para el backend (que
+incluye el módulo de sincronización, ADR 1), donde el proveedor cloud gestiona el reinicio
+automático de instancias caídas y el escalado, sin que el equipo administre servidores directamente.
 
 ## Alternativas consideradas
 
