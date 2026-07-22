@@ -58,7 +58,11 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
 
 - **Activacion** — tipo de emergencia (aeronáutica/epidemiológica/estructural/MATPEL), nivel de
   alerta (I/II/III, o campo `tipo_alerta` 1-10 solo para aeronáutica), **tipo de incidente**
-  (capturado en este paso, Flujo A — `Design.md`), hora de activación, estado.
+  (capturado en este paso, Flujo A — `Design.md`), hora de activación, estado. El nivel de alerta se
+  deriva de un campo de clasificación propio por categoría (PRD, sección 8, confirmado 2026-07-21):
+  triaje EMERGENCIA/URGENCIA/CONSULTA en Epidemiológica, campo Incidente/Estructural en
+  Estructural/Incidentes, y Clasificación MATPEL de 9 categorías en MATPEL (esta última sin mapeo a
+  nivel de activación, se registra tal cual).
 - **ConvocatoriaMiembro** — miembro convocado (COE o PMM), rol, activación asociada, hora de
   confirmación.
 - **EvaluacionInicial** — magnitud, riesgos secundarios, activación asociada, registrada por el CI.
@@ -152,10 +156,6 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
 
 ## Riesgos técnicos abiertos
 
-- El detalle de las escalas de activación diferenciadas para las 3 categorías no aeronáuticas
-  (Epidemiológica, Estructural/Incidentes, MATPEL) sigue sin definir (PRD, secciones 6 y 8) — el
-  modelo de datos de `Activacion` asume un campo de nivel de alerta genérico por categoría, pero no
-  puede cerrarse del todo hasta que esas escalas se definan formalmente.
 - El levantamiento/georreferenciación en campo del mapa cuadriculado (PRD, sección 8) es un
   prerrequisito externo al desarrollo del software: sin coordenadas georreferenciables reales, el
   `MarcadorIncidente` no puede ubicarse sobre un mapa real, solo sobre la cuadrícula lógica.

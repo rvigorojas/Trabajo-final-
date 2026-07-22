@@ -85,7 +85,7 @@ El AIJC ya cuenta con un mapa cuadriculado del aeropuerto ("mapa de zona con sis
 
 ### Dentro del alcance V1
 
-- Registro de activación de emergencia con nivel de Alerta (I/II/III para eventos aeronáuticos; cada una de las otras 3 categorías con su propia escala diferenciada, confirmado que no comparten la escala aeronáutica — Renzo, 2026-07-17; detalle de cada escala aún por definir) y tipo de incidente, y activación diferenciada de miembros de COE y/o PMM según el nivel. [El tipo de incidente se registra en este paso — Renzo, 2026-07-21]
+- Registro de activación de emergencia con nivel de Alerta (I/II/III para eventos aeronáuticos; cada una de las otras 3 categorías con su propia escala diferenciada, confirmado que no comparten la escala aeronáutica — Renzo, 2026-07-17; detalle de cada escala cerrado — Renzo, 2026-07-21, ver sección 8) y tipo de incidente, y activación diferenciada de miembros de COE y/o PMM según el nivel. [El tipo de incidente se registra en este paso — Renzo, 2026-07-21]
 - Registro de la evaluación inicial del Comandante de Incidente (magnitud, riesgos secundarios) y transmisión estructurada de ese informe al COE — reemplazo digital del reporte verbal/WhatsApp actual.
 - Biblioteca de Pre-PAI digitalizados, activables por tipo de escenario, con los campos ya estandarizados (sector, riesgos, contactos de emergencia, recursos logísticos/humanos, estrategias de control, plano/acceso al equipo).
 - Registro de miembros convocados a COE y a PMM en cada activación (según las listas reales de Alerta II/III del Plan de Emergencia).
@@ -132,7 +132,11 @@ Toda función del PCE debe ser alcanzable en máximo 3 clics desde la pantalla p
 - **Riesgo — conectividad en pista:** si las tablets GETAC pierden señal durante una emergencia real, el PCE no debe bloquear el flujo operativo del CI (ver modo offline, sección 7).
 - **Riesgo — doble registro:** mientras conviven el PCE y los 4 Excel actuales durante la transición, el personal podría registrar en ambos o en ninguno. Mitigación propuesta: definir una fecha de corte por categoría de emergencia.
 - **Confirmado (Renzo, 2026-07-17)** — el mapa cuadriculado existente (hoy en papel/PDF) no tiene coordenadas georreferenciables utilizables tal cual; requiere trabajo de levantamiento/georreferenciación en campo antes de usarse como base del mapa geoespacial del PCE.
-- **Confirmado (Renzo, 2026-07-17)** — las 3 categorías no aeronáuticas (Epidemiológica, Estructural/Incidentes, MATPEL) no comparten la escala I/II/III aeronáutica: cada una maneja su propia escala de activación diferenciada. El detalle específico de cada escala queda pendiente de definir formalmente (ver sección 6).
+- **Confirmado (Renzo, 2026-07-17)** — las 3 categorías no aeronáuticas (Epidemiológica, Estructural/Incidentes, MATPEL) no comparten la escala I/II/III aeronáutica: cada una maneja su propia escala de activación diferenciada.
+- **Confirmado (Renzo, 2026-07-21)** — detalle de la escala de activación diferenciada de cada categoría no aeronáutica (basado en los campos ya usados en 'Cuadro Estadístico de Emergencias Epidemiológicas 2026.xlsx', 'Cuadro Estadístico de Emergencias Estructurales e Incidentes 2026.xlsx' y 'Cuadro Estadístico de Emergencia MATPEL 2026.xlsx'):
+  - **Epidemiológica** usa el triaje ya registrado (campo "Clasificación de la emergencia"): EMERGENCIA → activación general, URGENCIA → activación parcial, CONSULTA → monitoreo.
+  - **Estructural/Incidentes** usa el campo ya registrado "Incidente / Estructural": Estructural → activación general, Incidente → activación parcial.
+  - **MATPEL** usa la Clasificación MATPEL ya registrada, de 9 categorías por tipo de material (Clase 1 Explosivos, Clase 2 Gases, Clase 3 Líquidos inflamables, Clase 4 Sólidos inflamables, Clase 5 Sustancias oxidantes y peróxidos orgánicos, Clase 6 Sustancias tóxicas e infecciosas, Clase 7 Materiales radiactivos, Clase 8 Sustancias corrosivas, Clase 9 Misceláneos), sin mapeo a niveles de activación general/parcial/monitoreo — se usa tal cual como clasificación.
 
 ## 9. Glosario
 
