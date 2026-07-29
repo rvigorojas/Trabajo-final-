@@ -13,6 +13,11 @@ dependencies = [
     "pydantic-settings>=2.5",
     "pyjwt>=2.9",
     "passlib[bcrypt]>=1.7",
+    # passlib 1.7.4 (última versión, sin releases desde 2020) hace un self-test interno
+    # con un password > 72 bytes; bcrypt >=4.0 empezo a rechazar eso con ValueError en
+    # vez de truncar en silencio, rompiendo el arranque del backend. Fijado hasta que
+    # se migre a una librería de hashing mantenida.
+    "bcrypt<4.0",
     "python-multipart>=0.0.12",
 ]
 
@@ -32,4 +37,6 @@ include = ["app*"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
 pythonpath = ["."]
