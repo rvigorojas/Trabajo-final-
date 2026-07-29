@@ -1,0 +1,48 @@
+import enum
+import uuid
+
+from sqlalchemy import Boolean, Enum, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.db.base import Base
+from app.models.mixins import TimestampMixin
+
+
+class Rol(str, enum.Enum):
+    """Roles del Plan de Emergencia (PRD sección 5)."""
+
+    GERENTE_SEGURIDAD = "gerente_seguridad"
+    GERENTE_OPERACIONES_AEROPORTUARIAS = "gerente_operaciones_aeroportuarias"
+    DUTY_MANAGER = "duty_manager"
+    JEFE_RESCATE = "jefe_rescate"
+    SUPERVISOR_GRAL_RESCATE = "supervisor_gral_rescate"
+    SUPERVISOR_RESCATE = "supervisor_rescate"
+    M4 = "m4"
+    M7 = "m7"
+    SGO = "sgo"
+    BOMBERO_AERONAUTICO = "bombero_aeronautico"
+    SERVICIO_MEDICO = "servicio_medico"
+
+
+class InstanciaPrincipal(str, enum.Enum):
+    COE = "coe"
+    PMM = "pmm"
+
+
+class Usuario(TimestampMixin, Base):
+    __tablename__ = "usuario"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    nombre: Mapped[str] = mapped_column(String(200), nullable=False)
+    # Credenciales de acceso (TDD § Modelo de datos, "Usuario"): username usado en /auth/login.
+    username: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    rol: Mapped[Rol] = mapped_column(Enum(Rol, name="rol"), nullable=False)
+    instancia_principal: Mapped[InstanciaPrincipal] = mapped_column(
+        Enum(InstanciaPrincipal, name="instancia_principal"), nullable=False
+    )
+    contacto: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
