@@ -8,6 +8,7 @@ from app.models.relevo_mando import Instancia
 
 class RelevoMandoCreate(BaseModel):
     id: uuid.UUID | None = None  # idempotencia ADR-6
+    activacion_id: uuid.UUID
     instancia: Instancia
     responsable_saliente: str
     responsable_entrante: str
@@ -18,6 +19,7 @@ class RelevoMandoRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+    activacion_id: uuid.UUID
     instancia: Instancia
     responsable_saliente: str
     responsable_entrante: str

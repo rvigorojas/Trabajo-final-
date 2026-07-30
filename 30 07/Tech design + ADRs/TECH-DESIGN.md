@@ -3,8 +3,9 @@
 **Tipo de proyecto:** Greenfield.
 **Design.md disponible:** Sí — 4 flujos (Activación, Vista COE, Mapa geoespacial, Relevo de mando),
 cada uno con la variante de wireframe elegida por Renzo y sus huecos de diseño ya resueltos
-(2026-07-21). El modelo de datos de este documento se deriva de `Design.md`, no ya del
-`wireflame 0.1.pptx` crudo.
+(2026-07-21, más un hueco adicional del Flujo A resuelto 2026-07-30 al revisar
+`Tablet_app_structures.pptx`). El modelo de datos de este documento se deriva de `Design.md`, no ya
+del `wireflame 0.1.pptx` crudo.
 
 ## Resumen
 
@@ -86,9 +87,12 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
   activación asociada, hora de confirmación.
 - **EvaluacionInicial** — magnitud, riesgos secundarios, activación asociada, registrada por el CI.
   El tipo de incidente ya no vive acá: se hereda de `Activacion` (Flujo B, `Design.md`).
-- **RelevoMando** — instancia (COE o PMM/CI), responsable saliente, responsable entrante,
-  `hora_evento`/`hora_recepcion` (ADR 2). Listado histórico consultable desde la pestaña "Cadena de
-  mando" del cliente COE (Flujo D, `Design.md`).
+- **RelevoMando** — **activación asociada** (`activacion_id`, agregada 2026-07-30 — hasta esa fecha
+  el modelo real no tenía este campo pese a que ya se documentaba acá, hueco detectado al escribir
+  `FRONTEND-SPEC.md` y corregido en la migración `0003_relevo_activacion_y_cierre`), instancia (COE
+  o PMM/CI), responsable saliente, responsable entrante, `hora_evento`/`hora_recepcion` (ADR 2).
+  Listado histórico filtrable por activación, consultable desde la pestaña "Cadena de mando" del
+  cliente COE (Flujo D, `Design.md`).
 - **Unidad** — identificador (R1, R2, R8-R13, CR9), estado (OK / F.S. / N.A.), última actualización
   (`hora_recepcion` — es el campo mutable que usa last-write-wins, ADR 6, por eso no lleva
   `hora_evento` propio).
@@ -114,8 +118,12 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
 
 ### Activación de emergencia (Alerta I/II/III)
 
-- [ ] Registrar una activación exige nivel de alerta, tipo de incidente y la convocatoria dividida
-      en columnas COE/PMM antes de notificar (Flujo A, variante 1c de `Design.md`).
+- [ ] Registrar una activación exige elegir primero la categoría de emergencia (Aeronáutica /
+      Epidemiológica / Estructural-Incidente / MATPEL, preseleccionada en Aeronáutica por defecto),
+      lo que determina cuál selector de nivel/escala se muestra (Alerta I/II/III, triaje, o
+      Clasificación MATPEL según corresponda — Hueco de diseño resuelto 2026-07-30, `Design.md`),
+      además de tipo de incidente y la convocatoria dividida en columnas COE/PMM antes de notificar
+      (Flujo A, variante 1c de `Design.md`).
 - [ ] Alerta II o III convoca automáticamente a los miembros de COE y PMM que corresponden según el
       Plan de Emergencia (sección 5 del PRD), sin que el usuario los seleccione manualmente uno por
       uno.
@@ -145,7 +153,17 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
 - [ ] El relevo rápido es alcanzable en 1 clic desde cualquier pantalla del dashboard COE (Flujo D,
       variante 1l de `Design.md`).
 - [ ] El historial completo de relevos (COE y PMM/CI, con hora, saliente y entrante) es consultable
-      en la pestaña dedicada "Cadena de mando" del cliente COE.
+      en la pestaña dedicada "Cadena de mando" del cliente COE, filtrable por activación
+      (`GET /relevos-mando?activacion_id=...`, agregado 2026-07-30).
+
+### Desactivación de una activación
+
+- [ ] El Coordinador del Plan de Emergencia (Gerente de Seguridad o sus suplentes, PRD sección 5) —
+      no el CI/PMM — puede cerrar una activación (`POST /activaciones/{id}/desactivar`, agregado
+      2026-07-30), cambiando `estado` de `activa` a `cerrada`. Es la única transición de UPDATE
+      permitida sobre `Activacion` (ver ADR 2), reforzada por un trigger de DB dedicado y auditada
+      como cualquier otro cambio relevante.
+- [ ] Desactivar una activación ya cerrada es idempotente (no falla, devuelve el estado actual).
 
 ### Panel de estado de unidades
 

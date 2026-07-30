@@ -55,6 +55,16 @@ ROLES_EDICION_EVALUACION_RELEVO = [
     Rol.DUTY_MANAGER,
 ]
 
+# PRD sección 5: el Coordinador del Plan de Emergencia (Gerente de Seguridad; en su
+# ausencia, Gerente de Operaciones Aeroportuarias; en su ausencia, Duty Manager) es
+# quien decide activación/desactivación — no el CI/PMM. Agregado 2026-07-30 junto
+# con el endpoint de cierre de activación (hueco detectado en FRONTEND-SPEC.md).
+ROLES_DESACTIVACION = [
+    Rol.GERENTE_SEGURIDAD,
+    Rol.GERENTE_OPERACIONES_AEROPORTUARIAS,
+    Rol.DUTY_MANAGER,
+]
+
 
 def require_role(roles_permitidos: list[Rol]) -> Callable:
     async def _checker(usuario: UsuarioActual = Depends(get_current_usuario)) -> UsuarioActual:

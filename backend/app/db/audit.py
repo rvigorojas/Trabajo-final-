@@ -65,5 +65,9 @@ def registrar_listeners_auditoria() -> None:
     ):
         event.listen(modelo, "after_insert", _after_insert)
 
+    # Activacion admite una única transición de UPDATE (cierre, ver
+    # routers/activaciones.py::desactivar_activacion y la migración 0003) —
+    # auditarla igual que el last-write-wins de Unidad.
+    event.listen(Activacion, "after_update", _after_update)
     event.listen(Unidad, "after_insert", _after_insert)
     event.listen(Unidad, "after_update", _after_update)

@@ -6,10 +6,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.deps import UsuarioActual, get_current_usuario, get_db
-from app.models.activacion import Activacion, TipoEmergencia
+from app.deps import ROLES_DESACTIVACION, UsuarioActual, get_current_usuario, get_db, require_role
+from app.models.activacion import Activacion, EstadoActivacion, TipoEmergencia
 from app.models.convocatoria_miembro import ConvocatoriaMiembro
-from app.schemas.activacion import ActivacionConConvocatoria, ActivacionCreate
+from app.schemas.activacion import ActivacionConConvocatoria, ActivacionCreate, ActivacionRead
 from app.schemas.convocatoria_miembro import ConvocatoriaMiembroRead
 from app.services.clasificacion import derivar_nivel_alerta
 from app.services.convocatoria import auto_convocar
@@ -83,6 +83,32 @@ async def obtener_activacion(
     )
     if activacion is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Activación no encontrada")
+    return activacion
+
+
+@router.post("/{activacion_id}/desactivar", response_model=ActivacionRead)
+async def desactivar_activacion(
+    activacion_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    usuario: UsuarioActual = Depends(require_role(ROLES_DESACTIVACION)),
+) -> Activacion:
+    """Única transición de estado permitida sobre una Activacion (activa -> cerrada).
+
+    Agregado 2026-07-30 (hueco detectado en FRONTEND-SPEC.md): Activacion es
+    insert-only (ADR-2) salvo esta excepción explícita, reforzada por el
+    trigger de DB de la migración 0003 (que solo permite este cambio puntual
+    de `estado`, ningún otro campo). Idempotente: desactivar una activación ya
+    cerrada no falla, simplemente devuelve el estado actual.
+    """
+    activacion = await db.get(Activacion, activacion_id)
+    if activacion is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Activación no encontrada")
+    if activacion.estado == EstadoActivacion.CERRADA:
+        return activacion
+    activacion.estado = EstadoActivacion.CERRADA
+    activacion._audit_usuario_id = usuario.id
+    await db.commit()
+    await db.refresh(activacion)
     return activacion
 
 

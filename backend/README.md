@@ -58,3 +58,15 @@ Con el backend arriba, `GET http://localhost:8000/docs` da la Swagger UI:
   todavía no existe.
 - El esquema de columnas de `ReporteCierre` es genérico, no el de los 4
   Excel reales — completar contra el encabezado real de cada categoría.
+- Reconciliar la cola offline del PMM cuando el JWT ya expiró al reconectar
+  no está resuelto (el backend valida el JWT de cada request sin excepción)
+  — ver `FRONTEND-SPEC.md` sección 6.4.
+
+## Historial de migraciones posteriores a la verificación inicial
+
+- `0003_relevo_activacion_y_cierre` (2026-07-30): agrega `activacion_id` a
+  `RelevoMando` (vía `Base.metadata`, no un `ADD COLUMN` — ver docstring de la
+  migración) y reemplaza el trigger insert-only de `activacion` por uno que
+  permite exactamente la transición `activa -> cerrada` (endpoint
+  `POST /activaciones/{id}/desactivar`). Verificado contra Postgres real:
+  14/14 tests (5 nuevos: `test_relevos_mando.py`, `test_desactivar_activacion.py`).

@@ -25,6 +25,7 @@ async def crear_relevo_mando(
 
     relevo = RelevoMando(
         id=relevo_id,
+        activacion_id=payload.activacion_id,
         instancia=payload.instancia,
         responsable_saliente=payload.responsable_saliente,
         responsable_entrante=payload.responsable_entrante,
@@ -40,8 +41,18 @@ async def crear_relevo_mando(
 
 @router.get("", response_model=list[RelevoMandoRead])
 async def listar_relevos_mando(
-    db: AsyncSession = Depends(get_db), _=Depends(get_current_usuario)
+    activacion_id: uuid.UUID | None = None,
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_current_usuario),
 ) -> list[RelevoMando]:
-    """Histórico completo — respalda la pestaña 'Cadena de mando' del COE."""
-    result = await db.execute(select(RelevoMando).order_by(RelevoMando.hora_recepcion))
+    """Histórico de relevos — respalda la pestaña 'Cadena de mando' del COE.
+
+    Filtrable por `activacion_id` (agregado 2026-07-30): sin el filtro, devuelve
+    el historial completo de todas las activaciones, que era el único
+    comportamiento posible antes de que este modelo tuviera `activacion_id`.
+    """
+    consulta = select(RelevoMando).order_by(RelevoMando.hora_recepcion)
+    if activacion_id is not None:
+        consulta = consulta.where(RelevoMando.activacion_id == activacion_id)
+    result = await db.execute(consulta)
     return result.scalars().all()

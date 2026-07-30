@@ -40,6 +40,18 @@ el motor relacional (ver "Riesgos técnicos abiertos" del TDD), agregar un trigg
 tabla que rechace UPDATE/DELETE directos sobre esas mismas tablas, como defensa adicional si algo
 además de la API llega a tocar la base (ej. un script de mantenimiento mal escrito).
 
+**Excepción puntual para el cierre de Activacion (agregada 2026-07-30, migración
+`0003_relevo_activacion_y_cierre`):** el trigger de `activacion` no es un bloqueo absoluto como en
+las otras 3 tablas insert-only — el botón "Desactivar" (presente en las 5 variantes de navegación de
+`Tablet_app_structures.pptx`, requerido desde el PRD) necesita cambiar `estado` de `activa` a
+`cerrada`. Se resolvió con un trigger dedicado para `activacion` que permite **exactamente** esa
+transición (verifica que ningún otro campo cambie en el mismo UPDATE) y sigue rechazando cualquier
+otro UPDATE/DELETE — preserva la intención real de este ADR ("sin edición retroactiva **no
+auditada**") sin bloquear una transición de negocio legítima, que además queda auditada
+(`app/db/audit.py` ahora escucha `after_update` de `Activacion`, igual que ya hacía con `Unidad`).
+`RelevoMando` sí ganó una columna nueva (`activacion_id`, antes ausente pese a que este mismo
+documento ya la daba por hecha) — eso fue un cambio de esquema, no del mecanismo insert-only en sí.
+
 ## Alternativas consideradas
 
 - **Event sourcing (append-only)** — satisface la trazabilidad de forma nativa, ya que el estado

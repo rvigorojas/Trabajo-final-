@@ -171,17 +171,113 @@ Con `git mv` (preserva historial), se movió desde la raíz del repo a esta carp
 `Design.md`, y la carpeta completa `Tech design + ADRs/` con las correcciones de los Pasos 8-10 ya
 aplicadas.
 
+## Paso 12 — Revisión de `Tablet_app_structures.pptx` y Hueco 5 (2026-07-30)
+
+Se movió la documentación vigente de `Documentacion 21 07/` a `30 07/` (nueva carpeta oficial) y se
+sumó `Tablet_app_structures.pptx`: 5 variantes de navegación completa para la app de tablet (1A-1E,
+más login 1F), derivadas de `Design.md`.
+
+Al revisar el pptx se detectó un hueco no cubierto ni ahí ni en `Design.md`: el panel de "Nueva
+activación" (variante 1A) solo mostraba el selector Alerta I/II/III — la escala aeronáutica — sin
+ningún campo para elegir la categoría de emergencia, pese a que el PRD ya confirmó (2026-07-21) que
+Epidemiológica, Estructural/Incidentes y MATPEL usan escalas propias y distintas.
+
+Resuelto: se agrega un selector de **categoría de emergencia** (Aeronáutica/Epidemiológica/
+Estructural-Incidente/MATPEL, preseleccionada en Aeronáutica) como primer campo del panel de
+activación, que determina cuál selector de escala se muestra debajo. Actualizado en los 4 documentos:
+
+- `Design.md` — Flujo A ampliado con el nuevo selector; agregado como "Hueco de diseño —
+  2026-07-30" en la sección de huecos.
+- `TECH-DESIGN.md` — criterio de aceptación de Activación ampliado para reflejar el selector (el
+  campo `tipo de emergencia` ya existía en el modelo de datos de `Activacion`, no fue necesario
+  agregar una entidad nueva).
+- `PRD_PCE_JorgeChavez.3.md` y `.docx` — nota agregada a la sección 6 (edición del `.docx` vía Word
+  COM, sincronizada con el `.md`).
+- `Tablet_app_structures.pptx` — diapositiva 2 (Opción 1A) editada vía PowerPoint COM: se insertó el
+  selector (label + campo tipo dropdown "Aeronáutica ▾") antes del selector de Alerta, corriendo el
+  resto del panel hacia abajo y agrandando el marco del mockup para que no se corte; diapositiva 8
+  ("Próximos pasos") ampliada con un cuarto punto para confirmar con Renzo si el campo nuevo sigue
+  cumpliendo el límite de 3 clics.
+
+**Confirmado (2026-07-30):** el selector de categoría no agrega clics de navegación — el límite de
+3 clics del PRD (sección 7) mide profundidad de navegación para llegar a una función, y el selector
+se agrega dentro de la misma pantalla de activación ya alcanzable, no como pantalla o paso nuevo.
+Actualizado en `Design.md`, `Tablet_app_structures.pptx` (diapositiva 8) y esta bitácora.
+
+## Paso 13 — `FRONTEND-SPEC.md` + `FRONTEND-TASKS.md` (2026-07-30)
+
+Con el backend ya implementado y verificado, se armó la especificación del frontend (Cliente PMM +
+Cliente COE) leyendo el código real del backend (`app/models`, `app/schemas`, `app/routers`) en vez
+de asumir el contrato desde `TECH-DESIGN.md` solo — esto expuso 4 huecos entre lo documentado y lo
+implementado:
+
+- `RelevoMando` no tiene `activacion_id` en el modelo real, pese a que `TECH-DESIGN.md` la describe
+  con "activación asociada" — "Cadena de mando" no puede filtrar por incidente hasta corregirlo.
+- No hay endpoint que exponga `LogAuditoria` — se resolvió como decisión de diseño (no agregar uno;
+  construir el feed de "últimos eventos" del Resumen COE combinando los endpoints de dominio ya
+  consumidos) en vez de dejarlo como hueco abierto.
+- No hay endpoint para cambiar `Activacion.estado` a `cerrada` — bloquea el botón "Desactivar".
+- El mecanismo de "token blando" (ADR-7) no tiene resuelto qué pasa si el JWT ya expiró al momento
+  de reconectar y reenviar la cola offline — el backend valida el JWT de cada request sin excepción.
+
+`FRONTEND-SPEC.md` documenta el contrato real endpoint por endpoint (incluidos los valores exactos
+de `clasificacion_origen` por categoría, que ya estaban implementados server-side coincidiendo con
+el hueco de diseño resuelto en el Paso 12), qué pantalla consume qué dato, y qué queda fuera de
+alcance. `FRONTEND-TASKS.md` desglosa el trabajo en 6 fases, con los 4 huecos de arriba y la
+decisión pendiente de shell de navegación (1A-1E, pptx) marcados explícitamente como bloqueantes de
+esa tarea puntual (no del resto del frontend).
+
+## Paso 14 — Cierre de 2 huecos de backend detectados en el Paso 13 (2026-07-30)
+
+De los 4 huecos de `FRONTEND-SPEC.md`, se resolvieron los 2 que eran puro código (no requerían
+decisión de Renzo ni del Jefe de Rescate):
+
+- **`RelevoMando.activacion_id`:** agregado al modelo. La migración 0001 delega en
+  `Base.metadata.create_all()` (documentado en su propio docstring como espejo vivo de los modelos,
+  no DDL congelado), así que ya crea la tabla con la columna incluida — la migración nueva
+  (`0003_relevo_activacion_y_cierre`) no necesita un `ADD COLUMN` para esto (intentarlo daba
+  `DuplicateColumnError`, detectado corriendo la migración contra Postgres real). `GET
+  /relevos-mando` ahora acepta `?activacion_id=` opcional.
+- **Cierre de activación:** `POST /activaciones/{id}/desactivar`, restringido a
+  `ROLES_DESACTIVACION` (Gerente de Seguridad, Gerente de Operaciones Aeroportuarias, Duty Manager —
+  el Coordinador del Plan de Emergencia y sus suplentes, PRD sección 5, no el CI). Como `Activacion`
+  es insert-only (ADR-2) con un trigger de DB que antes bloqueaba cualquier UPDATE sin excepción, se
+  reemplazó ese trigger por uno dedicado que permite **únicamente** la transición `activa -> cerrada`
+  (verifica que ningún otro campo cambie en el mismo UPDATE) — preserva la intención real del ADR
+  ("sin edición retroactiva no auditada") sin bloquear esta acción legítima, que además ahora queda
+  auditada (`app/db/audit.py` escucha `after_update` de `Activacion`).
+
+**Bug real encontrado y corregido al verificar contra Postgres:** el primer trigger escrito comparaba
+`OLD.estado = 'activa'` (minúsculas, el `.value` del enum de Python que usa la API JSON) y fallaba
+con "invalid input syntax for enum" — SQLAlchemy guarda el **nombre** del enum (`'ACTIVA'`,
+mayúsculas), no su `.value`. Se corrigió comparando contra `'ACTIVA'`/`'CERRADA'` y se verificó
+consultando `pg_enum` directamente para confirmar los labels reales antes de asumir nada.
+
+Verificación: `alembic upgrade head` / `downgrade -1` / `upgrade head` de nuevo sin error, y 14/14
+tests (9 existentes + 5 nuevos: `test_relevos_mando.py`, `test_desactivar_activacion.py`) contra
+PostgreSQL 16 real. Actualizado en `FRONTEND-SPEC.md`, `FRONTEND-TASKS.md`, `TECH-DESIGN.md`, ADR-2 y
+`backend/README.md`.
+
+Quedan 2 huecos de los 4 originales: 6.2 (decisión ya tomada, no bloquea nada) y 6.4 (mecanismo de
+sync con token vencido — sigue pendiente de decidir con Renzo).
+
 ---
 
 ## Estado actual
 
-- PRD vigente: `.3`, sin preguntas abiertas pendientes de confirmación general. Quedan 2 supuestos
-  `[Propuesto]` explícitos dentro del TDD (convocatoria MATPEL, ventana de sesión offline de 12h) a
-  confirmar con el Jefe de Rescate y con Renzo respectivamente — no bloquean el desarrollo.
+- PRD vigente: `.3`, ahora en `30 07/` (carpeta oficial desde el 2026-07-30, reemplaza
+  `Documentacion 21 07/`). Sin preguntas abiertas de la ronda 21/07; con la nota del selector de
+  categoría agregada el 30/07 (Paso 12).
 - TDD y los 8 ADRs: revisados adversarialmente, con los 4 Críticos, 6 Advertencias y 2 Sugerencias
-  resueltos y documentados en el propio texto de cada ADR (no se ocultó ningún cambio; cada
-  corrección referencia explícitamente la revisión del 2026-07-21).
-- Repo: los cambios de los Pasos 8-11 (ediciones de contenido + `git mv`) están en el árbol de
-  trabajo/staging, **pendientes de commit**.
-- Pendiente externo: respuesta del Jefe de Rescate sobre el criterio real de convocatoria para
-  emergencias MATPEL.
+  resueltos y documentados en el propio texto de cada ADR.
+- Backend FastAPI implementado (commits `53126bc`, `f3ba454`) y verificado end-to-end contra
+  PostgreSQL 16 real: migraciones limpias, servidor sirviendo endpoints autenticados. Ampliado el
+  30/07 (Paso 14, aún sin commit) con la migración `0003_relevo_activacion_y_cierre` — 14/14 tests.
+- Repo: `main` sincronizada con `origin/main` hasta `f3ba454`. El traslado a `30 07/` (fuera de
+  `git mv`, por eso Git lo ve como borrado + carpeta nueva sin trackear) y todas las ediciones de los
+  Pasos 12-14 (documentos + código de backend + migración + tests nuevos) están en el árbol de
+  trabajo, **pendientes de commit**.
+- Pendientes externos (ninguno bloquea el desarrollo):
+  - Respuesta del Jefe de Rescate sobre el criterio real de convocatoria para emergencias MATPEL.
+  - Confirmación de Renzo sobre la ventana de 12h del token blando (ADR-7).
+  - Confirmación de Renzo sobre el mecanismo de sync con token vencido (hueco 6.4, `FRONTEND-SPEC.md`).

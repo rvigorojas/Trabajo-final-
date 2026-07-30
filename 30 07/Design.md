@@ -8,7 +8,14 @@ Renzo para cada uno, como el diseño de referencia para la implementación.
 
 **Variante elegida: 1c — Panel dividido COE / PMM**
 
-- Selector de nivel de alerta (Alerta I / II / III) en la parte superior.
+- **Selector de categoría de emergencia** (Aeronáutica / Epidemiológica / Estructural-Incidente /
+  MATPEL) como primer campo, antes del selector de escala — resuelto en Hueco 5: el selector de
+  escala que aparece debajo cambia según la categoría elegida (Alerta I/II/III para Aeronáutica;
+  triaje EMERGENCIA/URGENCIA/CONSULTA para Epidemiológica; Estructural/Incidente para esa categoría;
+  Clasificación MATPEL de 9 categorías para MATPEL). Aeronáutica queda preseleccionada por defecto,
+  por ser la categoría más frecuente, para no sumar fricción al caso más común.
+- Selector de nivel/escala de activación (depende de la categoría elegida, ver arriba) en la parte
+  superior.
 - **Campo de tipo de incidente** (ej. "Advertencia de aeronave") junto al nivel de alerta —
   resuelto: se captura acá, la magnitud y los riesgos secundarios quedan para la evaluación inicial
   posterior del CI (ver Flujo B).
@@ -18,9 +25,9 @@ Renzo para cada uno, como el diseño de referencia para la implementación.
 - Hora de activación autogenerada (no editable manualmente).
 - Botón único "Registrar activación".
 
-**Datos que implica:** `Activacion` (nivel de alerta, tipo de incidente, hora auto),
-`ConvocatoriaMiembro` por cada persona listada en cada columna (instancia COE/PMM, rol, activación
-asociada).
+**Datos que implica:** `Activacion` (categoría de emergencia, nivel de alerta/escala, tipo de
+incidente, hora auto), `ConvocatoriaMiembro` por cada persona listada en cada columna (instancia
+COE/PMM, rol, activación asociada).
 
 ## Flujo B — Vista COE (Sala de Crisis)
 
@@ -86,3 +93,17 @@ asociada).
 - **Flujo D (1l):** no tenía vista de historial de relevos. Resuelto — se agrega una pestaña
   dedicada "Cadena de mando" a la vista COE (Flujo B), con el historial completo en formato de doble
   carril.
+
+## Hueco de diseño — detectado y resuelto en sesión de trabajo, 2026-07-30
+
+- **Flujo A (1c):** el panel de "Nueva activación" (tanto en esta descripción como en
+  `Tablet_app_structures.pptx`) solo mostraba el selector Alerta I/II/III, la escala aeronáutica —
+  sin ningún campo que determine cuál escala aplica para las otras 3 categorías (Epidemiológica,
+  Estructural/Incidentes, MATPEL), pese a que el PRD confirmó el 2026-07-21 que cada una usa una
+  escala propia y distinta. Resuelto — se agrega un selector de **categoría de emergencia** como
+  primer campo del panel de activación, que determina dinámicamente cuál selector de escala se
+  muestra debajo (ver Flujo A arriba). **Confirmado, 2026-07-30:** el selector no agrega clics de
+  navegación al límite de 3 clics del PRD (sección 7) — se agrega como un campo más dentro de la
+  misma pantalla de activación, ya alcanzable en el mismo número de clics que antes; el límite mide
+  la profundidad de navegación para llegar a una función, no la cantidad de campos que se completan
+  una vez alcanzada la pantalla.
