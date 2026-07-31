@@ -261,22 +261,39 @@ PostgreSQL 16 real. Actualizado en `FRONTEND-SPEC.md`, `FRONTEND-TASKS.md`, `TEC
 Quedan 2 huecos de los 4 originales: 6.2 (decisión ya tomada, no bloquea nada) y 6.4 (mecanismo de
 sync con token vencido — sigue pendiente de decidir con Renzo).
 
+Todo lo anterior (Pasos 12-14: documentos + código de backend + migración + tests nuevos) quedó
+commiteado el 2026-07-30 en `9698419` ("Especificar frontend PMM/COE y cerrar huecos de backend
+detectados al escribirla").
+
+## Paso 15 — Decisión de la variante de navegación (2026-07-30)
+
+De los ítems bloqueados de `FRONTEND-TASKS.md` Fase 0, se resolvió el primero: Renzo revisó las 5
+variantes de `Tablet_app_structures.pptx` (exportadas a PNG vía PowerPoint COM para poder verlas) y
+eligió la **Opción 1A — tabs inferiores + acciones flotantes**: barra de tabs fija abajo, con Relevo
+de mando y Desactivar como botones flotantes siempre a mano; en portrait la barra de tabs se
+comprime con scroll horizontal.
+
+Actualizado en `FRONTEND-TASKS.md`: el ítem de Fase 0 marcado como resuelto, y las referencias al
+"shell provisional" en Fase 2 y Fase 4 reemplazadas por la referencia directa a 1A (ya no hace falta
+un shell provisional de reemplazo).
+
 ---
 
 ## Estado actual
 
-- PRD vigente: `.3`, ahora en `30 07/` (carpeta oficial desde el 2026-07-30, reemplaza
+- PRD vigente: `.3`, en `30 07/` (carpeta oficial desde el 2026-07-30, reemplaza
   `Documentacion 21 07/`). Sin preguntas abiertas de la ronda 21/07; con la nota del selector de
   categoría agregada el 30/07 (Paso 12).
 - TDD y los 8 ADRs: revisados adversarialmente, con los 4 Críticos, 6 Advertencias y 2 Sugerencias
   resueltos y documentados en el propio texto de cada ADR.
-- Backend FastAPI implementado (commits `53126bc`, `f3ba454`) y verificado end-to-end contra
-  PostgreSQL 16 real: migraciones limpias, servidor sirviendo endpoints autenticados. Ampliado el
-  30/07 (Paso 14, aún sin commit) con la migración `0003_relevo_activacion_y_cierre` — 14/14 tests.
-- Repo: `main` sincronizada con `origin/main` hasta `f3ba454`. El traslado a `30 07/` (fuera de
-  `git mv`, por eso Git lo ve como borrado + carpeta nueva sin trackear) y todas las ediciones de los
-  Pasos 12-14 (documentos + código de backend + migración + tests nuevos) están en el árbol de
-  trabajo, **pendientes de commit**.
+- Backend FastAPI implementado (commits `53126bc`, `f3ba454`, `9698419`) y verificado end-to-end
+  contra PostgreSQL 16 real: migraciones limpias (incluida `0003_relevo_activacion_y_cierre`),
+  14/14 tests, servidor sirviendo endpoints autenticados.
+- Shell de navegación del frontend: **decidido — Opción 1A** (Paso 15). Fase 0 de
+  `FRONTEND-TASKS.md` casi cerrada; queda pendiente el hueco 6.4 (sync con token vencido) y dos
+  confirmaciones de alcance (Comunicaciones, edición de estado de unidad desde COE).
+- Repo: `main` tiene 10 commits, **1 por delante de `origin/main`** — `9698419` está commiteado
+  localmente pero no pusheado todavía.
 - Pendientes externos (ninguno bloquea el desarrollo):
   - Respuesta del Jefe de Rescate sobre el criterio real de convocatoria para emergencias MATPEL.
   - Confirmación de Renzo sobre la ventana de 12h del token blando (ADR-7).

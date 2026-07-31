@@ -119,7 +119,7 @@ lista correspondiente, aunque el backend ya las rechace con 403.
 ## 4. Cliente COE — pantallas
 
 Basado en `Design.md` Flujo B (navegación de contenido, agnóstica del shell) y `Tablet_app_structures.pptx`
-(shell de navegación, opciones 1A-1E — **pendiente de elegir**, ver sección 8).
+(shell de navegación — **Opción 1A, decidida 2026-07-30**, ver sección 8).
 
 ### Login (1F)
 - Formulario usuario/contraseña → `POST /auth/login` → guardar `access_token`.
@@ -281,12 +281,12 @@ no crea nuevos Pre-PAI, no hace geolocalización en tiempo real de unidades ni c
 
 ## 8. Pendiente de decisión de Renzo
 
-- **Shell de navegación (1A-1E, `Tablet_app_structures.pptx`, diapositiva 8):** ninguna variante fue
-  elegida todavía. Este spec describe el contenido/dato de cada pantalla de forma agnóstica al
-  shell, así que el trabajo de capas de datos y lógica de negocio (Fase 1-2 de `FRONTEND-TASKS.md`)
-  puede arrancar ya; la implementación final de navegación (tabs/rail/cards/split-panel) debe
-  esperar esa decisión o construirse con una interfaz de navegación intercambiable para no
-  bloquearse.
+- **Shell de navegación:** **decidido 2026-07-30 — Opción 1A** (tabs inferiores + acciones
+  flotantes para Relevo/Desactivar; en portrait la barra de tabs se comprime con scroll
+  horizontal), de las 5 variantes de `Tablet_app_structures.pptx`. Este spec describe el
+  contenido/dato de cada pantalla de forma agnóstica al shell, así que el trabajo de capas de datos
+  y lógica de negocio (Fase 1-2 de `FRONTEND-TASKS.md`) no tiene que esperar; la implementación de
+  navegación ya puede construirse directamente sobre 1A.
 - Los 3 `[Propuesto]` ya conocidos (convocatoria MATPEL, ventana 12h del token blando, y ahora el
   mecanismo de sync con token vencido — hueco 6.4) siguen sin confirmar.
 - Si el COE puede editar el estado de unidad desde su propia pantalla o es solo lectura ahí (sección

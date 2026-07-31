@@ -6,8 +6,10 @@ Rescate) o de un hueco de backend (`FRONTEND-SPEC.md`, sección 6) — no empeza
 
 ## Fase 0 — Prerrequisitos antes de escribir código de UI
 
-- [ ] **[bloqueado — Renzo]** Elegir la variante de navegación final entre 1A-1E de
-      `Tablet_app_structures.pptx`, o confirmar que se combinan ideas de varias.
+- [x] Elegir la variante de navegación final entre 1A-1E de
+      `Tablet_app_structures.pptx`. **Decidido 2026-07-30 (Renzo): Opción 1A — tabs inferiores +
+      acciones flotantes** (Relevo/Desactivar siempre a mano; en portrait la barra de tabs se
+      comprime con scroll horizontal).
 - [x] Arreglar hueco 6.1: migración Alembic que agrega `activacion_id` a `RelevoMando` + filtro por
       query param en `GET /relevos-mando`. **Hecho 2026-07-30** (migración
       `0003_relevo_activacion_y_cierre`, verificado contra Postgres real).
@@ -36,8 +38,8 @@ Rescate) o de un hueco de backend (`FRONTEND-SPEC.md`, sección 6) — no empeza
 
 ## Fase 2 — Cliente COE
 
-- [ ] Shell de navegación **provisional** (tabs simples) si la Fase 0 sigue bloqueada — reemplazar
-      por la variante final una vez decidida, sin bloquear el resto.
+- [ ] Shell de navegación: Opción **1A** (tabs inferiores + acciones flotantes para Relevo y
+      Desactivar), con la barra de tabs comprimida con scroll horizontal en portrait.
 - [ ] Pantalla Resumen: alerta activa, cronómetro, convocatoria COE/PMM X/3, evaluación inicial,
       feed de "últimos eventos" construido client-side (sección 4 de `FRONTEND-SPEC.md`, no depende
       de `LogAuditoria`). Polling 3s (ADR-5).
@@ -81,8 +83,7 @@ Rescate) o de un hueco de backend (`FRONTEND-SPEC.md`, sección 6) — no empeza
 - [ ] Tests de integración mínimos: al menos un flujo end-to-end por cliente (activación → evaluación
       → relevo → cierre) contra el backend real, no mocks — mismo criterio ya usado para verificar
       el backend contra PostgreSQL real en vez de una base simulada.
-- [ ] Verificación manual del límite de 3 clics en ambos clientes, con el shell de navegación ya
-      decidido (no el provisional).
+- [ ] Verificación manual del límite de 3 clics en ambos clientes, con el shell de navegación 1A.
 - [ ] Accesibilidad básica: contraste, tamaño de tap targets (tablet GETAC usada con guantes en
       algunos escenarios — no confirmado en el PRD, validar con Renzo si aplica).
 - [ ] Prueba de pérdida de conectividad real en el Cliente PMM (no solo simulada en devtools): cortar
