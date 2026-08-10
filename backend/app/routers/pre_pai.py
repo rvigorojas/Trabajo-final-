@@ -1,10 +1,10 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.deps import UsuarioActual, get_current_usuario, get_db
+from app.deps import UsuarioActual, get_current_usuario, get_db, get_or_404
 from app.models.pre_pai import PrePAI
 from app.schemas.pre_pai import PrePAICreate, PrePAIRead, PrePAIUpdate
 
@@ -39,9 +39,7 @@ async def actualizar_pre_pai(
     _=Depends(get_current_usuario),
 ) -> PrePAI:
     """Catálogo editable (no es registro de incidente, sí admite UPDATE)."""
-    pre_pai = await db.get(PrePAI, pre_pai_id)
-    if pre_pai is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Pre-PAI no encontrado")
+    pre_pai = await get_or_404(db, PrePAI, pre_pai_id, "Pre-PAI no encontrado")
     for campo, valor in payload.model_dump().items():
         setattr(pre_pai, campo, valor)
     await db.commit()

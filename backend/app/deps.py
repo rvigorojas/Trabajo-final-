@@ -1,5 +1,6 @@
 import uuid
 from collections.abc import Callable
+from typing import Any, TypeVar
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -10,6 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.security import decode_access_token
 from app.db.base import get_session
 from app.models.usuario import Rol, Usuario
+
+ModeloT = TypeVar("ModeloT")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
@@ -86,3 +89,24 @@ async def get_db() -> AsyncSession:
 async def get_usuario_por_username(db: AsyncSession, username: str) -> Usuario | None:
     result = await db.execute(select(Usuario).where(Usuario.username == username))
     return result.scalar_one_or_none()
+
+
+async def get_or_404(
+    db: AsyncSession,
+    modelo: type[ModeloT],
+    id_: Any,
+    mensaje: str,
+    *,
+    options: list[Any] | None = None,
+) -> ModeloT:
+    """Busca `modelo` por su PK; si no existe, corta con 404 y `mensaje`.
+
+    Centraliza el patrón `db.get(...) -> if None: raise HTTPException(404, ...)`
+    que estaba duplicado igual en activaciones.py, pre_pai.py y reportes_cierre.py
+    (Sesión 07: refactor por señal de "validaciones repetidas en varios lugares",
+    no un fix de bug — el comportamiento observable no cambia).
+    """
+    instancia = await db.get(modelo, id_, options=options)
+    if instancia is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, mensaje)
+    return instancia

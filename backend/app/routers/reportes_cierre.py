@@ -1,10 +1,10 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.deps import get_current_usuario, get_db
+from app.deps import get_current_usuario, get_db, get_or_404
 from app.models.activacion import Activacion
 from app.models.evaluacion_inicial import EvaluacionInicial
 from app.models.marcador_incidente import MarcadorIncidente
@@ -18,9 +18,7 @@ router = APIRouter(prefix="/reportes-cierre", tags=["reportes-cierre"])
 async def crear_reporte_cierre(
     payload: ReporteCierreCreate, db: AsyncSession = Depends(get_db), _=Depends(get_current_usuario)
 ) -> ReporteCierre:
-    activacion = await db.get(Activacion, payload.activacion_id)
-    if activacion is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Activación no encontrada")
+    activacion = await get_or_404(db, Activacion, payload.activacion_id, "Activación no encontrada")
 
     existente = (
         await db.execute(
@@ -80,7 +78,4 @@ async def crear_reporte_cierre(
 async def obtener_reporte_cierre(
     reporte_id: uuid.UUID, db: AsyncSession = Depends(get_db), _=Depends(get_current_usuario)
 ) -> ReporteCierre:
-    reporte = await db.get(ReporteCierre, reporte_id)
-    if reporte is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Reporte no encontrado")
-    return reporte
+    return await get_or_404(db, ReporteCierre, reporte_id, "Reporte no encontrado")

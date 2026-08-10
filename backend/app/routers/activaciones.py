@@ -6,7 +6,14 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.deps import ROLES_DESACTIVACION, UsuarioActual, get_current_usuario, get_db, require_role
+from app.deps import (
+    ROLES_DESACTIVACION,
+    UsuarioActual,
+    get_current_usuario,
+    get_db,
+    get_or_404,
+    require_role,
+)
 from app.models.activacion import Activacion, EstadoActivacion, TipoEmergencia
 from app.models.convocatoria_miembro import ConvocatoriaMiembro
 from app.schemas.activacion import ActivacionConConvocatoria, ActivacionCreate, ActivacionRead
@@ -78,12 +85,13 @@ async def obtener_activacion(
     db: AsyncSession = Depends(get_db),
     _=Depends(get_current_usuario),
 ) -> Activacion:
-    activacion = await db.get(
-        Activacion, activacion_id, options=[selectinload(Activacion.convocatoria)]
+    return await get_or_404(
+        db,
+        Activacion,
+        activacion_id,
+        "Activación no encontrada",
+        options=[selectinload(Activacion.convocatoria)],
     )
-    if activacion is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Activación no encontrada")
-    return activacion
 
 
 @router.post("/{activacion_id}/desactivar", response_model=ActivacionRead)
@@ -100,9 +108,7 @@ async def desactivar_activacion(
     de `estado`, ningún otro campo). Idempotente: desactivar una activación ya
     cerrada no falla, simplemente devuelve el estado actual.
     """
-    activacion = await db.get(Activacion, activacion_id)
-    if activacion is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Activación no encontrada")
+    activacion = await get_or_404(db, Activacion, activacion_id, "Activación no encontrada")
     if activacion.estado == EstadoActivacion.CERRADA:
         return activacion
     activacion.estado = EstadoActivacion.CERRADA
