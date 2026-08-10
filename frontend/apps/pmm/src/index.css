@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@import "@pce/api-client/src/design-tokens.css";
+
+/* @pce/api-client vive en node_modules (symlink de workspace) — Tailwind v4 no escanea
+   node_modules por default, hay que agregarlo explícito o sus clases nunca se generan
+   (hallazgo real de verify, Sesión 09 — no un ajuste cosmético). */
+@source "../../../packages/api-client/src/**/*.{ts,tsx}";
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-on-background);
+  font-family: var(--font-body);
+}

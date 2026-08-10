@@ -1,0 +1,104 @@
+/*
+ * Design tokens — PCE Jorge Chávez
+ * Fuente: sistema de diseño "Sentinel Command" generado en Stitch a partir de Design.md
+ * (proyecto Stitch "PCE Jorge Chávez", assets/16f5e680539043ecade07f8a699daa0b).
+ * Valores copiados literalmente — no reinventados. Importar desde apps/coe y apps/pmm.
+ */
+
+@theme {
+  /* Superficies (dark mode — sala de crisis, low-glare) */
+  --color-background: #0b1326;
+  --color-surface: #0b1326;
+  --color-surface-bright: #31394d;
+  --color-surface-container-lowest: #060e20;
+  --color-surface-container-low: #131b2e;
+  --color-surface-container: #171f33;
+  --color-surface-container-high: #222a3d;
+  --color-surface-container-highest: #2d3449;
+  --color-surface-dim: #0b1326;
+  --color-surface-variant: #2d3449;
+
+  --color-on-background: #dae2fd;
+  --color-on-surface: #dae2fd;
+  --color-on-surface-variant: #c5c6cd;
+  --color-outline: #8f9097;
+  --color-outline-variant: #45474c;
+
+  /* Primary / secondary / tertiary */
+  --color-primary: #bcc7de;
+  --color-on-primary: #263143;
+  --color-primary-container: #1e293b;
+  --color-on-primary-container: #8590a6;
+
+  --color-secondary: #b9c7e0;
+  --color-on-secondary: #233144;
+  --color-secondary-container: #3c4a5e;
+  --color-on-secondary-container: #abb9d2;
+
+  --color-tertiary: #b7c8e1;
+  --color-on-tertiary: #213145;
+  --color-tertiary-container: #1a2a3e;
+  --color-on-tertiary-container: #8191a9;
+
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+
+  /* Colores semánticos por nivel de alerta (PCE) — los tokens que más se usan en la práctica */
+  --color-alerta-i: #1976D2;
+  --color-alerta-ii: #F57C00;
+  --color-alerta-iii: #D32F2F;
+  --color-success-safe: #388E3C;
+  --color-offline-badge: #94A3B8;
+
+  /* Tipografía */
+  --font-body: "Inter", sans-serif;
+  --font-headline: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --text-timer-display: 48px;
+  --text-timer-display--line-height: 48px;
+  --text-timer-display--font-weight: 700;
+  --text-timer-display--letter-spacing: -0.02em;
+
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+  --text-headline-lg--font-weight: 700;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--font-weight: 600;
+
+  --text-status-label: 18px;
+  --text-status-label--line-height: 24px;
+  --text-status-label--font-weight: 800;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 24px;
+
+  --text-data-mono: 14px;
+  --text-data-mono--line-height: 20px;
+  --text-data-mono--font-weight: 500;
+
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 16px;
+  --text-label-sm--font-weight: 600;
+
+  /* Espaciado — base 8px, touch targets grandes para tablet con guantes */
+  --spacing: 8px;
+  --spacing-touch-target-min: 48px;
+  --spacing-gutter: 16px;
+  --spacing-margin-tablet: 24px;
+  --spacing-panel-gap: 12px;
+
+  /* Radios — "ruggedized" (4px estándar, más grande solo en contenedores grandes) */
+  --radius-sm: 0.125rem;
+  --radius-DEFAULT: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+}
