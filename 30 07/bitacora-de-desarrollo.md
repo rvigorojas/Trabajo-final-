@@ -277,6 +277,51 @@ Actualizado en `FRONTEND-TASKS.md`: el ítem de Fase 0 marcado como resuelto, y 
 "shell provisional" en Fase 2 y Fase 4 reemplazadas por la referencia directa a 1A (ya no hace falta
 un shell provisional de reemplazo).
 
+## Paso 16 — Arranque del frontend con Spec-Driven Development (2026-08-10)
+
+Se instaló el skill `spec-driven-development` (`addyosmani/agent-skills`) y se armó `BACKLOG.md`
+(raíz del repo) con los 11 ítems del frontend derivados de `FRONTEND-SPEC.md`/`FRONTEND-TASKS.md`,
+cada uno pensado como un ciclo SDD independiente (Specify→Plan→Tasks→Implement, gate humano entre
+fases). Ítem #1 (Setup compartido) completado: monorepo `frontend/` (npm workspaces, apps
+`coe`/`pmm`, paquete `@pce/api-client`), tipos TS espejo de los schemas Pydantic, cliente HTTP
+tipado, store de sesión, login compartido — Tailwind v4 + tokens del design system Stitch
+("Sentinel Command"), 9 tests (Vitest + RTL + MSW). `CLAUDE.md` agregado a la raíz del repo como
+contexto persistente. Detalle completo en `tasks/item-01-setup/`.
+
+## Paso 17 — Ítem #2: Shell de navegación Cliente COE, Opción 1A (2026-08-10)
+
+Segundo ciclo SDD, con `tasks/` reorganizado en subcarpetas por ítem (`tasks/item-01-setup/`,
+`tasks/item-02-shell-navegacion/`) para no perder las decisiones de cada ciclo anterior. Specify
+confirmó dos bifurcaciones reales: routing con React Router (URLs reales por tab, no estado local)
+y las acciones flotantes se ocultan por completo (no deshabilitadas) para roles sin permiso.
+
+Implementado: React Router 8.3.0 + Radix UI (`Tabs`, `DropdownMenu` — primer uso real de Radix en
+el repo) sobre las 5 pantallas principales (Resumen, Mapa, Unidades, Comunicaciones, Cadena de
+mando, todas *stub*), acciones flotantes Relevo/Desactivar gateadas por rol (roles copiados
+literal de `backend/app/deps.py`), y menú aparte para Pre-PAI/Reportes (`Design.md` Flujo B,
+Hueco 2). 7 tests (Vitest + RTL), con TDD real confirmado en el gating por rol (roto a propósito →
+2/3 tests fallaron → revertido → 3/3 pasan).
+
+Dos hallazgos reales durante la verificación, ninguno de lógica de negocio propia:
+
+- **jsdom + data router de React Router 8**: cualquier `navigate()` con `RouterProvider` sobre
+  `jsdom` tira `TypeError: RequestInit: Expected signal... to be an instance of AbortSignal` — el
+  data router arma un `Request` interno en cada navegación, y jsdom instala su propia clase
+  `AbortSignal` (para el "abortable fetch" del spec DOM) que `undici` no reconoce como la suya.
+  Fix: `happy-dom` como entorno de test de `apps/coe` en vez de `jsdom` (`packages/api-client`
+  sigue con `jsdom` sin problema, no navega).
+- **`lang="en"` en ambos `index.html` con contenido 100% en español**: Chrome traducía la UI en
+  vivo (se vio "Informes" en vez de "Reportes" en pantalla, aunque el DOM real ya decía
+  "Reportes" — confirmado leyendo `textContent`). Corregido `lang="es"` en `apps/coe/index.html` y
+  `apps/pmm/index.html`.
+
+Verificación manual real en navegador (no solo tests): clics reales en las 5 tabs y el menú
+aparte, deep-link directo a `/mapa`, y compresión de la barra de tabs con scroll horizontal en
+viewport angosto (`scrollWidth` > `clientWidth`, las 5 tabs siguen en el DOM, ninguna recortada).
+
+Ítem #2 cerrado. `BACKLOG.md` y `CLAUDE.md` actualizados. Siguiente: ítem #3 (Cliente COE —
+Resumen y Cadena de mando).
+
 ---
 
 ## Estado actual
@@ -289,11 +334,14 @@ un shell provisional de reemplazo).
 - Backend FastAPI implementado (commits `53126bc`, `f3ba454`, `9698419`) y verificado end-to-end
   contra PostgreSQL 16 real: migraciones limpias (incluida `0003_relevo_activacion_y_cierre`),
   14/14 tests, servidor sirviendo endpoints autenticados.
-- Shell de navegación del frontend: **decidido — Opción 1A** (Paso 15). Fase 0 de
-  `FRONTEND-TASKS.md` casi cerrada; queda pendiente el hueco 6.4 (sync con token vencido) y dos
-  confirmaciones de alcance (Comunicaciones, edición de estado de unidad desde COE).
-- Repo: `main` tiene 10 commits, **1 por delante de `origin/main`** — `9698419` está commiteado
-  localmente pero no pusheado todavía.
+- Frontend: `BACKLOG.md` (11 ítems, ciclos SDD independientes) — **ítems #1 y #2 cerrados**
+  (Paso 16, Paso 17): setup compartido del monorepo + shell de navegación COE (Opción 1A, React
+  Router + Radix UI, 5 tabs + acciones flotantes por rol + menú aparte). 16 tests entre ambos
+  ítems. Siguiente: ítem #3 (Cliente COE — Resumen y Cadena de mando). Quedan pendientes el hueco
+  6.4 (sync con token vencido) y dos confirmaciones de alcance (Comunicaciones, edición de estado
+  de unidad desde COE) — no bloquean el ítem #3.
+- Repo: `main` sincronizado con `origin/main` al momento de escribir esto (Pasos 16-17 sin
+  commitear todavía — ver el propio git status antes de asumir que ya se pusheó).
 - Pendientes externos (ninguno bloquea el desarrollo):
   - Respuesta del Jefe de Rescate sobre el criterio real de convocatoria para emergencias MATPEL.
   - Confirmación de Renzo sobre la ventana de 12h del token blando (ADR-7).
