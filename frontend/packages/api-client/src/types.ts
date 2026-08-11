@@ -99,3 +99,43 @@ export interface Activacion {
 export interface ActivacionConConvocatoria extends Activacion {
   convocatoria: ConvocatoriaMiembro[]
 }
+
+// backend/app/schemas/evaluacion_inicial.py — EvaluacionInicialRead
+export interface EvaluacionInicial {
+  id: string
+  activacion_id: string
+  magnitud: string
+  riesgos_secundarios: string | null
+  hora_evento: string
+  hora_recepcion: string
+}
+
+// backend/app/models/relevo_mando.py — Instancia
+export type Instancia = "coe" | "pmm_ci"
+
+// backend/app/schemas/relevo_mando.py — RelevoMandoRead
+export interface RelevoMando {
+  id: string
+  activacion_id: string
+  instancia: Instancia
+  responsable_saliente: string
+  responsable_entrante: string
+  hora_evento: string
+  hora_recepcion: string
+}
+
+// backend/app/models/marcador_incidente.py — CapaMapa
+export type CapaMapa = "cuadricula" | "incidente" | "accesos" | "unidades_fase2"
+
+// backend/app/schemas/marcador_incidente.py — MarcadorIncidenteRead
+export interface MarcadorIncidente {
+  id: string
+  activacion_id: string
+  coordenada_cuadricula: string
+  tipo_incidente: string
+  riesgo: string | null
+  capa: CapaMapa
+  estado_sincronizado: boolean
+  hora_evento: string
+  hora_recepcion: string
+}

@@ -26,4 +26,9 @@ export type {
   ActivacionCreate,
   Activacion,
   ActivacionConConvocatoria,
+  EvaluacionInicial,
+  Instancia,
+  RelevoMando,
+  CapaMapa,
+  MarcadorIncidente,
 } from "./types"

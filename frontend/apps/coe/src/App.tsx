@@ -1,11 +1,7 @@
 import { RouterProvider } from "react-router"
-import { Login, createApiClient, getToken } from "@pce/api-client"
+import { Login, getToken } from "@pce/api-client"
 import { router } from "./router"
-
-const apiClient = createApiClient({
-  baseUrl: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000",
-  getToken,
-})
+import { apiClient } from "./apiClient"
 
 function App() {
   if (!getToken()) {
