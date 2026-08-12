@@ -17,4 +17,5 @@ export const server = setupServer(
   http.get(`${BASE_URL}/evaluaciones-iniciales`, () => HttpResponse.json([])),
   http.get(`${BASE_URL}/marcadores-incidente`, () => HttpResponse.json([])),
   http.get(`${BASE_URL}/relevos-mando`, () => HttpResponse.json([])),
+  http.get(`${BASE_URL}/unidades`, () => HttpResponse.json([])),
 )

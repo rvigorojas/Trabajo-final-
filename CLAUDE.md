@@ -16,7 +16,19 @@ menú aparte, 7 tests. Ítem #3 (Cliente COE — Resumen y Cadena de mando) cerr
 polling 3s vía `usePolling`) y `CadenaDeMandoScreen` (2 carriles COE/PMM), 17 tests. Verificado
 contra backend real (CORS agregado en la sesión previa, confirmado funcionando). Los botones
 "Relevo de mando"/"Desactivar" del shell (ítem #2) siguen sin handler — su lógica es el ítem #6.
-Próximo: ítem #4 (Cliente COE — Mapa y Unidades).
+Ítem #4 (Cliente COE — Mapa y Unidades) cerrado 2026-08-11: `MapaScreen` (marcadores filtrados por
+activación en curso, toggle de capas Cuadrícula/Incidente/Accesos, capa Unidades deshabilitada) y
+`UnidadesScreen` (lista editable inline vía `PUT /unidades/{id}` — confirmado con el usuario que
+el COE puede editar el estado de una unidad, sin restricción de rol adicional, backend sin
+cambios), 4 tests nuevos (21 en total en `coe`). Verificado end-to-end contra backend real.
+Próximo: ítem #5 (Cliente COE — Pre-PAI, Reportes y Comunicaciones).
+
+**Nota de sesión**: el skill `spec-driven-development` (y `generar-tech-design`/
+`revision-adversarial`) no aparece disponible cuando la sesión de Claude Code arranca fuera de
+esta carpeta (ej. invocada desde `/proyecto` con working directory `C:\Users\ASUS`) — el
+descubrimiento de skills de proyecto depende de la raíz real de la sesión, reinstalar no lo
+arregla. En ese caso, seguir el mismo proceso a mano (Specify→Plan→Tasks→Implement, con el mismo
+gate humano entre fases) en vez de forzar la invocación del skill — así se hizo en el ítem #4.
 
 **Gotcha de React Router 8 (data router) + jsdom** (encontrado en `verify` del ítem #2): cualquier
 `navigate()` con `RouterProvider`/`createMemoryRouter` sobre `jsdom` tira `TypeError: RequestInit:

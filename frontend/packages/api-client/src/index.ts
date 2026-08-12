@@ -31,4 +31,6 @@ export type {
   RelevoMando,
   CapaMapa,
   MarcadorIncidente,
+  EstadoUnidad,
+  Unidad,
 } from "./types"

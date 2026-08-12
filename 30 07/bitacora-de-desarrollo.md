@@ -349,6 +349,42 @@ de cierre, retomada en esta sesión:
 Ítem #3 cerrado. `BACKLOG.md`, `CLAUDE.md` y `tasks/item-03-resumen-cadena-mando/todo.md`
 actualizados. Siguiente: ítem #4 (Cliente COE — Mapa y Unidades).
 
+## Paso 19 — Ítem #4: Mapa y Unidades (2026-08-11)
+
+Pregunta abierta real heredada de `BACKLOG.md`/`FRONTEND-SPEC.md`: si el COE puede editar el
+estado de una unidad desde su propia pantalla, o es solo lectura ahí (sin definir en `Design.md`).
+Confirmado con el usuario: **sí, editable desde COE** — el backend ya lo soportaba sin cambios
+(`PUT /unidades/{id}` no distingue quién actualiza). Actualizado `FRONTEND-SPEC.md` y
+`BACKLOG.md` con la decisión antes de arrancar el ciclo.
+
+**El skill `spec-driven-development` no apareció disponible en esta sesión** (invocada desde
+`/proyecto` con working directory `C:\Users\ASUS`, fuera de esta carpeta — el descubrimiento de
+skills de proyecto depende de la raíz real de la sesión, no solo de que el símlink exista en
+disco). Se siguió el mismo proceso a mano: Specify (`spec.md`) → gate humano → Plan (`plan.md`) →
+Tasks (`todo.md`) → Implement, con la misma estructura y rigor que los ciclos anteriores.
+
+Implementado: `MapaScreen.tsx` (marcadores vía `GET /marcadores-incidente`, filtrados
+client-side por el `activacion_id` de la activación en curso — mismo patrón que `ResumenScreen`
+del ítem #3; toggle de capas Cuadrícula/Incidente/Accesos, capa "Unidades" visible pero
+deshabilitada, fase 2 fuera de alcance) y `UnidadesScreen.tsx` (lista de `GET /unidades` con
+`<select>` de estado por unidad, `onChange` dispara `PUT /unidades/{id}`). Tipos nuevos
+`EstadoUnidad`/`Unidad` en `@pce/api-client`. 4 tests nuevos (21 en total en `coe`).
+
+**Hallazgo real durante `verify`**: `apps/coe/src/mocks/server.ts` no tenía un handler MSW por
+defecto para `GET /unidades` (sí para los demás endpoints) — al montar `UnidadesScreen` sin
+querer desde `TabBar.test.tsx` (que navega por todas las tabs), MSW tiraba "intercepted a request
+without a matching request handler". Agregado el handler por defecto, mismo patrón que los
+demás.
+
+Verificación manual real en navegador contra backend real: activación de prueba nueva + un
+marcador en capa "incidente" + unidad `R1`. Confirmado el filtro por activación, el toggle de
+capas ocultando/mostrando el marcador, y que cambiar el estado de `R1` desde el `<select>`
+persiste (confirmado recargando la página).
+
+Ítem #4 cerrado. `BACKLOG.md`, `CLAUDE.md`, `FRONTEND-SPEC.md` y
+`tasks/item-04-mapa-unidades/todo.md` actualizados. Siguiente: ítem #5 (Cliente COE — Pre-PAI,
+Reportes y Comunicaciones).
+
 ---
 
 ## Estado actual
@@ -361,16 +397,18 @@ actualizados. Siguiente: ítem #4 (Cliente COE — Mapa y Unidades).
 - Backend FastAPI implementado (commits `53126bc`, `f3ba454`, `9698419`) y verificado end-to-end
   contra PostgreSQL 16 real: migraciones limpias (incluida `0003_relevo_activacion_y_cierre`),
   14/14 tests, servidor sirviendo endpoints autenticados.
-- Frontend: `BACKLOG.md` (11 ítems, ciclos SDD independientes) — **ítems #1, #2 y #3 cerrados**
-  (Paso 16, Paso 17, Paso 18): setup compartido del monorepo + shell de navegación COE (Opción 1A,
-  React Router + Radix UI, 5 tabs + acciones flotantes por rol + menú aparte) + Resumen/Cadena de
-  mando (alerta, cronómetro, convocatoria, feed de eventos, polling 3s, verificado end-to-end
-  contra backend real). 33 tests entre los tres ítems. Siguiente: ítem #4 (Cliente COE — Mapa y
-  Unidades). Los botones "Relevo de mando"/"Desactivar" del shell siguen sin handler (ítem #6).
-  Quedan pendientes el hueco 6.4 (sync con token vencido) y dos confirmaciones de alcance
-  (Comunicaciones, edición de estado de unidad desde COE) — no bloquean el ítem #4.
-- Repo: al escribir esto, `main` tenía commits locales sin pushear (Pasos 16-18) — ver el propio
-  `git status` antes de asumir que ya se pusheó.
+- Frontend: `BACKLOG.md` (11 ítems, ciclos SDD independientes) — **ítems #1, #2, #3 y #4 cerrados**
+  (Paso 16, Paso 17, Paso 18, Paso 19): setup compartido del monorepo + shell de navegación COE
+  (Opción 1A, React Router + Radix UI, 5 tabs + acciones flotantes por rol + menú aparte) +
+  Resumen/Cadena de mando (alerta, cronómetro, convocatoria, feed de eventos, polling 3s) + Mapa/
+  Unidades (marcadores filtrados por activación con toggle de capas, edición inline de estado de
+  unidad) — los 4 verificados end-to-end contra backend real. 37 tests entre los cuatro ítems.
+  Siguiente: ítem #5 (Cliente COE — Pre-PAI, Reportes y Comunicaciones). Los botones "Relevo de
+  mando"/"Desactivar" del shell siguen sin handler (ítem #6). Quedan pendientes el hueco 6.4 (sync
+  con token vencido) y una confirmación de alcance (Comunicaciones, sin entidad de datos definida)
+  — no bloquean el ítem #5.
+- Repo: al escribir esto, `main` tenía commits locales sin pushear (Paso 19 en adelante) — ver el
+  propio `git status` antes de asumir que ya se pusheó.
 - Pendientes externos (ninguno bloquea el desarrollo):
   - Respuesta del Jefe de Rescate sobre el criterio real de convocatoria para emergencias MATPEL.
   - Confirmación de Renzo sobre la ventana de 12h del token blando (ADR-7).

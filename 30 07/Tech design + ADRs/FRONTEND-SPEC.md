@@ -151,9 +151,9 @@ Basado en `Design.md` Flujo B (navegación de contenido, agnóstica del shell) y
 ### Unidades
 - `GET /unidades` — estado OK/F.S./N.A. por unidad (R1, R2, R8-R13, CR9), `hora_recepcion` como
   "última actualización". Polling 3s.
-- El COE puede además `PUT /unidades/{id}` si el flujo lo permite (el backend no distingue quién
-  actualiza) — confirmar con Renzo si el COE debe poder editar estado de unidad o es solo lectura
-  desde esa pantalla (no especificado en Design.md Flujo B).
+- **Confirmado con Renzo (2026-08-11): el COE puede editar el estado de una unidad desde su propia
+  pantalla** — `PUT /unidades/{id}`, sin restricción de rol adicional a estar autenticado (el
+  backend ya no distingue quién actualiza, sin cambios necesarios ahí).
 
 ### Comunicaciones
 - Pestaña presente en la navegación de `Design.md` y el pptx, pero **sin entidad de datos definida**

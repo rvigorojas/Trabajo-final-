@@ -139,3 +139,13 @@ export interface MarcadorIncidente {
   hora_evento: string
   hora_recepcion: string
 }
+
+// backend/app/models/unidad.py — EstadoUnidad
+export type EstadoUnidad = "ok" | "fuera_de_servicio" | "no_aplica"
+
+// backend/app/schemas/unidad.py — UnidadRead
+export interface Unidad {
+  identificador: string
+  estado: EstadoUnidad
+  hora_recepcion: string
+}
