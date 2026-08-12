@@ -489,6 +489,17 @@ estáticos servidos por el propio `vite preview`.
 actualizados. Siguiente: ítem #8 (Cliente PMM — Nueva activación), la primera pantalla real del
 Cliente PMM — recién ahí hace falta armar un router para `pmm` (hoy no tiene ninguno).
 
+## Confirmación externa — Criterio de convocatoria MATPEL (2026-08-11)
+
+Antes de arrancar el ítem #8: el Jefe de Rescate confirmó el criterio que `TECH-DESIGN.md` tenía
+marcado como `[Propuesto, pendiente de confirmar]` — la convocatoria automática de MATPEL es
+**siempre "activación general"**, sin escala diferenciada por clase UN (no hay datos reales de
+incidentes MATPEL de donde derivar una escala, PRD sección 10). Es el criterio definitivo, no un
+supuesto. Actualizado `TECH-DESIGN.md` (Modelo de datos → `Activacion`, y sacada la entrada de
+"Riesgos técnicos abiertos"), `BACKLOG.md` (ítem #8, columna "Contexto extra requerido" vacía) y
+`CLAUDE.md` (sección "Pendientes externos"). Quedan 2 pendientes externos, ambos de Renzo: ventana
+de 12h del token blando (ADR-7) y mecanismo de sync con token vencido (hueco 6.4).
+
 ---
 
 ## Estado actual
@@ -507,13 +518,12 @@ Cliente PMM — recién ahí hace falta armar un router para `pmm` (hoy no tiene
   (4 tests), `vite-plugin-pwa` con aviso de actualización (nunca silencioso), y gateo de sesión
   sin llamar al backend si ya había una sesión guardada. Sin router ni pantallas reales todavía en
   `pmm` — eso arranca en el ítem #8. Siguiente: ítem #8 (Cliente PMM — Nueva activación); ítem #11
-  (endurecimiento) es lo último. Quedan pendientes el hueco 6.4 (sync con token vencido), la
-  ventana de 12h del token blando (ADR-7) y la confirmación del Jefe de Rescate sobre MATPEL — no
-  bloquean el ítem #8, sí condicionan el alcance final de los ítems #8 (MATPEL)/#10 (token
-  vencido).
+  (endurecimiento) es lo último. Criterio de convocatoria MATPEL confirmado con el Jefe de Rescate
+  2026-08-11 (siempre "activación general", ya no es un pendiente). Quedan pendientes el hueco 6.4
+  (sync con token vencido) y la ventana de 12h del token blando (ADR-7), ambos de Renzo — no
+  bloquean el ítem #8, condicionan el alcance final del ítem #10.
 - Repo: al escribir esto, `main` tenía commits locales sin pushear (Paso 22 en adelante) — ver el
   propio `git status` antes de asumir que ya se pusheó.
 - Pendientes externos (ninguno bloquea el desarrollo):
-  - Respuesta del Jefe de Rescate sobre el criterio real de convocatoria para emergencias MATPEL.
   - Confirmación de Renzo sobre la ventana de 12h del token blando (ADR-7).
   - Confirmación de Renzo sobre el mecanismo de sync con token vencido (hueco 6.4, `FRONTEND-SPEC.md`).

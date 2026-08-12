@@ -66,16 +66,15 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
   `Design.md`), `hora_evento`/`hora_recepcion` (ADR 2), estado. El nivel de alerta se deriva de un campo de clasificación
   propio por categoría (PRD, sección 8, confirmado 2026-07-21): triaje EMERGENCIA/URGENCIA/CONSULTA
   en Epidemiológica, campo Incidente/Estructural en Estructural/Incidentes, y Clasificación MATPEL de
-  9 categorías en MATPEL. **MATPEL — `nivel_alerta` = activación general, siempre `[Propuesto,
-  2026-07-21, pendiente de confirmar con el Jefe de Rescate]`:** el PRD confirma que la Clasificación
-  MATPEL (9 categorías UN) no tiene mapeo real a nivel de activación, y la planilla MATPEL 2026 está
-  vacía (PRD sección 10) — no hay incidentes reales de donde derivar una escala diferenciada por
-  clase con el mismo rigor usado en Epidemiológica/Estructural. Se adopta un criterio conservador
-  fijo en vez de inventar una escala de severidad sin datos: toda activación MATPEL, sin importar la
-  clase UN registrada, dispara convocatoria automática general (equivalente a Alerta III) — materiales
-  peligrosos ameritan por defecto la respuesta más amplia disponible. Revisar este criterio si en
-  producción se junta suficiente historial real de incidentes MATPEL para justificar una escala
-  diferenciada.
+  9 categorías en MATPEL. **MATPEL — `nivel_alerta` = activación general, siempre.** Confirmado con
+  el Jefe de Rescate (2026-08-11): la Clasificación MATPEL (9 categorías UN) no tiene mapeo real a
+  nivel de activación, y la planilla MATPEL 2026 está vacía (PRD sección 10) — no hay incidentes
+  reales de donde derivar una escala diferenciada por clase con el mismo rigor usado en
+  Epidemiológica/Estructural. Se adopta un criterio conservador fijo en vez de inventar una escala de
+  severidad sin datos: toda activación MATPEL, sin importar la clase UN registrada, dispara
+  convocatoria automática general (equivalente a Alerta III) — materiales peligrosos ameritan por
+  defecto la respuesta más amplia disponible. Revisar este criterio si en producción se junta
+  suficiente historial real de incidentes MATPEL para justificar una escala diferenciada.
 - **Usuario** — persona con cuenta en el sistema: nombre, rol (uno de los roles del Plan de
   Emergencia listados en PRD sección 5: Gerente de Seguridad, Gerente Operaciones Aeroportuarias,
   Duty Manager, Jefe de Rescate, Sup. Gral. de Rescate, Supervisor de Rescate, M4, M7, SGO, etc.),
@@ -207,10 +206,6 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
 - No se definió aún el proveedor cloud concreto para el despliegue managed/serverless (ADR 8) ni el
   motor de base de datos relacional específico (ADR 2) — quedan como decisiones de implementación a
   cerrar antes de empezar a construir.
-- **[Propuesto, pendiente de confirmar con el Jefe de Rescate]** La convocatoria automática de
-  MATPEL se fijó como "siempre activación general" a falta de datos reales para una escala
-  diferenciada (ver Modelo de datos, `Activacion`). Revisar con el Jefe de Rescate en cuanto sea
-  posible; no bloquea el desarrollo porque el criterio conservador es seguro por defecto.
 - **[Propuesto, pendiente de confirmar con Renzo]** La ventana máxima de sesión offline del token
   "blando" (ADR 7) se fijó en 12 horas como valor por defecto (un turno operativo). Ajustar si el
   Plan de Emergencia define turnos de otra duración.

@@ -89,6 +89,8 @@ antes de reinstalar (evita drift de versión).
 
 ## Pendientes externos (no bloquean desarrollo)
 
-- Criterio real de convocatoria para emergencias MATPEL (Jefe de Rescate).
 - Ventana de 12h del token blando (ADR-7, confirmación de Renzo).
 - Mecanismo de sync con token vencido (hueco 6.4 de `FRONTEND-SPEC.md`, confirmación de Renzo).
+
+Criterio de convocatoria MATPEL: **confirmado con el Jefe de Rescate 2026-08-11** — siempre
+"activación general" (ver `TECH-DESIGN.md`, Modelo de datos → `Activacion`). Ya no es un pendiente.

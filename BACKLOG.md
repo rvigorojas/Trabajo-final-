@@ -1,8 +1,9 @@
 # Backlog: Frontend PMM + COE — PCE Jorge Chávez
 
 Deriva de `30 07/Tech design + ADRs/FRONTEND-SPEC.md` y `FRONTEND-TASKS.md` (Fases 1-4; la Fase 0
-de prerrequisitos ya está resuelta salvo las 3 preguntas listadas como contexto extra abajo, y la
-Fase 5 son pendientes externos que no bloquean, no un ítem de este backlog).
+de prerrequisitos ya está resuelta — de las preguntas originales de "Contexto extra requerido"
+solo queda abierta la del ítem #10 (sync con token vencido/ventana de 12h) — y la Fase 5 son
+pendientes externos que no bloquean, no un ítem de este backlog).
 
 | # | Item | Alcance | Depende de | Contexto extra requerido |
 |---|---|---|---|---|
@@ -13,7 +14,7 @@ Fase 5 son pendientes externos que no bloquean, no un ítem de este backlog).
 | 5 | ✅ Cliente COE — Pre-PAI, Reportes y Comunicaciones — **cerrado 2026-08-11** | Pre-PAI: listar + ver detalle (solo lectura, confirmado 2026-08-11 — "activar" con precarga real al formulario de evaluación inicial es el ítem #9, Cliente PMM, que no existe todavía). Reportes: `POST`/`GET /reportes-cierre`, tabla genérica (esquema de columnas real pendiente contra los 4 Excel). Comunicaciones: placeholder sin funcionalidad (confirmado 2026-08-11, sin entidad de datos definida — se define en otro momento). Detalle y verificación final en `tasks/item-05-pre-pai-reportes-comunicaciones/todo.md`. | #1, #2 | — |
 | 6 | ✅ Acciones rápidas — Relevo de mando y Desactivar — **cerrado 2026-08-11** | Modal de Relevo (instancia, sale/entra) reutilizable entre COE y PMM, rol restringido a `ROLES_EDICION_EVALUACION_RELEVO`. Desactivar activación, rol restringido a `ROLES_DESACTIVACION`, idempotente. (ADR-2) Detalle y verificación final en `tasks/item-06-relevo-desactivar/todo.md`. | #1, #2 | — |
 | 7 | ✅ Cliente PMM — Setup PWA y login offline — **cerrado 2026-08-11** | `vite-plugin-pwa`/Workbox sobre la base de #1. Login que reabre sesión guardada sin llamar al backend si ya había una sesión previa. Aviso de actualización de versión al reconectar, nunca caché vieja en silencio. (ADR-4) Detalle y verificación final en `tasks/item-07-pwa-login-offline/todo.md`. | #1 | — |
-| 8 | Cliente PMM — Nueva activación | Selector de categoría (Aeronáutica preseleccionada) → escala dependiente → tipo de incidente → hora auto. `id` (UUID) generado client-side. Payload exacto por categoría (nunca `nivel_alerta`+`clasificacion_origen` juntos fuera de Aeronáutica). (ADR-6) | #7 | Criterio real de convocatoria MATPEL (hoy fijo en "activación general", Jefe de Rescate sin confirmar). |
+| 8 | Cliente PMM — Nueva activación | Selector de categoría (Aeronáutica preseleccionada) → escala dependiente → tipo de incidente → hora auto. `id` (UUID) generado client-side. Payload exacto por categoría (nunca `nivel_alerta`+`clasificacion_origen` juntos fuera de Aeronáutica). Convocatoria MATPEL: siempre "activación general", confirmado con el Jefe de Rescate 2026-08-11 (criterio definitivo, no supuesto). (ADR-6) | #7 | — |
 | 9 | Cliente PMM — Evaluación inicial y Marcador de incidente | Evaluación inicial (magnitud, riesgos, rol restringido, encolable offline). Marcador: coordenada de cuadrícula manual (sin geolocalización GETAC en v1), badge "sin sincronizar" calculado client-side (el backend siempre devuelve `estado_sincronizado: true`). (ADR-6) | #7, #8 | — |
 | 10 | Cliente PMM — Cola offline y token blando | Persistencia local (IndexedDB) de las 4 escrituras offline-capaces, reintento al reconectar contra el mismo POST idempotente. Token blando: seguir encolando con JWT expirado mientras esté offline. Ventana máxima de sesión offline. (ADR-6, ADR-7) | #8, #9, #6 | Mecanismo de sync con token vencido (hueco 6.4) y ventana de 12h — ambos `[Propuesto]`, sin confirmar con Renzo. |
 | 11 | Endurecimiento | Al menos un flujo end-to-end por cliente contra backend real (no mocks). Verificación manual del límite de 3 clics (PRD sección 7) con el shell 1A. Accesibilidad básica (contraste, tap targets para uso con guantes). Prueba real de corte de conectividad en el Cliente PMM (no solo simulada), confirmando sync sin duplicados. | #3, #4, #5, #6, #10 | — |
