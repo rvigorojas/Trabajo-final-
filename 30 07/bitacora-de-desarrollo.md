@@ -322,6 +322,33 @@ viewport angosto (`scrollWidth` > `clientWidth`, las 5 tabs siguen en el DOM, ni
 Ítem #2 cerrado. `BACKLOG.md` y `CLAUDE.md` actualizados. Siguiente: ítem #3 (Cliente COE —
 Resumen y Cadena de mando).
 
+## Paso 18 — Ítem #3: Resumen y Cadena de mando, cierre de verificación (2026-08-11)
+
+El código y los tests del ítem #3 (`ResumenScreen`, `CadenaDeMandoScreen`, `usePolling`,
+`lib/activacionActual.ts`, `lib/ultimosEventos.ts`, 5 tipos TS nuevos) se habían completado en la
+sesión anterior, con un hallazgo real ya corregido ahí (falta de `CORSMiddleware` en el backend,
+detectado al probar `fetch()` desde `apps/coe` en navegador). Quedaba pendiente la checklist final
+de cierre, retomada en esta sesión:
+
+- Postgres 16 (servicio `postgresql-x64-16`) ya corría; `alembic upgrade head` confirmó la base ya
+  al día (`0003_relevo_activacion_y_cierre`).
+- Backend reiniciado (`uvicorn app.main:app --port 8000`) para tomar el `CORSMiddleware` agregado
+  en la sesión previa — confirmado con un `OPTIONS` manual que el preflight responde
+  `access-control-allow-origin` para `localhost:5173`.
+- `npm run test/lint/build --workspace=coe`: 17/17 tests, lint y build limpios.
+- Verificación manual en navegador (Chrome vía `claude-in-chrome`) contra la activación de prueba
+  real ya presente en Postgres (`test_duty`/`test1234`, "Incendio de prueba E2E"): login,
+  Resumen con alerta/cronómetro corriendo/convocatoria, polling cada 3s confirmado por
+  `read_network_requests` (3 ciclos de los 5 endpoints). **Hallazgo no bloqueante**: los botones
+  "Relevo de mando"/"Desactivar" del shell (ítem #2) son solo UI sin `onClick` — su lógica es el
+  ítem #6, todavía no implementado. Para probar el caso "sin activación activa → redirige a Cadena
+  de mando" se desactivó la activación directo por API (`POST
+  /activaciones/{id}/desactivar`), no por el botón; confirmado el redirect con los 2 carriles
+  COE/PMM.
+
+Ítem #3 cerrado. `BACKLOG.md`, `CLAUDE.md` y `tasks/item-03-resumen-cadena-mando/todo.md`
+actualizados. Siguiente: ítem #4 (Cliente COE — Mapa y Unidades).
+
 ---
 
 ## Estado actual
@@ -334,14 +361,16 @@ Resumen y Cadena de mando).
 - Backend FastAPI implementado (commits `53126bc`, `f3ba454`, `9698419`) y verificado end-to-end
   contra PostgreSQL 16 real: migraciones limpias (incluida `0003_relevo_activacion_y_cierre`),
   14/14 tests, servidor sirviendo endpoints autenticados.
-- Frontend: `BACKLOG.md` (11 ítems, ciclos SDD independientes) — **ítems #1 y #2 cerrados**
-  (Paso 16, Paso 17): setup compartido del monorepo + shell de navegación COE (Opción 1A, React
-  Router + Radix UI, 5 tabs + acciones flotantes por rol + menú aparte). 16 tests entre ambos
-  ítems. Siguiente: ítem #3 (Cliente COE — Resumen y Cadena de mando). Quedan pendientes el hueco
-  6.4 (sync con token vencido) y dos confirmaciones de alcance (Comunicaciones, edición de estado
-  de unidad desde COE) — no bloquean el ítem #3.
-- Repo: `main` sincronizado con `origin/main` al momento de escribir esto (Pasos 16-17 sin
-  commitear todavía — ver el propio git status antes de asumir que ya se pusheó).
+- Frontend: `BACKLOG.md` (11 ítems, ciclos SDD independientes) — **ítems #1, #2 y #3 cerrados**
+  (Paso 16, Paso 17, Paso 18): setup compartido del monorepo + shell de navegación COE (Opción 1A,
+  React Router + Radix UI, 5 tabs + acciones flotantes por rol + menú aparte) + Resumen/Cadena de
+  mando (alerta, cronómetro, convocatoria, feed de eventos, polling 3s, verificado end-to-end
+  contra backend real). 33 tests entre los tres ítems. Siguiente: ítem #4 (Cliente COE — Mapa y
+  Unidades). Los botones "Relevo de mando"/"Desactivar" del shell siguen sin handler (ítem #6).
+  Quedan pendientes el hueco 6.4 (sync con token vencido) y dos confirmaciones de alcance
+  (Comunicaciones, edición de estado de unidad desde COE) — no bloquean el ítem #4.
+- Repo: al escribir esto, `main` tenía commits locales sin pushear (Pasos 16-18) — ver el propio
+  `git status` antes de asumir que ya se pusheó.
 - Pendientes externos (ninguno bloquea el desarrollo):
   - Respuesta del Jefe de Rescate sobre el criterio real de convocatoria para emergencias MATPEL.
   - Confirmación de Renzo sobre la ventana de 12h del token blando (ADR-7).

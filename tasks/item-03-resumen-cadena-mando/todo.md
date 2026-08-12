@@ -78,11 +78,23 @@ Orden = orden de dependencia (ver `tasks/item-03-resumen-cadena-mando/plan.md`).
 
 ## Verificación final del ítem
 
-- [ ] Todas las tasks anteriores en verde (`npm run test --workspace=coe`).
-- [ ] `npm run lint --workspace=coe` sin errores.
-- [ ] `npm run build --workspace=coe` limpio.
-- [ ] Verificación manual contra el backend real (Postgres levantado, `alembic upgrade head`):
-      crear una activación de prueba, confirmar que Resumen la muestra y que el cronómetro corre;
-      cerrarla y confirmar que Resumen redirige a Cadena de mando.
-- [ ] Correr `verify` (fase final del ciclo SDD) contra `spec.md` + `plan.md` + este archivo antes
-      de cerrar el ítem.
+- [x] Todas las tasks anteriores en verde (`npm run test --workspace=coe`) — **17/17, 2026-08-11**.
+- [x] `npm run lint --workspace=coe` sin errores — **2026-08-11**.
+- [x] `npm run build --workspace=coe` limpio — **2026-08-11**.
+- [x] Verificación manual contra el backend real (Postgres levantado, `alembic upgrade head`) —
+      **2026-08-11**. Backend reiniciado con el `CORSMiddleware` de la sesión anterior (ya no
+      fallaba `fetch()` desde `localhost:5173`). Contra la activación real ya presente en Postgres
+      (`test_duty`/`test1234`, "Incendio de prueba E2E"): Resumen mostró alerta II, cronómetro
+      corriendo (confirmado avance entre dos screenshots), convocatoria "COE 0/3 · PMM 0/3", feed
+      vacío (correcto: sin evaluación inicial/marcadores/relevos/confirmaciones reales para esa
+      activación). Polling cada 3s confirmado por red (`read_network_requests`: 3 ciclos de los 5
+      endpoints). Los botones "Relevo de mando"/"Desactivar" del shell no tienen handler todavía
+      (son el ítem #6, fuera de alcance) — la desactivación para probar el redirect se hizo vía
+      `POST /activaciones/{id}/desactivar` directo por API, no por UI. Con la activación cerrada,
+      `/resumen` redirigió a `/cadena-de-mando` mostrando los 2 carriles COE/PMM.
+- [x] Correr `verify` (fase final del ciclo SDD) contra `spec.md` + `plan.md` + este archivo —
+      **2026-08-11**. Los 5 Success Criteria de `spec.md` se cumplen; los 5 checkpoints de
+      `plan.md` quedaron confirmados durante el desarrollo (sesión anterior) y esta verificación
+      final confirma el comportamiento end-to-end contra backend real. Sin hallazgos nuevos.
+
+**Ítem #3 cerrado — 2026-08-11.**

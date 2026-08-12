@@ -11,7 +11,12 @@ apps `coe`/`pmm` (Vite + React + TypeScript) y paquete `@pce/api-client` (tipos,
 store de sesión, login compartido), con Tailwind v4 + design tokens de Stitch ("Sentinel
 Command") y 9 tests (Vitest + RTL + MSW). Ítem #2 (Shell de navegación COE, Opción 1A) también
 cerrado: React Router + Radix Tabs/DropdownMenu, 5 tabs + acciones flotantes gateadas por rol +
-menú aparte, 7 tests. Próximo: ítem #3 (Cliente COE — Resumen y Cadena de mando).
+menú aparte, 7 tests. Ítem #3 (Cliente COE — Resumen y Cadena de mando) cerrado 2026-08-11:
+`ResumenScreen` (alerta, cronómetro, convocatoria, feed de últimos eventos armado client-side,
+polling 3s vía `usePolling`) y `CadenaDeMandoScreen` (2 carriles COE/PMM), 17 tests. Verificado
+contra backend real (CORS agregado en la sesión previa, confirmado funcionando). Los botones
+"Relevo de mando"/"Desactivar" del shell (ítem #2) siguen sin handler — su lógica es el ítem #6.
+Próximo: ítem #4 (Cliente COE — Mapa y Unidades).
 
 **Gotcha de React Router 8 (data router) + jsdom** (encontrado en `verify` del ítem #2): cualquier
 `navigate()` con `RouterProvider`/`createMemoryRouter` sobre `jsdom` tira `TypeError: RequestInit:
