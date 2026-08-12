@@ -451,6 +451,44 @@ verificados end-to-end contra backend real). `BACKLOG.md`, `CLAUDE.md` y
 `tasks/item-06-relevo-desactivar/todo.md` actualizados. Siguiente: arrancar el Cliente PMM
 (ítems #7-#10), el trabajo offline-first — la parte más grande y menos avanzada del backlog.
 
+## Paso 22 — Ítem #7: Cliente PMM, Setup PWA y login offline (2026-08-11)
+
+Primer ítem del Cliente PMM. `apps/pmm` existía desde el ítem #1 (scaffold, Tailwind + tokens,
+`Login` compartido) pero sin tooling de test propio — Vitest/RTL/MSW solo se habían agregado a
+`coe`. Este ítem agrega ese tooling a `pmm` (mismo `vitest.config.ts`/`test-setup.ts`/
+`mocks/server.ts` que `coe`, con `happy-dom`) y arranca el PWA propiamente dicho.
+
+Implementado: `vite-plugin-pwa` con `registerType: "prompt"` (ADR-4 — nunca `"autoUpdate"`
+silencioso, siempre avisar); `ActualizacionDisponible.tsx` (usa `useRegisterSW` de
+`virtual:pwa-register/react`, aviso + botón "Reiniciar para aplicar" cuando hay `needRefresh`);
+`App.tsx` gatea por `getToken()` (mismo patrón que `coe`, ítem #1) — sin sesión, `Login`; con
+sesión, un placeholder simple ("Sesión iniciada", sin pantallas reales todavía, esas son los
+ítems #8-#10).
+
+**Dos hallazgos reales durante la implementación/`verify`:**
+
+- `vite-plugin-pwa` también hay que agregarlo al `vitest.config.ts` de `pmm`, no solo al
+  `vite.config.ts` de producción — sin el plugin ahí, Vite no resuelve el módulo virtual
+  `"virtual:pwa-register/react"` y el import falla en el análisis de imports antes de que
+  `vi.mock(...)` llegue a interceptarlo. Se agregó `VitePWA({ registerType: "prompt" })` también
+  en `vitest.config.ts`.
+- `ActualizacionDisponible` se decidió montar **siempre** en `App.tsx`, no solo en la rama
+  post-login como se había planeado en `plan.md` — es la que dispara `useRegisterSW`, y el shell
+  de la app debe cachearse desde antes del primer login para que la propia pantalla de `Login`
+  pueda recargar sin conexión (si solo se registraba post-login, un usuario que nunca inició
+  sesión con conectividad no tendría el SW activo la primera vez que la necesite offline).
+
+Verificación manual real: `vite build --workspace=pmm && vite preview --port 4173`. Confirmado en
+`navigator.serviceWorker.getRegistrations()` que el SW quedó `"activated"` en
+`http://localhost:4173/sw.js`. Con un JWT real (`test_duty`) inyectado directo en
+`localStorage["pce.session.token"]`, recargar mostró "Sesión iniciada" sin pasar por el login, y
+`read_network_requests` confirmó que ninguna request fue a `localhost:8000` — solo assets
+estáticos servidos por el propio `vite preview`.
+
+Ítem #7 cerrado. `BACKLOG.md`, `CLAUDE.md` y `tasks/item-07-pwa-login-offline/todo.md`
+actualizados. Siguiente: ítem #8 (Cliente PMM — Nueva activación), la primera pantalla real del
+Cliente PMM — recién ahí hace falta armar un router para `pmm` (hoy no tiene ninguno).
+
 ---
 
 ## Estado actual
@@ -463,16 +501,17 @@ verificados end-to-end contra backend real). `BACKLOG.md`, `CLAUDE.md` y
 - Backend FastAPI implementado (commits `53126bc`, `f3ba454`, `9698419`) y verificado end-to-end
   contra PostgreSQL 16 real: migraciones limpias (incluida `0003_relevo_activacion_y_cierre`),
   14/14 tests, servidor sirviendo endpoints autenticados.
-- Frontend: `BACKLOG.md` (11 ítems, ciclos SDD independientes) — **ítems #1-#6 cerrados** (Paso 16
-  a Paso 21): setup compartido del monorepo + shell de navegación COE (Opción 1A) + Resumen/
-  Cadena de mando + Mapa/Unidades + Pre-PAI/Reportes/Comunicaciones + Relevo de mando/Desactivar
-  reales — los 6 verificados end-to-end contra backend real. 28 tests en `coe`.
-  **El Cliente COE queda completo en su alcance actual.** Siguiente: arrancar el Cliente PMM
-  (ítems #7-#10, todo el trabajo offline-first — el más grande y menos avanzado del backlog);
-  ítem #11 (endurecimiento) es lo último. Quedan pendientes el hueco 6.4 (sync con token vencido),
-  la ventana de 12h del token blando (ADR-7) y la confirmación del Jefe de Rescate sobre MATPEL —
-  no bloquean el arranque del Cliente PMM, sí condicionan el alcance final de los ítems #8/#10.
-- Repo: al escribir esto, `main` tenía commits locales sin pushear (Paso 21 en adelante) — ver el
+- Frontend: `BACKLOG.md` (11 ítems, ciclos SDD independientes) — **ítems #1-#7 cerrados** (Paso 16
+  a Paso 22). **Cliente COE completo** (ítems #1-#6, 28 tests en `coe`). **Cliente PMM arrancado**:
+  ítem #7 (setup PWA + login offline) cerrado — `apps/pmm` ya tiene su propio tooling de test
+  (4 tests), `vite-plugin-pwa` con aviso de actualización (nunca silencioso), y gateo de sesión
+  sin llamar al backend si ya había una sesión guardada. Sin router ni pantallas reales todavía en
+  `pmm` — eso arranca en el ítem #8. Siguiente: ítem #8 (Cliente PMM — Nueva activación); ítem #11
+  (endurecimiento) es lo último. Quedan pendientes el hueco 6.4 (sync con token vencido), la
+  ventana de 12h del token blando (ADR-7) y la confirmación del Jefe de Rescate sobre MATPEL — no
+  bloquean el ítem #8, sí condicionan el alcance final de los ítems #8 (MATPEL)/#10 (token
+  vencido).
+- Repo: al escribir esto, `main` tenía commits locales sin pushear (Paso 22 en adelante) — ver el
   propio `git status` antes de asumir que ya se pusheó.
 - Pendientes externos (ninguno bloquea el desarrollo):
   - Respuesta del Jefe de Rescate sobre el criterio real de convocatoria para emergencias MATPEL.

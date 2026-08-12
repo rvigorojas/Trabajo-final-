@@ -30,9 +30,15 @@ end-to-end contra backend real. Ítem #6 (Relevo de mando y Desactivar) cerrado 
 `RelevoModal`/`DesactivarModal` (`@radix-ui/react-dialog`, primer uso de `Dialog`) conectados a
 `FloatingActions` — ambos resuelven la activación en curso al abrirse y llaman a
 `POST /relevos-mando`/`POST /activaciones/{id}/desactivar`. 5 tests nuevos (28 en total en `coe`).
-Verificado end-to-end contra backend real. **Cliente COE completo en su alcance actual.** Próximo:
-ítem #7 (Cliente PMM — Setup PWA y login offline), inicio del Cliente PMM (ítems #7-#10, el
-trabajo offline-first, todavía sin empezar).
+Verificado end-to-end contra backend real. **Cliente COE completo en su alcance actual.** Ítem #7 (Cliente PMM — Setup PWA y login offline)
+cerrado 2026-08-11, primer ítem del Cliente PMM: `apps/pmm` ganó su propio tooling de test
+(Vitest+RTL+MSW+happy-dom, nunca lo tuvo desde el ítem #1) y `vite-plugin-pwa` con
+`registerType: "prompt"` (ADR-4, nunca `"autoUpdate"` silencioso). `App.tsx` gatea por
+`getToken()` (mismo patrón que `coe`) y `ActualizacionDisponible` (usa `useRegisterSW`) se monta
+siempre, no solo post-login, para que el shell cachee desde antes del primer login. 4 tests
+nuevos. Verificado con `vite build && vite preview`: SW `"activated"` real, y reabrir con un JWT
+guardado no dispara ninguna request a `localhost:8000`. Próximo: ítem #8 (Cliente PMM — Nueva
+activación), primera pantalla real del Cliente PMM — recién ahí hace falta un router.
 
 **Nota de sesión**: el skill `spec-driven-development` (y `generar-tech-design`/
 `revision-adversarial`) no aparece disponible cuando la sesión de Claude Code arranca fuera de
