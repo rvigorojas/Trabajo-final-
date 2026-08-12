@@ -33,4 +33,6 @@ export type {
   MarcadorIncidente,
   EstadoUnidad,
   Unidad,
+  PrePAI,
+  ReporteCierre,
 } from "./types"

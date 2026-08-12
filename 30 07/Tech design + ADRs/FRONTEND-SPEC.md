@@ -157,9 +157,9 @@ Basado en `Design.md` Flujo B (navegación de contenido, agnóstica del shell) y
 
 ### Comunicaciones
 - Pestaña presente en la navegación de `Design.md` y el pptx, pero **sin entidad de datos definida**
-  en `TECH-DESIGN.md` ni en el backend (no hay modelo de "mensaje" o "comunicación"). Placeholder de
-  contenido a definir — no bloquea el resto del frontend, pero no inventar un backend para esto sin
-  antes confirmar su alcance real con Renzo.
+  en `TECH-DESIGN.md` ni en el backend (no hay modelo de "mensaje" o "comunicación"). **Confirmado
+  con Renzo (2026-08-11): queda como placeholder sin funcionalidad real** — no inventar un backend
+  para esto, su alcance se define en otro momento.
 
 ### Cadena de mando
 - Historial de relevos — `GET /relevos-mando?activacion_id=<id de la activación en curso>`
@@ -173,6 +173,10 @@ Basado en `Design.md` Flujo B (navegación de contenido, agnóstica del shell) y
   contactos, recursos, estrategias de control) en el formulario de evaluación inicial que el usuario
   esté completando — no existe (ni debe crearse) un endpoint que "vincule" un Pre-PAI a una
   Activación en el backend.
+- **Confirmado con Renzo (2026-08-11): en el Cliente COE (ítem #5 del BACKLOG.md) esta pantalla es
+  solo lectura** — listar la biblioteca y ver el detalle de cada Pre-PAI. La precarga real hacia el
+  formulario de evaluación inicial se implementa en el ítem #9 (Cliente PMM), la única pantalla
+  donde ese formulario existe hoy.
 
 ### Reportes (menú aparte)
 - `POST /reportes-cierre` (una vez por activación cerrada) + `GET /reportes-cierre/{id}` para ver/

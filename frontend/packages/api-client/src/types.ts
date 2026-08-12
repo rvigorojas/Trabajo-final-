@@ -149,3 +149,27 @@ export interface Unidad {
   estado: EstadoUnidad
   hora_recepcion: string
 }
+
+// backend/app/schemas/pre_pai.py — PrePAIRead
+export interface PrePAI {
+  id: string
+  nombre_escenario: string
+  sector: string
+  tipo_emergencia: TipoEmergencia
+  caracterizacion: string
+  riesgos: string | null
+  contactos_emergencia: string | null
+  recursos: string | null
+  estrategias_control: string | null
+  plano_acceso: string | null
+  dimensiones_escenario: string | null
+}
+
+// backend/app/schemas/reporte_cierre.py — ReporteCierreRead
+export interface ReporteCierre {
+  id: string
+  activacion_id: string
+  tipo_emergencia: TipoEmergencia
+  generado_en: string
+  datos: Record<string, unknown>
+}

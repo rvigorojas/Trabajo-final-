@@ -385,6 +385,43 @@ persiste (confirmado recargando la página).
 `tasks/item-04-mapa-unidades/todo.md` actualizados. Siguiente: ítem #5 (Cliente COE — Pre-PAI,
 Reportes y Comunicaciones).
 
+## Paso 20 — Ítem #5: Pre-PAI, Reportes y Comunicaciones (2026-08-11)
+
+Dos preguntas abiertas reales de `BACKLOG.md`/`FRONTEND-SPEC.md` confirmadas con el usuario antes
+de arrancar la spec:
+
+1. **Comunicaciones**: queda como placeholder sin funcionalidad — sin entidad de datos definida,
+   se define en otro momento (sin cambios sobre el stub del ítem #2).
+2. **"Activar" un Pre-PAI**: en el Cliente COE (este ítem) la pantalla es de solo lectura —
+   listar + ver detalle. La precarga real hacia el formulario de evaluación inicial es el ítem #9
+   (Cliente PMM), la única pantalla donde ese formulario existe hoy (confirmado leyendo
+   `FRONTEND-SPEC.md` sección 5 — el formulario de evaluación inicial está documentado solo del
+   lado PMM).
+
+`FRONTEND-SPEC.md` y `BACKLOG.md` actualizados con ambas decisiones antes de la spec.
+
+Implementado: `PrePAIScreen.tsx` (`GET /pre-pai`, lista + detalle al seleccionar) y
+`ReportesScreen.tsx` (`GET /activaciones` filtrado client-side por `estado === "cerrada"`, botón
+"Ver reporte" por activación que dispara `POST /reportes-cierre` — idempotente, así que no hace
+falta un `GET` de listado que no existe — y muestra `datos` como lista clave/valor genérica, con
+`JSON.stringify` para los arrays anidados). Tipos nuevos `PrePAI`/`ReporteCierre` en
+`@pce/api-client`. 2 tests nuevos (23 en total en `coe`).
+
+**Hallazgo real durante `verify`**: mismo patrón que el ítem #4 — faltaba el handler MSW por
+defecto de `GET /pre-pai` en `apps/coe/src/mocks/server.ts` (contaminaba `MenuAparte.test.tsx`,
+que navega a `/pre-pai`). Agregado, mismo criterio que los demás endpoints.
+
+Verificación manual real en navegador contra backend real: Pre-PAI de prueba creado por API,
+visible en la lista con su detalle completo; Reportes mostró solo la activación cerrada real de
+sesiones anteriores, ocultando la activa, y generó/mostró su reporte correctamente (incluidos los
+arrays vacíos). Nota aparte, no bug de este ítem: el JWT de sesión expiró a los 30 min entre la
+verificación del ítem #4 y esta — es exactamente el hueco 6.4 ya documentado (sync/refresh con
+token vencido, pendiente de confirmar con Renzo), no algo nuevo.
+
+Ítem #5 cerrado. `BACKLOG.md`, `CLAUDE.md`, `FRONTEND-SPEC.md` y
+`tasks/item-05-pre-pai-reportes-comunicaciones/todo.md` actualizados. Siguiente: ítem #6 (Relevo
+de mando y Desactivar — acciones reales de los botones del shell, hoy solo UI sin `onClick`).
+
 ---
 
 ## Estado actual
@@ -397,17 +434,20 @@ Reportes y Comunicaciones).
 - Backend FastAPI implementado (commits `53126bc`, `f3ba454`, `9698419`) y verificado end-to-end
   contra PostgreSQL 16 real: migraciones limpias (incluida `0003_relevo_activacion_y_cierre`),
   14/14 tests, servidor sirviendo endpoints autenticados.
-- Frontend: `BACKLOG.md` (11 ítems, ciclos SDD independientes) — **ítems #1, #2, #3 y #4 cerrados**
-  (Paso 16, Paso 17, Paso 18, Paso 19): setup compartido del monorepo + shell de navegación COE
-  (Opción 1A, React Router + Radix UI, 5 tabs + acciones flotantes por rol + menú aparte) +
-  Resumen/Cadena de mando (alerta, cronómetro, convocatoria, feed de eventos, polling 3s) + Mapa/
-  Unidades (marcadores filtrados por activación con toggle de capas, edición inline de estado de
-  unidad) — los 4 verificados end-to-end contra backend real. 37 tests entre los cuatro ítems.
-  Siguiente: ítem #5 (Cliente COE — Pre-PAI, Reportes y Comunicaciones). Los botones "Relevo de
-  mando"/"Desactivar" del shell siguen sin handler (ítem #6). Quedan pendientes el hueco 6.4 (sync
-  con token vencido) y una confirmación de alcance (Comunicaciones, sin entidad de datos definida)
-  — no bloquean el ítem #5.
-- Repo: al escribir esto, `main` tenía commits locales sin pushear (Paso 19 en adelante) — ver el
+- Frontend: `BACKLOG.md` (11 ítems, ciclos SDD independientes) — **ítems #1-#5 cerrados** (Paso 16
+  a Paso 20): setup compartido del monorepo + shell de navegación COE (Opción 1A, React Router +
+  Radix UI, 5 tabs + acciones flotantes por rol + menú aparte) + Resumen/Cadena de mando (alerta,
+  cronómetro, convocatoria, feed de eventos, polling 3s) + Mapa/Unidades (marcadores filtrados por
+  activación con toggle de capas, edición inline de estado de unidad) + Pre-PAI/Reportes/
+  Comunicaciones (biblioteca de escenarios solo lectura, generación/vista de reportes de cierre,
+  Comunicaciones placeholder) — los 5 verificados end-to-end contra backend real. 39 tests entre
+  los cinco ítems. **El Cliente COE queda completo en su alcance de lectura/consulta** — solo
+  falta el ítem #6 (acciones reales de Relevo de mando/Desactivar, hoy botones sin `onClick`) para
+  cerrar el Cliente COE por completo. Siguiente: ítem #6, o arrancar el Cliente PMM (ítems #7-#10,
+  todo el trabajo offline-first — el más grande y menos avanzado del backlog). Quedan pendientes
+  el hueco 6.4 (sync con token vencido) y la confirmación del Jefe de Rescate sobre MATPEL — no
+  bloquean el ítem #6, sí condicionan el ítem #8/#10 del Cliente PMM.
+- Repo: al escribir esto, `main` tenía commits locales sin pushear (Paso 20 en adelante) — ver el
   propio `git status` antes de asumir que ya se pusheó.
 - Pendientes externos (ninguno bloquea el desarrollo):
   - Respuesta del Jefe de Rescate sobre el criterio real de convocatoria para emergencias MATPEL.

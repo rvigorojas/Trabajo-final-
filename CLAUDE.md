@@ -21,7 +21,13 @@ activación en curso, toggle de capas Cuadrícula/Incidente/Accesos, capa Unidad
 `UnidadesScreen` (lista editable inline vía `PUT /unidades/{id}` — confirmado con el usuario que
 el COE puede editar el estado de una unidad, sin restricción de rol adicional, backend sin
 cambios), 4 tests nuevos (21 en total en `coe`). Verificado end-to-end contra backend real.
-Próximo: ítem #5 (Cliente COE — Pre-PAI, Reportes y Comunicaciones).
+Ítem #5 (Cliente COE — Pre-PAI, Reportes y Comunicaciones) cerrado 2026-08-11: `PrePAIScreen`
+(solo lectura — lista + detalle; "activar" con precarga real es el ítem #9, Cliente PMM) y
+`ReportesScreen` (lista de activaciones cerradas, `POST /reportes-cierre` idempotente, `datos`
+renderizado genérico); Comunicaciones queda placeholder sin funcionalidad (confirmado con el
+usuario, sin entidad de datos definida). 2 tests nuevos (23 en total en `coe`). Verificado
+end-to-end contra backend real. Próximo: ítem #6 (Relevo de mando y Desactivar — acciones reales
+de los botones del shell, hoy solo UI).
 
 **Nota de sesión**: el skill `spec-driven-development` (y `generar-tech-design`/
 `revision-adversarial`) no aparece disponible cuando la sesión de Claude Code arranca fuera de
