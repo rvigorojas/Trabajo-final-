@@ -422,6 +422,35 @@ token vencido, pendiente de confirmar con Renzo), no algo nuevo.
 `tasks/item-05-pre-pai-reportes-comunicaciones/todo.md` actualizados. Siguiente: ítem #6 (Relevo
 de mando y Desactivar — acciones reales de los botones del shell, hoy solo UI sin `onClick`).
 
+## Paso 21 — Ítem #6: Relevo de mando y Desactivar (2026-08-11)
+
+Último ítem del Cliente COE. Conecta los botones de `FloatingActions` (ítem #2, ya gateados por
+rol) a acciones reales. Nueva dependencia: `@radix-ui/react-dialog` (primer uso de `Dialog` en el
+repo, mismo criterio que `Tabs`/`DropdownMenu` del ítem #2).
+
+Implementado: `RelevoModal.tsx` y `DesactivarModal.tsx`, ambos resolviendo la activación en curso
+al abrirse (`GET /activaciones` + `activacionActual`, ítem #3) en vez de recibirla por props —
+los botones son globales y no saben en qué pantalla está el usuario. Relevo: formulario
+`instancia`/`responsable_saliente`/`responsable_entrante` → `POST /relevos-mando`. Desactivar:
+confirmación dentro del propio modal (no `window.confirm` nativo — decisión propia, no
+documentada en `FRONTEND-SPEC.md`, para evitar cerrar una emergencia real por mal click) → `POST
+/activaciones/{id}/desactivar`. 5 tests nuevos (28 en total en `coe`): 2 de `RelevoModal`, 1 de
+`DesactivarModal`, 2 agregados a `FloatingActions.test.tsx` (sin romper los 3 existentes, que
+verifican gateo por rol sin red).
+
+Verificación manual real en navegador contra backend real, con la activación activa del ítem #4
+todavía abierta: registrar un relevo (Capitán Rojas → Capitán Vega) y confirmarlo visible en
+Cadena de mando; desactivar esa misma activación y confirmar por API que quedó `estado: "cerrada"`,
+y que `/resumen` redirige a `/cadena-de-mando` (comportamiento ya construido en el ítem #3, sin
+tocar). Hallazgo cosmético no bloqueante: los `<input>` de texto del modal de Relevo no tienen
+borde visible contra el fondo oscuro hasta hacer foco — ajuste de estilos pendiente para otro
+momento, no afecta la funcionalidad.
+
+**Ítem #6 cerrado — el Cliente COE queda completo en su alcance actual** (ítems #1-#6, todos
+verificados end-to-end contra backend real). `BACKLOG.md`, `CLAUDE.md` y
+`tasks/item-06-relevo-desactivar/todo.md` actualizados. Siguiente: arrancar el Cliente PMM
+(ítems #7-#10), el trabajo offline-first — la parte más grande y menos avanzada del backlog.
+
 ---
 
 ## Estado actual
@@ -434,20 +463,16 @@ de mando y Desactivar — acciones reales de los botones del shell, hoy solo UI 
 - Backend FastAPI implementado (commits `53126bc`, `f3ba454`, `9698419`) y verificado end-to-end
   contra PostgreSQL 16 real: migraciones limpias (incluida `0003_relevo_activacion_y_cierre`),
   14/14 tests, servidor sirviendo endpoints autenticados.
-- Frontend: `BACKLOG.md` (11 ítems, ciclos SDD independientes) — **ítems #1-#5 cerrados** (Paso 16
-  a Paso 20): setup compartido del monorepo + shell de navegación COE (Opción 1A, React Router +
-  Radix UI, 5 tabs + acciones flotantes por rol + menú aparte) + Resumen/Cadena de mando (alerta,
-  cronómetro, convocatoria, feed de eventos, polling 3s) + Mapa/Unidades (marcadores filtrados por
-  activación con toggle de capas, edición inline de estado de unidad) + Pre-PAI/Reportes/
-  Comunicaciones (biblioteca de escenarios solo lectura, generación/vista de reportes de cierre,
-  Comunicaciones placeholder) — los 5 verificados end-to-end contra backend real. 39 tests entre
-  los cinco ítems. **El Cliente COE queda completo en su alcance de lectura/consulta** — solo
-  falta el ítem #6 (acciones reales de Relevo de mando/Desactivar, hoy botones sin `onClick`) para
-  cerrar el Cliente COE por completo. Siguiente: ítem #6, o arrancar el Cliente PMM (ítems #7-#10,
-  todo el trabajo offline-first — el más grande y menos avanzado del backlog). Quedan pendientes
-  el hueco 6.4 (sync con token vencido) y la confirmación del Jefe de Rescate sobre MATPEL — no
-  bloquean el ítem #6, sí condicionan el ítem #8/#10 del Cliente PMM.
-- Repo: al escribir esto, `main` tenía commits locales sin pushear (Paso 20 en adelante) — ver el
+- Frontend: `BACKLOG.md` (11 ítems, ciclos SDD independientes) — **ítems #1-#6 cerrados** (Paso 16
+  a Paso 21): setup compartido del monorepo + shell de navegación COE (Opción 1A) + Resumen/
+  Cadena de mando + Mapa/Unidades + Pre-PAI/Reportes/Comunicaciones + Relevo de mando/Desactivar
+  reales — los 6 verificados end-to-end contra backend real. 28 tests en `coe`.
+  **El Cliente COE queda completo en su alcance actual.** Siguiente: arrancar el Cliente PMM
+  (ítems #7-#10, todo el trabajo offline-first — el más grande y menos avanzado del backlog);
+  ítem #11 (endurecimiento) es lo último. Quedan pendientes el hueco 6.4 (sync con token vencido),
+  la ventana de 12h del token blando (ADR-7) y la confirmación del Jefe de Rescate sobre MATPEL —
+  no bloquean el arranque del Cliente PMM, sí condicionan el alcance final de los ítems #8/#10.
+- Repo: al escribir esto, `main` tenía commits locales sin pushear (Paso 21 en adelante) — ver el
   propio `git status` antes de asumir que ya se pusheó.
 - Pendientes externos (ninguno bloquea el desarrollo):
   - Respuesta del Jefe de Rescate sobre el criterio real de convocatoria para emergencias MATPEL.

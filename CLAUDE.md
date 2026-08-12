@@ -26,8 +26,13 @@ cambios), 4 tests nuevos (21 en total en `coe`). Verificado end-to-end contra ba
 `ReportesScreen` (lista de activaciones cerradas, `POST /reportes-cierre` idempotente, `datos`
 renderizado genérico); Comunicaciones queda placeholder sin funcionalidad (confirmado con el
 usuario, sin entidad de datos definida). 2 tests nuevos (23 en total en `coe`). Verificado
-end-to-end contra backend real. Próximo: ítem #6 (Relevo de mando y Desactivar — acciones reales
-de los botones del shell, hoy solo UI).
+end-to-end contra backend real. Ítem #6 (Relevo de mando y Desactivar) cerrado 2026-08-11:
+`RelevoModal`/`DesactivarModal` (`@radix-ui/react-dialog`, primer uso de `Dialog`) conectados a
+`FloatingActions` — ambos resuelven la activación en curso al abrirse y llaman a
+`POST /relevos-mando`/`POST /activaciones/{id}/desactivar`. 5 tests nuevos (28 en total en `coe`).
+Verificado end-to-end contra backend real. **Cliente COE completo en su alcance actual.** Próximo:
+ítem #7 (Cliente PMM — Setup PWA y login offline), inicio del Cliente PMM (ítems #7-#10, el
+trabajo offline-first, todavía sin empezar).
 
 **Nota de sesión**: el skill `spec-driven-development` (y `generar-tech-design`/
 `revision-adversarial`) no aparece disponible cuando la sesión de Claude Code arranca fuera de
