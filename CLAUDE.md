@@ -45,8 +45,13 @@ por categoría armado en una función pura (`lib/payloadActivacion.ts`) para no 
 — se arma con el ítem #9). 6 tests nuevos. Verificado creando una activación Aeronáutica y una
 MATPEL reales desde el formulario contra el backend real; ambas mostraron "Convocados: 0"
 (esperable, la base de test solo tiene un usuario sin roles operativos que el backend convoque).
-Próximo: ítem #9 (Cliente PMM — Evaluación inicial y Marcador de incidente), donde recién hace
-falta un router.
+Ítem #9 (Cliente PMM — Evaluación inicial y Marcador de incidente) cerrado 2026-08-11: primer
+router de `pmm` (`react-router`, 3 rutas, `Shell` con nav simple — sin diseño documentado para
+esto, decisión de bajo riesgo) + `EvaluacionInicialScreen` (rol restringido, oculta el formulario
+sin permiso) + `MarcadorIncidenteScreen` (badge "sin sincronizar" del envío en curso — la cola
+offline persistente real es el ítem #10, que depende de este). 6 tests nuevos (16 en total en
+`pmm`). Verificado creando una evaluación inicial real y un marcador real desde el formulario
+contra el backend real. Próximo: ítem #10 (Cliente PMM — Cola offline y token blando).
 
 **Nota de sesión**: el skill `spec-driven-development` (y `generar-tech-design`/
 `revision-adversarial`) no aparece disponible cuando la sesión de Claude Code arranca fuera de

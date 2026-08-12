@@ -1,29 +1,27 @@
+import { RouterProvider } from "react-router"
 import { Login, getToken } from "@pce/api-client"
 import { apiClient } from "./apiClient"
+import { router } from "./router"
 import { ActualizacionDisponible } from "./components/ActualizacionDisponible"
-import { NuevaActivacionScreen } from "./screens/NuevaActivacionScreen"
 
 /*
  * Gateo de sesión (FRONTEND-SPEC.md sección 5, "Login"): con una sesión ya guardada, no se llama
  * al backend al arrancar — requisito de "funcionar sin conexión si el usuario ya se había
- * logueado antes". Sin router todavía (una sola pantalla real, ítem #8) — se arma cuando el
- * ítem #9 agregue una segunda pantalla.
+ * logueado antes". Mismo patrón que apps/coe/src/App.tsx.
  *
- * ActualizacionDisponible se monta siempre, no solo post-login: es la que dispara el registro
- * del service worker (useRegisterSW), y el caché del shell de la app debe existir desde antes del
- * primer login para que la propia pantalla de Login pueda recargar sin conexión.
+ * ActualizacionDisponible se monta en ambas ramas (acá directo sin sesión; dentro de Shell con
+ * sesión, ítem #9) — dispara el registro del service worker desde antes del primer login.
  */
 function App() {
-  return (
-    <>
-      {getToken() ? (
-        <NuevaActivacionScreen />
-      ) : (
+  if (!getToken()) {
+    return (
+      <>
         <Login apiClient={apiClient} onSuccess={() => window.location.reload()} />
-      )}
-      <ActualizacionDisponible />
-    </>
-  )
+        <ActualizacionDisponible />
+      </>
+    )
+  }
+  return <RouterProvider router={router} />
 }
 
 export default App

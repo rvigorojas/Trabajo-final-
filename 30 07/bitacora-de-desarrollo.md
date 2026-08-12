@@ -533,6 +533,38 @@ desde la confirmación (cosmético).
 actualizados. Siguiente: ítem #9 (Cliente PMM — Evaluación inicial y Marcador de incidente) —
 recién ahí hace falta armar un router para `pmm` (2+ pantallas reales).
 
+## Paso 24 — Ítem #9: Cliente PMM, Evaluación inicial y Marcador de incidente (2026-08-11)
+
+Segunda y tercera pantalla real del Cliente PMM. Primera vez que `pmm` necesita un router: `Shell`
+con una nav simple de 3 enlaces, sin la barra de tabs + acciones flotantes de `coe` — `Design.md`
+solo documenta Flujo A/B/C/D (todos del dashboard COE o de una sola pantalla), nada específico
+para la navegación del PMM de campo. Decisión de bajo riesgo, ajustable sin impacto en datos.
+
+Implementado: `roles.ts` y `lib/activacionActual.ts` copiados de `coe` (mismo criterio de
+duplicar en vez de compartir sin un tercer caso de uso, ya aplicado con `apiClient.ts` en el ítem
+#8); `EvaluacionInicialScreen.tsx` (magnitud + riesgos secundarios, rol restringido a
+`ROLES_EDICION_EVALUACION_RELEVO` — oculta el formulario por completo sin el rol, no lo
+deshabilita, mismo criterio que `FloatingActions` de `coe`); `MarcadorIncidenteScreen.tsx`
+(coordenada de cuadrícula + tipo de incidente + riesgo + capa, sin restricción de rol). El badge
+"sin sincronizar" de Marcador se definió explícitamente como el estado del envío *actual* (visible
+mientras la promesa del `POST` no resuelve) — la cola offline persistente real (IndexedDB,
+reintento al reconectar) es el ítem #10, que depende de este.
+
+**Hallazgo real durante `verify`**: mismo patrón que los ítems #4/#5 de `coe` — faltaba el handler
+MSW por defecto de `GET /activaciones` en `apps/pmm/src/mocks/server.ts` (estaba vacío desde el
+ítem #7). Agregado.
+
+Verificación manual real contra backend real, con una de las activaciones activas del ítem #8:
+completada una evaluación inicial real y un marcador real desde el formulario, ambos confirmados
+por el `POST` 201 y luego por `GET` directo a la API. La extensión de Chrome tuvo fallas
+transitorias de CDP durante la sesión (screenshot y `computer:type` dejaron de responder) — se
+recuperó usando `form_input` (setea el valor del campo directo, sin simular tipeo) para completar
+la verificación sin perder el resultado.
+
+Ítem #9 cerrado. `BACKLOG.md`, `CLAUDE.md` y `tasks/item-09-evaluacion-marcador/todo.md`
+actualizados. Siguiente: ítem #10 (Cliente PMM — Cola offline y token blando), el ítem más
+complejo del backlog (IndexedDB, reintento, token blando ADR-7) — depende de este y del ítem #6.
+
 ---
 
 ## Estado actual
@@ -545,17 +577,16 @@ recién ahí hace falta armar un router para `pmm` (2+ pantallas reales).
 - Backend FastAPI implementado (commits `53126bc`, `f3ba454`, `9698419`) y verificado end-to-end
   contra PostgreSQL 16 real: migraciones limpias (incluida `0003_relevo_activacion_y_cierre`),
   14/14 tests, servidor sirviendo endpoints autenticados.
-- Frontend: `BACKLOG.md` (11 ítems, ciclos SDD independientes) — **ítems #1-#8 cerrados** (Paso 16
-  a Paso 23). **Cliente COE completo** (ítems #1-#6, 28 tests en `coe`). **Cliente PMM en curso**:
-  ítem #7 (setup PWA + login offline) e ítem #8 (Nueva activación, primera pantalla real —
-  selector de categoría, payload exacto por categoría vía `lib/payloadActivacion.ts`, sin router
-  todavía) cerrados, 10 tests en `pmm`. Siguiente: ítem #9 (Cliente PMM — Evaluación inicial y
-  Marcador de incidente) — ahí sí hace falta armar un router para `pmm`; ítem #11 (endurecimiento)
-  es lo último. Criterio de convocatoria MATPEL confirmado con el Jefe de Rescate 2026-08-11
-  (siempre "activación general", ya no es un pendiente). Quedan pendientes el hueco 6.4 (sync con
-  token vencido) y la ventana de 12h del token blando (ADR-7), ambos de Renzo — no bloquean el
-  ítem #9, condicionan el alcance final del ítem #10.
-- Repo: al escribir esto, `main` tenía commits locales sin pushear (Paso 23 en adelante) — ver el
+- Frontend: `BACKLOG.md` (11 ítems, ciclos SDD independientes) — **ítems #1-#9 cerrados** (Paso 16
+  a Paso 24). **Cliente COE completo** (ítems #1-#6, 28 tests en `coe`). **Cliente PMM en curso**:
+  ítems #7 (setup PWA + login offline), #8 (Nueva activación) y #9 (Evaluación inicial + Marcador
+  de incidente, primer router de `pmm`, 3 pantallas) cerrados, 16 tests en `pmm`. Siguiente: ítem
+  #10 (Cliente PMM — Cola offline y token blando), el más complejo del backlog (IndexedDB,
+  reintento, token blando ADR-7); ítem #11 (endurecimiento) es lo último. Criterio de convocatoria
+  MATPEL confirmado con el Jefe de Rescate 2026-08-11 (siempre "activación general", ya no es un
+  pendiente). Quedan pendientes el hueco 6.4 (sync con token vencido) y la ventana de 12h del
+  token blando (ADR-7), ambos de Renzo — condicionan directamente el alcance del ítem #10.
+- Repo: al escribir esto, `main` tenía commits locales sin pushear (Paso 24 en adelante) — ver el
   propio `git status` antes de asumir que ya se pusheó.
 - Pendientes externos (ninguno bloquea el desarrollo):
   - Confirmación de Renzo sobre la ventana de 12h del token blando (ADR-7).
