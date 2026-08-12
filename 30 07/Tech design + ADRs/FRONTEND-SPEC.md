@@ -87,8 +87,8 @@ server-side — coincide con el hueco de diseño resuelto el 30/07 en `Design.md
   el frontend debe usar en sus selectores/dropdowns):
   - Epidemiológica: `"EMERGENCIA"` | `"URGENCIA"` | `"CONSULTA"` (mayúsculas exactas).
   - Estructural/Incidentes: `"Estructural"` | `"Incidente"` (capitalización exacta).
-  - MATPEL: `"Clase 1"` … `"Clase 9"` (siempre deriva a activación general/`III`, criterio
-    `[Propuesto]`, TECH-DESIGN.md § Riesgos técnicos abiertos).
+  - MATPEL: `"Clase 1"` … `"Clase 9"` (siempre deriva a activación general/`III` — confirmado con
+    el Jefe de Rescate 2026-08-11, ver TECH-DESIGN.md § Modelo de datos → `Activacion`).
 - El campo "categoría de emergencia" del wireframe (Hueco resuelto 30/07) determina en la UI cuál de
   estos dos caminos tomar — el frontend arma el payload correcto según la categoría elegida, no envía
   campos "por si acaso".

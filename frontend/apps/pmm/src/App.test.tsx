@@ -25,14 +25,14 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Ingresar — PCE" })).toBeInTheDocument()
   })
 
-  it("con sesión guardada muestra el contenido post-login sin llamar al backend", () => {
+  it("con sesión guardada muestra Nueva activación sin llamar al backend", () => {
     vi.mocked(getToken).mockReturnValue("token-valido")
 
     render(<App />)
 
     // MSW (test-setup.ts) tiene onUnhandledRequest: "error" y este archivo no registra ningún
     // handler — si App llamara al backend acá, el test fallaría por la request sin interceptar.
-    expect(screen.getByText("Sesión iniciada")).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "Nueva activación" })).toBeInTheDocument()
     expect(screen.queryByRole("heading", { name: "Ingresar — PCE" })).not.toBeInTheDocument()
   })
 })

@@ -37,8 +37,16 @@ cerrado 2026-08-11, primer ítem del Cliente PMM: `apps/pmm` ganó su propio too
 `getToken()` (mismo patrón que `coe`) y `ActualizacionDisponible` (usa `useRegisterSW`) se monta
 siempre, no solo post-login, para que el shell cachee desde antes del primer login. 4 tests
 nuevos. Verificado con `vite build && vite preview`: SW `"activated"` real, y reabrir con un JWT
-guardado no dispara ninguna request a `localhost:8000`. Próximo: ítem #8 (Cliente PMM — Nueva
-activación), primera pantalla real del Cliente PMM — recién ahí hace falta un router.
+guardado no dispara ninguna request a `localhost:8000`. Ítem #8 (Cliente PMM — Nueva activación)
+cerrado 2026-08-11, primera pantalla real del Cliente PMM: `NuevaActivacionScreen` (selector de
+categoría → campos dependientes → tipo de incidente → confirmación con convocatoria) + payload
+por categoría armado en una función pura (`lib/payloadActivacion.ts`) para no mezclar
+`nivel_alerta`/`clasificacion_origen` entre categorías. Sin router todavía (una sola pantalla real
+— se arma con el ítem #9). 6 tests nuevos. Verificado creando una activación Aeronáutica y una
+MATPEL reales desde el formulario contra el backend real; ambas mostraron "Convocados: 0"
+(esperable, la base de test solo tiene un usuario sin roles operativos que el backend convoque).
+Próximo: ítem #9 (Cliente PMM — Evaluación inicial y Marcador de incidente), donde recién hace
+falta un router.
 
 **Nota de sesión**: el skill `spec-driven-development` (y `generar-tech-design`/
 `revision-adversarial`) no aparece disponible cuando la sesión de Claude Code arranca fuera de
