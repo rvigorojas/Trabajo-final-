@@ -206,6 +206,10 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
 - No se definió aún el proveedor cloud concreto para el despliegue managed/serverless (ADR 8) ni el
   motor de base de datos relacional específico (ADR 2) — quedan como decisiones de implementación a
   cerrar antes de empezar a construir.
-- **[Propuesto, pendiente de confirmar con Renzo]** La ventana máxima de sesión offline del token
-  "blando" (ADR 7) se fijó en 12 horas como valor por defecto (un turno operativo). Ajustar si el
-  Plan de Emergencia define turnos de otra duración.
+- **Confirmado con Renzo (2026-08-12)**: la ventana máxima de sesión offline del token "blando"
+  (ADR 7) es de 24 horas. Al superarla, exigir relogin antes de encolar acciones nuevas (las ya
+  encoladas dentro de la ventana no se pierden).
+- **Confirmado con Renzo (2026-08-12)**: reconciliación con token vencido al reconectar (hueco 6.4,
+  `FRONTEND-SPEC.md`) — no se agrega endpoint de sync especial al backend. El Cliente PMM exige
+  re-login al detectar reconexión con JWT vencido; la cola offline en IndexedDB se conserva intacta
+  y se sincroniza automáticamente contra el mismo POST idempotente en cuanto hay sesión válida.

@@ -565,6 +565,21 @@ la verificación sin perder el resultado.
 actualizados. Siguiente: ítem #10 (Cliente PMM — Cola offline y token blando), el ítem más
 complejo del backlog (IndexedDB, reintento, token blando ADR-7) — depende de este y del ítem #6.
 
+## Paso 25 — Confirmación de Renzo: ventana del token blando y hueco 6.4 (2026-08-12)
+
+Últimos 2 `[Propuesto]` del proyecto, ambos condicionaban el alcance del ítem #10:
+
+- Ventana máxima de sesión offline del token blando (ADR-7): confirmada en **24h** (no las 12h
+  propuestas por defecto).
+- Reconciliación con JWT vencido al reconectar (hueco 6.4, `FRONTEND-SPEC.md`): confirmado
+  re-login forzado al detectar reconexión con token vencido — sin endpoint especial de backend. La
+  cola offline en IndexedDB se conserva intacta y sincroniza automáticamente contra el mismo POST
+  idempotente en cuanto hay sesión válida.
+
+Actualizado `TECH-DESIGN.md` (Riesgos técnicos abiertos), `FRONTEND-SPEC.md` (sección 5 y hueco
+6.4), `BACKLOG.md` (ítem #10) y `CLAUDE.md` (Pendientes externos). No queda ningún `[Propuesto]`
+abierto en el proyecto. Ítem #10 desbloqueado.
+
 ---
 
 ## Estado actual
@@ -583,11 +598,11 @@ complejo del backlog (IndexedDB, reintento, token blando ADR-7) — depende de e
   de incidente, primer router de `pmm`, 3 pantallas) cerrados, 16 tests en `pmm`. Siguiente: ítem
   #10 (Cliente PMM — Cola offline y token blando), el más complejo del backlog (IndexedDB,
   reintento, token blando ADR-7); ítem #11 (endurecimiento) es lo último. Criterio de convocatoria
-  MATPEL confirmado con el Jefe de Rescate 2026-08-11 (siempre "activación general", ya no es un
-  pendiente). Quedan pendientes el hueco 6.4 (sync con token vencido) y la ventana de 12h del
-  token blando (ADR-7), ambos de Renzo — condicionan directamente el alcance del ítem #10.
-- Repo: al escribir esto, `main` tenía commits locales sin pushear (Paso 24 en adelante) — ver el
-  propio `git status` antes de asumir que ya se pusheó.
-- Pendientes externos (ninguno bloquea el desarrollo):
-  - Confirmación de Renzo sobre la ventana de 12h del token blando (ADR-7).
-  - Confirmación de Renzo sobre el mecanismo de sync con token vencido (hueco 6.4, `FRONTEND-SPEC.md`).
+  MATPEL confirmado con el Jefe de Rescate 2026-08-11 (siempre "activación general"). Ventana del
+  token blando confirmada con Renzo en 24h y hueco 6.4 (sync con token vencido) resuelto con
+  re-login forzado + cola intacta, ambos 2026-08-12 (Paso 25) — ya no quedan `[Propuesto]`
+  abiertos, ítem #10 desbloqueado.
+- Repo: al escribir el Paso 24, `main` tenía commits locales sin pushear — ya pusheados
+  (`3b41b73`) el 2026-08-12; ver el propio `git status`/`git log origin/main..HEAD` antes de
+  asumir el estado del repo.
+- Pendientes externos: ninguno. Ver Paso 25 y la sección "Pendientes externos" de `CLAUDE.md`.

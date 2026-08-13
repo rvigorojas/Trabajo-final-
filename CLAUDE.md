@@ -100,10 +100,15 @@ antes de reinstalar (evita drift de versión).
 - Verificación de migraciones: `alembic upgrade head` / `downgrade -1` / `upgrade head` sin
   error, contra PostgreSQL 16 real, no SQLite.
 
-## Pendientes externos (no bloquean desarrollo)
+## Pendientes externos
 
-- Ventana de 12h del token blando (ADR-7, confirmación de Renzo).
-- Mecanismo de sync con token vencido (hueco 6.4 de `FRONTEND-SPEC.md`, confirmación de Renzo).
+No quedan pendientes externos abiertos. Los 3 `[Propuesto]` históricos ya están confirmados:
 
-Criterio de convocatoria MATPEL: **confirmado con el Jefe de Rescate 2026-08-11** — siempre
-"activación general" (ver `TECH-DESIGN.md`, Modelo de datos → `Activacion`). Ya no es un pendiente.
+- Criterio de convocatoria MATPEL: **confirmado con el Jefe de Rescate 2026-08-11** — siempre
+  "activación general" (ver `TECH-DESIGN.md`, Modelo de datos → `Activacion`).
+- Ventana del token blando: **confirmada con Renzo 2026-08-12 — 24h** (ADR-7).
+- Sync con token vencido (hueco 6.4 de `FRONTEND-SPEC.md`): **confirmado con Renzo 2026-08-12** —
+  re-login forzado al reconectar, cola offline intacta, sync automático post-login; sin cambios en
+  el backend.
+
+Esto desbloquea el ítem #10 del `BACKLOG.md` (Cliente PMM — Cola offline y token blando).

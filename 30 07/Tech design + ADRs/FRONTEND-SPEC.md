@@ -239,16 +239,13 @@ Basado en `Design.md` Flujo B (navegación de contenido, agnóstica del shell) y
   reintentar no duplica.
 - **Token blando (ADR-7):** mientras el dispositivo esté offline, seguir aceptando y encolando
   acciones aunque el JWT decodificado ya esté expirado (no hay forma de renovarlo sin señal de todos
-  modos). Al reconectar, reenviar la cola con el token que estaba vigente al crearse cada acción — el
-  backend no valida antigüedad de esas escrituras, solo el JWT en el header de cada request; si el
-  token ya expiró, sincronizar podría fallar con 401 dependiendo de qué tan viejo sea. **Esto es un
-  hueco real: el backend no tiene hoy un mecanismo de "aceptar token vencido si viene de una cola
-  offline"** — confirmar con Renzo si hace falta un endpoint de sync especial o si alcanza con
-  refrescar el token en cuanto haya señal, antes de reenviar la cola (más simple, pero exige que el
-  reconectar dispare primero un intento de login silencioso/refresh).
-- Ventana máxima de sesión offline: `[Propuesto: 12h — a confirmar con Renzo, ADR-7]`. Si se supera,
-  exigir relogin antes de encolar acciones *nuevas* (las ya encoladas dentro de la ventana no se
-  pierden).
+  modos). **Confirmado con Renzo (2026-08-12), hueco 6.4**: al reconectar con el JWT ya vencido, no
+  se agrega endpoint de sync especial al backend — el Cliente PMM exige re-login; la cola offline en
+  IndexedDB se conserva intacta y se sincroniza automáticamente contra el mismo POST idempotente en
+  cuanto hay sesión válida.
+- Ventana máxima de sesión offline: **confirmado con Renzo (2026-08-12) — 24h** (ADR-7). Si se
+  supera, exigir relogin antes de encolar acciones *nuevas* (las ya encoladas dentro de la ventana
+  no se pierden).
 - Versionado del PWA (ADR-4): `vite-plugin-pwa` configurado para avisar "actualización disponible,
   reiniciar para aplicar" al reconectar, nunca servir caché vieja en silencio.
 
@@ -268,14 +265,12 @@ ningún router la expone. Recomendación: no agregar uno — construir el feed d
 Resumen del COE combinando los endpoints de dominio ya consumidos (sección 4), que ya traen toda la
 información relevante con mejor forma que el log genérico (`tabla`/`registro_id`/`detalle` JSON).
 
-**6.4 — Reconciliación con token vencido (sección 5, token blando).** El backend valida JWT en cada
-request sin excepción para colas offline reconectando con token ya expirado — confirmar con Renzo
-si hace falta resolverlo en el backend o alcanza con refrescar el token al detectar señal antes de
-sincronizar la cola.
+**6.4 — Reconciliación con token vencido (sección 5, token blando) — resuelto, 2026-08-12.** El
+backend no cambia: sigue validando JWT en cada request sin excepción. El Cliente PMM exige re-login
+al reconectar con token vencido; la cola offline se conserva y sincroniza sola tras el nuevo login.
 
-Quedan 2 huecos (6.2 es una decisión de diseño ya tomada, no bloquea nada; 6.4 sí requiere una
-decisión de Renzo antes de cerrar la sincronización robusta del PMM). Ninguno bloquea seguir con el
-resto del frontend.
+No quedan huecos abiertos (6.2 es una decisión de diseño ya tomada, no bloquea nada; 6.4 ya está
+resuelto). Ninguno bloquea seguir con el resto del frontend.
 
 ## 7. Fuera de alcance (heredado del PRD, sección 6)
 
@@ -291,8 +286,9 @@ no crea nuevos Pre-PAI, no hace geolocalización en tiempo real de unidades ni c
   contenido/dato de cada pantalla de forma agnóstica al shell, así que el trabajo de capas de datos
   y lógica de negocio (Fase 1-2 de `FRONTEND-TASKS.md`) no tiene que esperar; la implementación de
   navegación ya puede construirse directamente sobre 1A.
-- Los 3 `[Propuesto]` ya conocidos (convocatoria MATPEL, ventana 12h del token blando, y ahora el
-  mecanismo de sync con token vencido — hueco 6.4) siguen sin confirmar.
+- Los 3 `[Propuesto]` ya conocidos (convocatoria MATPEL, ventana del token blando, y el mecanismo
+  de sync con token vencido — hueco 6.4) ya están confirmados: MATPEL con el Jefe de Rescate
+  (2026-08-11), los otros dos con Renzo (2026-08-12) — ver sección 5 y 6.4.
 - Si el COE puede editar el estado de unidad desde su propia pantalla o es solo lectura ahí (sección
   4, "Unidades").
 - Alcance real de la pestaña "Comunicaciones" (sección 4) — no tiene entidad de datos definida en
