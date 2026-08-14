@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react"
 import type { ActivacionConConvocatoria, CapaMapa } from "@pce/api-client"
 import { apiClient } from "../apiClient"
 import { activacionActual } from "../lib/activacionActual"
+import { enviarOEncolar } from "../offline/colaOffline"
 
 const CAPAS: { valor: CapaMapa; etiqueta: string }[] = [
   { valor: "cuadricula", etiqueta: "Cuadrícula" },
@@ -32,16 +33,14 @@ export function MarcadorIncidenteScreen() {
     event.preventDefault()
     if (!activacion) return
     setEnviando(true)
-    await apiClient.apiFetch("/marcadores-incidente", {
-      method: "POST",
-      body: JSON.stringify({
-        activacion_id: activacion.id,
-        coordenada_cuadricula: coordenadaCuadricula,
-        tipo_incidente: tipoIncidente,
-        riesgo: riesgo || null,
-        capa,
-        hora_evento: new Date().toISOString(),
-      }),
+    await enviarOEncolar("/marcadores-incidente", {
+      id: crypto.randomUUID(),
+      activacion_id: activacion.id,
+      coordenada_cuadricula: coordenadaCuadricula,
+      tipo_incidente: tipoIncidente,
+      riesgo: riesgo || null,
+      capa,
+      hora_evento: new Date().toISOString(),
     })
     setEnviando(false)
     setEnviado(true)

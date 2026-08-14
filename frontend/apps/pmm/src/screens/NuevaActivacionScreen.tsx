@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react"
 import type { ActivacionConConvocatoria, NivelAlerta, TipoEmergencia } from "@pce/api-client"
-import { apiClient } from "../apiClient"
 import { payloadActivacion } from "../lib/payloadActivacion"
+import { enviarOEncolar } from "../offline/colaOffline"
 
 const CLASIFICACIONES: Record<Exclude<TipoEmergencia, "aeronautica">, string[]> = {
   epidemiologica: ["EMERGENCIA", "URGENCIA", "CONSULTA"],
@@ -24,6 +24,7 @@ export function NuevaActivacionScreen() {
   const [tipoIncidente, setTipoIncidente] = useState("")
   const [enviando, setEnviando] = useState(false)
   const [creada, setCreada] = useState<ActivacionConConvocatoria | null>(null)
+  const [encolada, setEncolada] = useState(false)
 
   async function enviar(event: FormEvent) {
     event.preventDefault()
@@ -37,12 +38,31 @@ export function NuevaActivacionScreen() {
       tipoAlerta: categoria === "aeronautica" ? tipoAlerta : undefined,
       clasificacionOrigen: categoria !== "aeronautica" ? clasificacionOrigen : undefined,
     })
-    const respuesta = await apiClient.apiFetch<ActivacionConConvocatoria>("/activaciones", {
-      method: "POST",
-      body: JSON.stringify(body),
-    })
+    const respuesta = await enviarOEncolar<ActivacionConConvocatoria>("/activaciones", body)
     setEnviando(false)
-    setCreada(respuesta)
+    if (respuesta) {
+      setCreada(respuesta)
+    } else {
+      setEncolada(true)
+    }
+  }
+
+  if (encolada) {
+    return (
+      <div className="p-4">
+        <h1 className="text-headline-md font-headline">Activación sin sincronizar</h1>
+        <p className="text-body-md mt-2">
+          Se guardó localmente y se enviará sola al reconectar.
+        </p>
+        <button
+          type="button"
+          onClick={() => setEncolada(false)}
+          className="min-h-touch-target-min mt-4 rounded-DEFAULT bg-secondary px-4 text-on-secondary"
+        >
+          Nueva activación
+        </button>
+      </div>
+    )
   }
 
   if (creada) {

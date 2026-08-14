@@ -13,6 +13,7 @@ export interface SessionClaims {
 }
 
 const STORAGE_KEY = "pce.session.token"
+const SESION_INICIADA_KEY = "pce.session.iniciadaEn"
 
 export function decodeToken(token: string): SessionClaims {
   const payloadSegment = token.split(".")[1]
@@ -33,10 +34,21 @@ export function decodeToken(token: string): SessionClaims {
 
 export function saveToken(token: string): void {
   localStorage.setItem(STORAGE_KEY, token)
+  localStorage.setItem(SESION_INICIADA_KEY, String(Date.now()))
 }
 
 export function getToken(): string | null {
   return localStorage.getItem(STORAGE_KEY)
+}
+
+/*
+ * Momento del login (ADR-7, ventana de sesión offline de 24h) — no confundir con la expiración
+ * del JWT en sí, que el cliente nunca valida: la ventana se mide desde que el usuario se logueó,
+ * no desde que el token expiró.
+ */
+export function getSesionIniciadaEn(): number | null {
+  const value = localStorage.getItem(SESION_INICIADA_KEY)
+  return value ? Number(value) : null
 }
 
 export function getClaims(): SessionClaims | null {
@@ -51,4 +63,5 @@ export function getClaims(): SessionClaims | null {
 
 export function logout(): void {
   localStorage.removeItem(STORAGE_KEY)
+  localStorage.removeItem(SESION_INICIADA_KEY)
 }

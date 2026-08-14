@@ -15,7 +15,7 @@ interface PayloadActivacionInput {
  * nivel_alerta/tipo_alerta y nunca clasificacion_origen; el resto de las categorías es al revés.
  * El backend rechaza con 422 si se mezclan, pero el cliente no debe depender de eso.
  */
-export function payloadActivacion(input: PayloadActivacionInput): ActivacionCreate {
+export function payloadActivacion(input: PayloadActivacionInput): ActivacionCreate & { id: string } {
   const base = {
     id: input.id,
     tipo_emergencia: input.categoria,

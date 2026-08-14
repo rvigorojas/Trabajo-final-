@@ -51,7 +51,20 @@ esto, decisión de bajo riesgo) + `EvaluacionInicialScreen` (rol restringido, oc
 sin permiso) + `MarcadorIncidenteScreen` (badge "sin sincronizar" del envío en curso — la cola
 offline persistente real es el ítem #10, que depende de este). 6 tests nuevos (16 en total en
 `pmm`). Verificado creando una evaluación inicial real y un marcador real desde el formulario
-contra el backend real. Próximo: ítem #10 (Cliente PMM — Cola offline y token blando).
+contra el backend real. Ítem #10 (Cliente PMM — Cola offline y token blando) cerrado 2026-08-13:
+`offline/db.ts` (IndexedDB, object store `cola`) + `offline/colaOffline.ts` (`enviarOEncolar`/
+`flushColaOffline`, solo encola por falla de red real, nunca por 4xx/5xx) + `offline/
+ventanaSesion.ts` (ventana de 24h desde `sesionIniciadaEn`, ADR-7). Las 4 escrituras
+offline-capaces (`NuevaActivacionScreen`, `EvaluacionInicialScreen`, `MarcadorIncidenteScreen`,
+la nueva `RelevoMandoScreen`) migradas a `enviarOEncolar`. `App.tsx` sincroniza al montar y en
+cada evento `online`; un 401 en el flush fuerza logout + `Login` sin vaciar la cola. `Shell`
+muestra el contador "N sin sincronizar". 13 tests nuevos (29 en total en `pmm`). Verificado
+end-to-end contra backend real deteniendo/reiniciando el proceso de `uvicorn` para simular cortes
+de red reales (no simulación de devtools): las 4 acciones se encolaron sin red y sincronizaron
+sin duplicados al reconectar (ids client-generados); repetido con un JWT vencido firmado a mano
+con el secreto real del backend — se encoló igual offline, el 401 al reconectar forzó el relogin,
+la cola sobrevivió en IndexedDB y sincronizó sola tras el siguiente login. Próximo: ítem #11
+(Endurecimiento), el último del backlog.
 
 **Nota de sesión**: el skill `spec-driven-development` (y `generar-tech-design`/
 `revision-adversarial`) no aparece disponible cuando la sesión de Claude Code arranca fuera de

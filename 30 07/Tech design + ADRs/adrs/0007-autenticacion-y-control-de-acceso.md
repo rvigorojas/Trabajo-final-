@@ -25,11 +25,19 @@ depender de una consulta al servidor.
 permanece sin señal más tiempo del que dura el token — exactamente el escenario que ADR-1 obliga a
 soportar. Para evitarlo: el cliente PMM sigue aceptando y encolando acciones localmente aunque el
 token ya haya expirado, siempre que el dispositivo siga sin conexión (no hay forma de renovarlo de
-todas formas). Al reconectar, el módulo de sincronización del backend acepta sin objeción las acciones ya encoladas
-durante la sesión que fue válida al momento de crearlas. Si, además, la desconexión superó una
-**ventana máxima de sesión offline `[Propuesto: 12 horas, equivalente a un turno operativo — a
-confirmar con Renzo]`**, el cliente exige relogin antes de permitir encolar *nuevas* acciones
-posteriores a la reconexión (las ya encoladas dentro de la ventana no se pierden ni se bloquean).
+todas formas). Si, además, la desconexión superó una **ventana máxima de sesión offline de 24
+horas (confirmado con Renzo, 2026-08-12)**, el cliente exige relogin antes de permitir encolar
+*nuevas* acciones posteriores a la reconexión (las ya encoladas dentro de la ventana no se pierden
+ni se bloquean).
+
+**Nota de resolución (hueco 6.4, confirmado con Renzo, 2026-08-12):** al reconectar con el JWT ya
+vencido, el módulo de sincronización del backend **no** gana un mecanismo especial para aceptar
+tokens expirados (la intención original de este ADR, "el backend acepta sin objeción las acciones
+ya encoladas...", se resolvió distinto). En cambio, el Cliente PMM detecta el token vencido al
+reconectar y exige relogin antes de reenviar la cola. Las acciones ya encoladas no se pierden —
+quedan en IndexedDB hasta que hay sesión válida, y se sincronizan solas contra el mismo POST
+idempotente en cuanto el usuario vuelve a loguearse. El backend sigue validando JWT sin excepción
+en cada request, sin cambios.
 
 ## Alternativas consideradas
 
@@ -50,7 +58,7 @@ posteriores a la reconexión (las ya encoladas dentro de la ventana no se pierde
   expiración debe elegirse deliberadamente corta para acotar esta ventana, balanceando seguridad
   contra la necesidad de no forzar reautenticaciones frecuentes en pista.
 - El token "blando" (arriba) amplía esa ventana de revocación tardía hasta el largo de la ventana
-  máxima de sesión offline propuesta (`[Propuesto: 12h]`) en el peor caso — un usuario revocado que
-  quedó sin señal justo antes de la revocación puede seguir encolando acciones válidas hasta
-  reconectar o hasta agotar esa ventana. Se acepta explícitamente frente a la alternativa (bloquear
-  al CI en pleno incidente), pero es un trade-off de seguridad real, no gratuito.
+  máxima de sesión offline (24h) en el peor caso — un usuario revocado que quedó sin señal justo
+  antes de la revocación puede seguir encolando acciones válidas hasta reconectar o hasta agotar
+  esa ventana. Se acepta explícitamente frente a la alternativa (bloquear al CI en pleno
+  incidente), pero es un trade-off de seguridad real, no gratuito.

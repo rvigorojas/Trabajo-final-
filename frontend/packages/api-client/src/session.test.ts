@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest"
-import { decodeToken, getClaims, getToken, logout, saveToken } from "./session"
+import { decodeToken, getClaims, getSesionIniciadaEn, getToken, logout, saveToken } from "./session"
 
 function buildFixtureToken(payload: Record<string, unknown>): string {
   const base64url = (value: unknown) =>
@@ -57,5 +57,21 @@ describe("session", () => {
 
     expect(getToken()).toBeNull()
     expect(getClaims()).toBeNull()
+  })
+
+  it("saveToken registra el momento del login; logout lo limpia", () => {
+    expect(getSesionIniciadaEn()).toBeNull()
+
+    const antes = Date.now()
+    saveToken(buildFixtureToken({ sub: "u1", rol: "m4", instancia_principal: "pmm" }))
+    const despues = Date.now()
+
+    const iniciadaEn = getSesionIniciadaEn()
+    expect(iniciadaEn).not.toBeNull()
+    expect(iniciadaEn as number).toBeGreaterThanOrEqual(antes)
+    expect(iniciadaEn as number).toBeLessThanOrEqual(despues)
+
+    logout()
+    expect(getSesionIniciadaEn()).toBeNull()
   })
 })

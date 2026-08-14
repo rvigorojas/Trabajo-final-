@@ -7,7 +7,7 @@
 export { createApiClient, ApiError } from "./client"
 export type { ApiClient, ApiClientConfig, ApiErrorKind } from "./client"
 
-export { decodeToken, saveToken, getToken, getClaims, logout } from "./session"
+export { decodeToken, saveToken, getToken, getClaims, getSesionIniciadaEn, logout } from "./session"
 export type { SessionClaims } from "./session"
 
 export { Login } from "./components/Login"

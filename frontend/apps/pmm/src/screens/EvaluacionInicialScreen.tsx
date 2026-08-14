@@ -4,6 +4,7 @@ import { getClaims } from "@pce/api-client"
 import { apiClient } from "../apiClient"
 import { activacionActual } from "../lib/activacionActual"
 import { ROLES_EDICION_EVALUACION_RELEVO } from "../roles"
+import { enviarOEncolar } from "../offline/colaOffline"
 
 export function EvaluacionInicialScreen() {
   const [activacion, setActivacion] = useState<ActivacionConConvocatoria | null>()
@@ -25,14 +26,12 @@ export function EvaluacionInicialScreen() {
     event.preventDefault()
     if (!activacion) return
     setEnviando(true)
-    await apiClient.apiFetch("/evaluaciones-iniciales", {
-      method: "POST",
-      body: JSON.stringify({
-        activacion_id: activacion.id,
-        magnitud,
-        riesgos_secundarios: riesgosSecundarios || null,
-        hora_evento: new Date().toISOString(),
-      }),
+    await enviarOEncolar("/evaluaciones-iniciales", {
+      id: crypto.randomUUID(),
+      activacion_id: activacion.id,
+      magnitud,
+      riesgos_secundarios: riesgosSecundarios || null,
+      hora_evento: new Date().toISOString(),
     })
     setEnviando(false)
     setEnviado(true)

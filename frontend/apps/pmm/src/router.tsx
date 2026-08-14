@@ -3,6 +3,7 @@ import { Shell } from "./shell/Shell"
 import { NuevaActivacionScreen } from "./screens/NuevaActivacionScreen"
 import { EvaluacionInicialScreen } from "./screens/EvaluacionInicialScreen"
 import { MarcadorIncidenteScreen } from "./screens/MarcadorIncidenteScreen"
+import { RelevoMandoScreen } from "./screens/RelevoMandoScreen"
 
 /*
  * Array plano (no createBrowserRouter([...]) directo) para que los tests puedan construir un
@@ -18,6 +19,7 @@ export const routes = [
       { path: "nueva-activacion", element: <NuevaActivacionScreen /> },
       { path: "evaluacion-inicial", element: <EvaluacionInicialScreen /> },
       { path: "marcador-incidente", element: <MarcadorIncidenteScreen /> },
+      { path: "relevo-mando", element: <RelevoMandoScreen /> },
     ],
   },
 ]
