@@ -41,7 +41,7 @@ export function PrePAIScreen() {
           <li key={prePAI.id}>
             <button
               type="button"
-              className="text-body-md underline"
+              className="min-h-touch-target-min text-body-md underline"
               onClick={() => setSeleccionadoId(prePAI.id)}
             >
               {prePAI.nombre_escenario} — {prePAI.sector}

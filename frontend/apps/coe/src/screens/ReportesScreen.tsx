@@ -43,7 +43,7 @@ export function ReportesScreen() {
               <p className="text-body-md">{activacion.tipo_incidente}</p>
               <button
                 type="button"
-                className="text-body-md underline"
+                className="min-h-touch-target-min text-body-md underline"
                 onClick={() => verReporte(activacion.id)}
               >
                 Ver reporte

@@ -93,6 +93,7 @@ export function NuevaActivacionScreen() {
         id="categoria"
         value={categoria}
         onChange={(event) => setCategoria(event.target.value as TipoEmergencia)}
+        className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
       >
         {CATEGORIAS.map(({ valor, etiqueta }) => (
           <option key={valor} value={valor}>
@@ -110,6 +111,7 @@ export function NuevaActivacionScreen() {
             id="nivel-alerta"
             value={nivelAlerta}
             onChange={(event) => setNivelAlerta(event.target.value as NivelAlerta)}
+            className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
           >
             <option value="I">I</option>
             <option value="II">II</option>
@@ -126,6 +128,7 @@ export function NuevaActivacionScreen() {
             max={10}
             value={tipoAlerta}
             onChange={(event) => setTipoAlerta(Number(event.target.value))}
+            className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
           />
         </>
       ) : (
@@ -137,6 +140,7 @@ export function NuevaActivacionScreen() {
             id="clasificacion-origen"
             value={clasificacionOrigen}
             onChange={(event) => setClasificacionOrigen(event.target.value)}
+            className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
           >
             {CLASIFICACIONES[categoria as Exclude<TipoEmergencia, "aeronautica">].map((valor) => (
               <option key={valor} value={valor}>
@@ -155,6 +159,7 @@ export function NuevaActivacionScreen() {
         value={tipoIncidente}
         onChange={(event) => setTipoIncidente(event.target.value)}
         required
+        className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
       />
 
       <p className="text-body-md mt-2">

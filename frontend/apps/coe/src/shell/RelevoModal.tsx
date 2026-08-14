@@ -59,6 +59,7 @@ export function RelevoModal({ onClose }: RelevoModalProps) {
                 id="relevo-instancia"
                 value={instancia}
                 onChange={(event) => setInstancia(event.target.value as Instancia)}
+                className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
               >
                 <option value="coe">COE</option>
                 <option value="pmm_ci">PMM</option>
@@ -72,6 +73,7 @@ export function RelevoModal({ onClose }: RelevoModalProps) {
                 value={responsableSaliente}
                 onChange={(event) => setResponsableSaliente(event.target.value)}
                 required
+                className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
               />
 
               <label className="text-body-md" htmlFor="relevo-entrante">
@@ -82,6 +84,7 @@ export function RelevoModal({ onClose }: RelevoModalProps) {
                 value={responsableEntrante}
                 onChange={(event) => setResponsableEntrante(event.target.value)}
                 required
+                className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
               />
 
               <button

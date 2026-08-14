@@ -73,6 +73,7 @@ export function EvaluacionInicialScreen() {
             value={magnitud}
             onChange={(event) => setMagnitud(event.target.value)}
             required
+            className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
           />
 
           <label className="text-body-md" htmlFor="riesgos-secundarios">
@@ -82,6 +83,7 @@ export function EvaluacionInicialScreen() {
             id="riesgos-secundarios"
             value={riesgosSecundarios}
             onChange={(event) => setRiesgosSecundarios(event.target.value)}
+            className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
           />
 
           <button

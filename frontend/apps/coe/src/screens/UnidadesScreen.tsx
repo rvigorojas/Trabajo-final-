@@ -43,6 +43,7 @@ export function UnidadesScreen() {
               onChange={(event) =>
                 cambiarEstado(unidad.identificador, event.target.value as EstadoUnidad)
               }
+              className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
             >
               {ESTADOS.map(({ estado, etiqueta }) => (
                 <option key={estado} value={estado}>

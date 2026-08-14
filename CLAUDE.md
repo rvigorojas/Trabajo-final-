@@ -63,8 +63,27 @@ end-to-end contra backend real deteniendo/reiniciando el proceso de `uvicorn` pa
 de red reales (no simulación de devtools): las 4 acciones se encolaron sin red y sincronizaron
 sin duplicados al reconectar (ids client-generados); repetido con un JWT vencido firmado a mano
 con el secreto real del backend — se encoló igual offline, el 401 al reconectar forzó el relogin,
-la cola sobrevivió en IndexedDB y sincronizó sola tras el siguiente login. Próximo: ítem #11
-(Endurecimiento), el último del backlog.
+la cola sobrevivió en IndexedDB y sincronizó sola tras el siguiente login. Ítem #11
+(Endurecimiento), último del backlog, cerrado 2026-08-14: walkthrough E2E documentado contra
+backend real en ambos clientes (COE: Resumen con feed real → relevo de mando → reflejado en
+Cadena de mando → editar estado de unidad → detalle de Pre-PAI; PMM: activación → evaluación →
+marcador → relevo, caso online, sin duplicados verificados contra el backend). Conteo real de
+clics desde la pantalla principal de cada cliente: máximo 2 (Pre-PAI/Reportes de COE vía menú
+aparte), dentro del límite de 3 del PRD sección 7. Auditoría de contraste (WCAG 2.2 AA): todos
+los pares texto/fondo del design system en uso real dan ≥7.71:1 (colores semánticos de alerta
+`alerta-i/iii` no cumplirían si se adoptan como texto, pero no tienen uso todavía — nota para el
+futuro). Auditoría de tap targets: hallazgo real y sistemático — los `<button>` de acción ya
+tenían el token de 48px, pero los `<input>`/`<select>` de los formularios operativos (evaluación
+inicial, marcador de incidente, nueva activación, relevo de mando, en ambos clientes) no tenían
+ninguna clase de altura mínima ni borde visible; corregidos 6 componentes replicando el patrón
+que ya usaba `Login.tsx`. Corte de conectividad real: referenciado del ítem #10, no repetido.
+Detalle completo en `tasks/item-11-endurecimiento/todo.md`.
+
+**Backlog completo: los 11 ítems de `BACKLOG.md` cerrados el 2026-08-14.** Frontend (Cliente COE +
+Cliente PMM) y backend verificados end-to-end contra PostgreSQL/backend reales, con offline-first
+y token blando funcionando. Quedan pendientes externos (Fase 5 de `FRONTEND-TASKS.md`, no
+bloquean el software): matriz real de convocatoria contra GSEG-L-001, esquema real de columnas de
+`ReporteCierre` por categoría, georreferenciación real del mapa cuadriculado.
 
 **Nota de sesión**: el skill `spec-driven-development` (y `generar-tech-design`/
 `revision-adversarial`) no aparece disponible cuando la sesión de Claude Code arranca fuera de

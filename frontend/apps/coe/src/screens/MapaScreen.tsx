@@ -51,7 +51,10 @@ export function MapaScreen() {
 
       <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Capas del mapa">
         {CAPAS_ACTIVABLES.map(({ capa, etiqueta }) => (
-          <label key={capa} className="text-body-md flex items-center gap-1">
+          <label
+            key={capa}
+            className="min-h-touch-target-min text-body-md flex items-center gap-1"
+          >
             <input
               type="checkbox"
               checked={capasActivas.has(capa)}
@@ -60,7 +63,7 @@ export function MapaScreen() {
             {etiqueta}
           </label>
         ))}
-        <label className="text-body-md flex items-center gap-1 opacity-50">
+        <label className="min-h-touch-target-min text-body-md flex items-center gap-1 opacity-50">
           <input type="checkbox" checked={false} disabled />
           Unidades (fase 2)
         </label>

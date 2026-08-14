@@ -78,6 +78,7 @@ export function MarcadorIncidenteScreen() {
             value={coordenadaCuadricula}
             onChange={(event) => setCoordenadaCuadricula(event.target.value)}
             required
+            className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
           />
 
           <label className="text-body-md" htmlFor="tipo-incidente-marcador">
@@ -88,17 +89,28 @@ export function MarcadorIncidenteScreen() {
             value={tipoIncidente}
             onChange={(event) => setTipoIncidente(event.target.value)}
             required
+            className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
           />
 
           <label className="text-body-md" htmlFor="riesgo">
             Riesgo
           </label>
-          <input id="riesgo" value={riesgo} onChange={(event) => setRiesgo(event.target.value)} />
+          <input
+            id="riesgo"
+            value={riesgo}
+            onChange={(event) => setRiesgo(event.target.value)}
+            className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
+          />
 
           <label className="text-body-md" htmlFor="capa">
             Capa
           </label>
-          <select id="capa" value={capa} onChange={(event) => setCapa(event.target.value as CapaMapa)}>
+          <select
+            id="capa"
+            value={capa}
+            onChange={(event) => setCapa(event.target.value as CapaMapa)}
+            className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
+          >
             {CAPAS.map(({ valor, etiqueta }) => (
               <option key={valor} value={valor}>
                 {etiqueta}
