@@ -81,9 +81,29 @@ Detalle completo en `tasks/item-11-endurecimiento/todo.md`.
 
 **Backlog completo: los 11 ítems de `BACKLOG.md` cerrados el 2026-08-14.** Frontend (Cliente COE +
 Cliente PMM) y backend verificados end-to-end contra PostgreSQL/backend reales, con offline-first
-y token blando funcionando. Quedan pendientes externos (Fase 5 de `FRONTEND-TASKS.md`, no
-bloquean el software): esquema real de columnas de `ReporteCierre` por categoría,
-georreferenciación real del mapa cuadriculado.
+y token blando funcionando. Queda un único pendiente externo (Fase 5 de `FRONTEND-TASKS.md`, no
+bloquea el software): georreferenciación real del mapa cuadriculado (levantamiento físico/GIS).
+
+**Esquema real de columnas de `ReporteCierre` resuelto 2026-08-15**: se encontraron y descargaron
+los 4 "Cuadro Estadístico de Emergencias..." reales del Drive LAP (carpeta "Excel atenciones") y
+se extrajeron sus encabezados exactos con openpyxl (no de una copia parafraseada — evita errores
+de tildes/orden). `backend/app/services/reporte_cierre.py` define `COLUMNAS_REPORTE_CIERRE` (lista
+ordenada por categoría, nombre y orden exactos del Excel real) y `construir_datos_reporte_cierre`,
+que solo autocompleta las columnas con una correspondencia directa a un campo ya registrado por el
+PCE (Fecha/Mes/Hora desde `hora_evento`, `clasificacion_origen` en las columnas reales que
+literalmente son ese mismo campo — "Incidente / Estructural", la clasificación MATPEL, "Clasificación
+de la emergencia" en Epidemiológica —, `tipo_incidente`, nombres de convocados M4/M7 y Supervisor
+(Gral.) de Rescate, texto de la evaluación inicial); el resto de columnas reales (la mayoría: PI-1/2/3,
+diagnósticos médicos, contratistas, uso de DEA, etc.) queda en `None` — detalle operativo que el PCE
+v1 no captura (PRD sección 6), a completar manualmente. Ojo con una trampa real: la columna "Nivel"
+del Excel de Estructural/Incidentes y de Epidemiológica es el **piso del edificio** (ej. "Piso 3
+(P30)"), no tiene relación con `nivel_alerta` — no confundirlas. El orden real vive en la lista
+Python, no en el JSONB de Postgres (que no garantiza preservar el orden de claves de un objeto);
+un exportador real a Excel/CSV (no construido) debe iterar esa lista, no las claves del JSON.
+`backend/app/routers/reportes_cierre.py` actualizado para usar el mapeo real. 3 tests nuevos
+(`test_reportes_cierre.py`, 17/17 en total). El frontend (`ReportesScreen.tsx`, Cliente COE) ya
+renderizaba `datos` de forma genérica (`Object.entries`), sin cambios de fondo — solo se ajustó
+`valorLegible` para mostrar "—" en vez del literal "null" en las columnas sin autocompletar.
 
 **Matriz real de convocatoria (GSEG-L-001) resuelta 2026-08-15**: se encontró el PDF real del Plan
 de Emergencia en el Drive LAP (`RESC-L-028-GSEG-L-001...pdf`, v.001) y se extrajo la lista real de

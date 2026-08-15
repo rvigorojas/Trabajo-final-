@@ -3,6 +3,11 @@ import type { ActivacionConConvocatoria, ReporteCierre } from "@pce/api-client"
 import { apiClient } from "../apiClient"
 
 function valorLegible(valor: unknown): string {
+  // La mayoría de las columnas reales de ReporteCierre.datos quedan en null:
+  // detalle operativo que el PCE v1 no captura, a completar manualmente
+  // (ver backend/app/services/reporte_cierre.py) — se muestra vacío, no el
+  // literal "null".
+  if (valor === null || valor === undefined) return "—"
   if (typeof valor === "string" || typeof valor === "number") return String(valor)
   return JSON.stringify(valor, null, 2)
 }

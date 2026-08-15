@@ -15,9 +15,12 @@ class ReporteCierre(TimestampMixin, Base):
 
     `datos` guarda pares columna->valor. El TDD exige que las columnas
     reproduzcan exactamente las del Excel actual de cada categoría (mismo
-    nombre, mismo orden) — ese encabezado real (Drive LAP) no está verificado
-    en este repo, así que no se hardcodea acá: se completa al construir el
-    exportador real, columna por columna, contra el Excel de cada categoría.
+    nombre, mismo orden) — encabezado real extraído del Drive LAP y
+    construido en app/services/reporte_cierre.py (`COLUMNAS_REPORTE_CIERRE`
+    + `construir_datos_reporte_cierre`, 2026-08-15). La mayoría de las
+    columnas reales quedan en `None`: registran detalle operativo que el PCE
+    v1 no captura (fuera de alcance, PRD sección 6); solo se autocompletan
+    las que tienen una correspondencia directa a un campo ya registrado.
     """
 
     __tablename__ = "reporte_cierre"

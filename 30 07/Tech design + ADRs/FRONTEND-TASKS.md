@@ -105,4 +105,9 @@ Rescate) o de un hueco de backend (`FRONTEND-SPEC.md`, sección 6) — no empeza
       extendida a las otras 3 categorías por decisión de Renzo, ya que el plan no define una matriz
       propia para ellas — supuesto explícito, a confirmar con el Jefe de Rescate si cambia. Ver
       `backend/app/services/seed.py`.
-- [ ] Esquema real de columnas de `ReporteCierre` por categoría, contra los 4 Excel actuales.
+- [x] Esquema real de columnas de `ReporteCierre` por categoría, contra los 4 Excel actuales —
+      **resuelto 2026-08-15**: encabezados extraídos con openpyxl de los 4 "Cuadro Estadístico..."
+      reales del Drive LAP; solo se autocompletan las columnas con correspondencia directa a un
+      campo ya registrado por el PCE (Fecha/Mes/Hora, clasificación de origen, tipo de incidente,
+      M4/M7 convocados), el resto queda en `None` — detalle operativo fuera de alcance v1. Ver
+      `backend/app/services/reporte_cierre.py`.

@@ -6,10 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import get_current_usuario, get_db, get_or_404
 from app.models.activacion import Activacion
+from app.models.convocatoria_miembro import ConvocatoriaMiembro
 from app.models.evaluacion_inicial import EvaluacionInicial
 from app.models.marcador_incidente import MarcadorIncidente
 from app.models.reporte_cierre import ReporteCierre
+from app.models.usuario import Usuario
 from app.schemas.reporte_cierre import ReporteCierreCreate, ReporteCierreRead
+from app.services.reporte_cierre import construir_datos_reporte_cierre
 
 router = APIRouter(prefix="/reportes-cierre", tags=["reportes-cierre"])
 
@@ -46,24 +49,23 @@ async def crear_reporte_cierre(
         .scalars()
         .all()
     )
+    convocatoria = activacion.convocatoria
+    usuarios = (
+        (
+            await db.execute(
+                select(Usuario).where(
+                    Usuario.id.in_([m.usuario_id for m in convocatoria])
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    nombres_por_usuario_id = {u.id: u.nombre for u in usuarios}
 
-    # NOTA: columnas genéricas, no las reales del Excel de cada categoría (ver
-    # comentario en app/models/reporte_cierre.py) — completar contra el
-    # encabezado real (Drive LAP) al construir el exportador definitivo.
-    datos = {
-        "tipo_emergencia": activacion.tipo_emergencia.value,
-        "nivel_alerta": activacion.nivel_alerta.value,
-        "tipo_incidente": activacion.tipo_incidente,
-        "hora_evento": activacion.hora_evento.isoformat(),
-        "evaluaciones_iniciales": [
-            {"magnitud": e.magnitud, "riesgos_secundarios": e.riesgos_secundarios}
-            for e in evaluaciones
-        ],
-        "marcadores_incidente": [
-            {"coordenada_cuadricula": m.coordenada_cuadricula, "tipo_incidente": m.tipo_incidente}
-            for m in marcadores
-        ],
-    }
+    datos = construir_datos_reporte_cierre(
+        activacion, evaluaciones, marcadores, convocatoria, nombres_por_usuario_id
+    )
 
     reporte = ReporteCierre(
         activacion_id=activacion.id, tipo_emergencia=activacion.tipo_emergencia, datos=datos
