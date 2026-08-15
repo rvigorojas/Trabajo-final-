@@ -75,6 +75,25 @@ describe("MapaScreen", () => {
     expect(screen.queryByText(/C4 — fuego focalizado/)).not.toBeInTheDocument()
   })
 
+  it("un marcador con lat/lon real se ubica como pin sobre la foto, no en la lista de texto", async () => {
+    const marcadorGeorreferenciado = {
+      ...marcadorDeLaActivacionActual,
+      id: "m3",
+      coordenada_cuadricula: `12°02'28.5"S 77°06'28.6"W`,
+    }
+    server.use(
+      http.get(`${BASE_URL}/activaciones`, () => HttpResponse.json([activacionActiva])),
+      http.get(`${BASE_URL}/marcadores-incidente`, () =>
+        HttpResponse.json([marcadorGeorreferenciado]),
+      ),
+    )
+
+    renderAt("/mapa")
+
+    expect(await screen.findByRole("img", { name: /fuego focalizado/ })).toBeInTheDocument()
+    expect(screen.queryByText(/12°02'28.5"S/)).not.toBeInTheDocument()
+  })
+
   it("sin activación activa no muestra marcadores ni redirige", async () => {
     server.use(
       http.get(`${BASE_URL}/activaciones`, () => HttpResponse.json([])),
