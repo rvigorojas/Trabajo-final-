@@ -99,7 +99,16 @@ Rescate) o de un hueco de backend (`FRONTEND-SPEC.md`, sección 6) — no empeza
       2026-08-12**: re-login forzado al reconectar, cola offline intacta, sync automático
       post-login, sin endpoint especial de backend.
 - [ ] Levantamiento/georreferenciación real del mapa cuadriculado (prerrequisito externo al
-      software, TECH-DESIGN.md § Riesgos técnicos abiertos).
+      software, TECH-DESIGN.md § Riesgos técnicos abiertos). **Workaround parcial 2026-08-15**:
+      `MapaScreen.tsx` (Cliente COE) ubica sobre una foto satelital del AIJC (Google Maps,
+      `frontend/apps/coe/public/mapa-aijc-satelite.jpg`) cualquier marcador cuyo
+      `coordenada_cuadricula` ya sea lat/lon real (DMS o decimal), vía una transformación afín
+      calibrada con 3 puntos de referencia (`frontend/apps/coe/src/lib/georreferenciacion.ts`).
+      Esto **no resuelve** el levantamiento del mapa cuadriculado en papel — los marcadores que
+      usen su formato de referencia (ej. "C4") se siguen listando como texto, sin ubicar en la
+      foto. Sigue pendiente el levantamiento real; queda además la posibilidad, a evaluar con
+      Renzo, de que futuros marcadores usen directamente el GPS de la tablet GETAC (PRD sección 3,
+      hardware ya pagado sin explotar) en vez de resolver la cuadrícula en papel.
 - [x] Matriz real de convocatoria (`rol_convocatoria`) contra GSEG-L-001 — **resuelto 2026-08-15**:
       sembrada con la lista real de § 4.2.2 para Aeronáutica (única categoría que el plan detalla);
       extendida a las otras 3 categorías por decisión de Renzo, ya que el plan no define una matriz
