@@ -91,10 +91,13 @@ Rescate) o de un hueco de backend (`FRONTEND-SPEC.md`, sección 6) — no empeza
 
 ## Fase 5 — Pendientes externos (no bloquean el desarrollo, sí el cierre del proyecto)
 
-- [ ] Respuesta del Jefe de Rescate: criterio real de convocatoria para MATPEL (hoy fijo en
-      "activación general").
-- [ ] Confirmación de Renzo: ventana de 12h del token blando.
-- [ ] Confirmación de Renzo: mecanismo de sync con token vencido (hueco 6.4).
+- [x] Respuesta del Jefe de Rescate: criterio real de convocatoria para MATPEL — **confirmado
+      2026-08-11**, siempre "activación general" (sin escala por clase UN).
+- [x] Confirmación de Renzo: ventana del token blando — **confirmado 2026-08-12**, 24h (no 12h,
+      ver ADR-7).
+- [x] Confirmación de Renzo: mecanismo de sync con token vencido (hueco 6.4) — **confirmado
+      2026-08-12**: re-login forzado al reconectar, cola offline intacta, sync automático
+      post-login, sin endpoint especial de backend.
 - [ ] Levantamiento/georreferenciación real del mapa cuadriculado (prerrequisito externo al
       software, TECH-DESIGN.md § Riesgos técnicos abiertos).
 - [x] Matriz real de convocatoria (`rol_convocatoria`) contra GSEG-L-001 — **resuelto 2026-08-15**:
