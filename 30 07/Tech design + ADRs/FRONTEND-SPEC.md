@@ -180,10 +180,12 @@ Basado en `Design.md` Flujo B (navegación de contenido, agnóstica del shell) y
 
 ### Reportes (menú aparte)
 - `POST /reportes-cierre` (una vez por activación cerrada) + `GET /reportes-cierre/{id}` para ver/
-  descargar. El campo `datos` es JSON genérico (columnas provisionales, no las reales de cada Excel
-  — README del backend ya lo marca como pendiente conocido). El frontend puede renderizarlo como
-  tabla genérica por ahora; no construir un exportador que asuma columnas específicas por categoría
-  hasta que ese esquema se cierre contra el Excel real.
+  descargar. El campo `datos` ya usa las columnas reales de cada Excel (mismo nombre, mismo orden
+  — resuelto 2026-08-15, ver `app/services/reporte_cierre.py`); la mayoría queda en `null` (detalle
+  operativo fuera de alcance v1). El frontend sigue renderizándolo como tabla genérica
+  (`ReportesScreen.tsx`, `Object.entries`), que ya funciona sin cambios contra el esquema real. Un
+  exportador real a Excel/CSV que respete el orden de columnas (no garantizado por las claves del
+  JSONB de Postgres) sigue sin construirse — no bloqueante.
 
 ### Relevo de mando (acción rápida, 1 clic desde cualquier pantalla)
 - Modal: `instancia` (COE/PMM), `responsable_saliente`, `responsable_entrante` → `POST
@@ -289,7 +291,11 @@ no crea nuevos Pre-PAI, no hace geolocalización en tiempo real de unidades ni c
 - Los 3 `[Propuesto]` ya conocidos (convocatoria MATPEL, ventana del token blando, y el mecanismo
   de sync con token vencido — hueco 6.4) ya están confirmados: MATPEL con el Jefe de Rescate
   (2026-08-11), los otros dos con Renzo (2026-08-12) — ver sección 5 y 6.4.
-- Si el COE puede editar el estado de unidad desde su propia pantalla o es solo lectura ahí (sección
-  4, "Unidades").
-- Alcance real de la pestaña "Comunicaciones" (sección 4) — no tiene entidad de datos definida en
-  ningún documento previo.
+- Si el COE puede editar el estado de unidad desde su propia pantalla — **confirmado 2026-08-11:
+  sí**, editable vía `PUT /unidades/{id}` sin restricción de rol adicional (ítem #4 del
+  `BACKLOG.md`).
+- Alcance real de la pestaña "Comunicaciones" — **confirmado 2026-08-11: queda como placeholder sin
+  funcionalidad**, sin entidad de datos definida; se define en otro momento (ítem #5 del
+  `BACKLOG.md`).
+
+No quedan pendientes de decisión abiertos en este documento.
