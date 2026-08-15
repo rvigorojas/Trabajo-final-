@@ -11,10 +11,10 @@ from app.models.usuario import Rol
 
 class RolConvocatoria(Base):
     """Mecanismo de configuración (no está en el TDD original): una fila por
-    (categoría, nivel de alerta, rol a convocar). No existe en el repo la
-    matriz real de GSEG-L-001 — se siembra con datos de ejemplo
-    [Propuesto, a confirmar con Renzo/Jefe de Rescate] y es editable sin tocar
-    código (tabla de catálogo, admite UPDATE/DELETE)."""
+    (categoría, nivel de alerta, rol a convocar). Sembrada con la matriz real
+    de GSEG-L-001 § 4.2.2 (Aeronáutica; extendida a las otras 3 categorías por
+    decisión de Renzo, ver app/services/seed.py) y editable sin tocar código
+    (tabla de catálogo, admite UPDATE/DELETE)."""
 
     __tablename__ = "rol_convocatoria"
     __table_args__ = (

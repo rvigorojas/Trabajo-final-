@@ -10,7 +10,14 @@ from app.models.mixins import TimestampMixin
 
 
 class Rol(str, enum.Enum):
-    """Roles del Plan de Emergencia (PRD sección 5)."""
+    """Roles del Plan de Emergencia (PRD sección 5).
+
+    Los 9 roles debajo de SERVICIO_MEDICO no estaban en el enum original
+    (acotado a la cadena de mando de Rescate/PMM) y se agregaron el
+    2026-08-15 al sembrar la matriz real de convocatoria de GSEG-L-001
+    § 4.2.2 (Anexo 1 — organigrama del Plan de Emergencia), que sí lista
+    supervisores de COE fuera de esa cadena. Ver app/services/seed.py.
+    """
 
     GERENTE_SEGURIDAD = "gerente_seguridad"
     GERENTE_OPERACIONES_AEROPORTUARIAS = "gerente_operaciones_aeroportuarias"
@@ -23,6 +30,15 @@ class Rol(str, enum.Enum):
     SGO = "sgo"
     BOMBERO_AERONAUTICO = "bombero_aeronautico"
     SERVICIO_MEDICO = "servicio_medico"
+    SUPERVISOR_GRAL_SEGURIDAD_PATRIMONIAL = "supervisor_gral_seguridad_patrimonial"
+    SUPERVISOR_GRAL_SEGURIDAD_AVIACION = "supervisor_gral_seguridad_aviacion"
+    SUPERVISOR_GRAL_TERMINALES = "supervisor_gral_terminales"
+    SUPERVISOR_GRAL_CCA = "supervisor_gral_cca"
+    INGENIERO_TURNO = "ingeniero_turno"
+    SUPERVISOR_GRAL_OPERACIONES_LADO_AIRE = "supervisor_gral_operaciones_lado_aire"
+    GERENTE_REPUTACION = "gerente_reputacion"
+    GERENTE_RRHH = "gerente_rrhh"
+    GERENTE_LOGISTICA = "gerente_logistica"
 
 
 class InstanciaPrincipal(str, enum.Enum):

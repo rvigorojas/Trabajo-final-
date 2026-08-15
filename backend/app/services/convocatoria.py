@@ -2,11 +2,12 @@
 § Activación de emergencia): convoca automáticamente a los miembros de COE y
 PMM que correspondan, sin selección manual uno por uno.
 
-La matriz real de "qué rol se convoca en qué nivel/categoría" vive en el Plan
-de Emergencia GSEG-L-001 y no está reproducida en este repo — se resuelve acá
-contra la tabla configurable `RolConvocatoria` (sembrada con datos de ejemplo
-`[Propuesto, a confirmar con Renzo/Jefe de Rescate]`, ver seed_rol_convocatoria
-en app/services/seed.py), reemplazable sin tocar código.
+La matriz de "qué rol se convoca en qué nivel/categoría" se resuelve contra
+la tabla configurable `RolConvocatoria`, sembrada con la matriz real de
+GSEG-L-001 § 4.2.2 para Aeronáutica (extendida por decisión de Renzo a las
+otras 3 categorías, que el plan no cubre — ver seed_rol_convocatoria en
+app/services/seed.py para el detalle y la cita exacta), reemplazable sin
+tocar código.
 """
 
 from sqlalchemy import select

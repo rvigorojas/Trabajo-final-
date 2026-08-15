@@ -82,8 +82,30 @@ Detalle completo en `tasks/item-11-endurecimiento/todo.md`.
 **Backlog completo: los 11 ítems de `BACKLOG.md` cerrados el 2026-08-14.** Frontend (Cliente COE +
 Cliente PMM) y backend verificados end-to-end contra PostgreSQL/backend reales, con offline-first
 y token blando funcionando. Quedan pendientes externos (Fase 5 de `FRONTEND-TASKS.md`, no
-bloquean el software): matriz real de convocatoria contra GSEG-L-001, esquema real de columnas de
-`ReporteCierre` por categoría, georreferenciación real del mapa cuadriculado.
+bloquean el software): esquema real de columnas de `ReporteCierre` por categoría,
+georreferenciación real del mapa cuadriculado.
+
+**Matriz real de convocatoria (GSEG-L-001) resuelta 2026-08-15**: se encontró el PDF real del Plan
+de Emergencia en el Drive LAP (`RESC-L-028-GSEG-L-001...pdf`, v.001) y se extrajo la lista real de
+"Miembros del COE/PMM" por nivel de alerta (§ 4.2.2 — Alerta II activación parcial, Alerta III
+activación general + Anexo 1). El `Rol` enum (`backend/app/models/usuario.py`) solo cubría la
+cadena de mando de Rescate/PMM (PRD sección 5); se agregaron 9 roles nuevos que el plan sí lista
+como convocados de COE (Supervisor Gral. de Seguridad Patrimonial/de la Aviación/de Terminales/del
+CCA, Ingeniero de Turno, Supervisor Gral. de Operaciones Lado Aire, y — solo en Alerta III —
+Gerente de Reputación/RRHH/Logística), decisión de Renzo. `backend/app/services/seed.py` siembra
+`rol_convocatoria` con esa matriz real para Aeronáutica; el plan **no** define una matriz de
+convocatoria propia para Epidemiológica/Estructural/MATPEL (esas secciones describen acciones de
+respuesta, no listas de convocados), así que por decisión de Renzo se aplica la misma matriz
+aeronáutica a las 4 categorías — supuesto explícito documentado en el docstring de `seed.py`, a
+confirmar con el Jefe de Rescate si cambia. El Jefe de Rescate/Coordinador del Plan y sus
+suplentes quedan fuera de la matriz (lideran la activación, no son "convocados"). Migraciones
+regeneradas limpias (`alembic downgrade base && upgrade head` contra Postgres real, sin
+`ALTER TYPE` — la 0001 deriva el esquema de `Base.metadata` en cada corrida). Un test dependía de
+la matriz placeholder anterior (`test_activacion_aeronautica_alerta_iii_auto_convoca_jefe_de_rescate`,
+asumía que el Jefe de Rescate se autoconvocaba a sí mismo); reescrito como
+`test_activacion_aeronautica_alerta_iii_auto_convoca_matriz_real` contra roles reales de la matriz
+(Supervisor Gral. de Rescate en ambos niveles, Gerente de Logística solo en Alerta III). 14/14
+tests pasan. Tipo TS espejo actualizado en `frontend/packages/api-client/src/types.ts`.
 
 **Nota de sesión**: el skill `spec-driven-development` (y `generar-tech-design`/
 `revision-adversarial`) no aparece disponible cuando la sesión de Claude Code arranca fuera de

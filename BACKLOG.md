@@ -37,6 +37,7 @@ Orden sugerido por dependencias: 1 → 2 → (3, 4, 5, 6 en paralelo) → 7 → 
 ítem 1 es el único prerrequisito duro de todo lo demás.
 
 **Backlog completo — los 11 ítems cerrados el 2026-08-14.** Lo que sigue fuera de este backlog son
-los pendientes externos de la Fase 5 de `FRONTEND-TASKS.md` (matriz real de convocatoria contra
-GSEG-L-001, esquema real de columnas de `ReporteCierre` por categoría, georreferenciación real del
-mapa cuadriculado) — no bloquean el software, sí el cierre operativo del proyecto.
+los pendientes externos de la Fase 5 de `FRONTEND-TASKS.md` (esquema real de columnas de
+`ReporteCierre` por categoría, georreferenciación real del mapa cuadriculado) — no bloquean el
+software, sí el cierre operativo del proyecto. La matriz real de convocatoria contra GSEG-L-001 se
+resolvió el 2026-08-15 (ver `CLAUDE.md`).

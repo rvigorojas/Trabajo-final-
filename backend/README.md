@@ -52,15 +52,8 @@ Con el backend arriba, `GET http://localhost:8000/docs` da la Swagger UI:
 
 ## Pendiente conocido (no bloqueante, documentado en el plan aprobado)
 
-- La matriz de auto-convocatoria (`rol_convocatoria`) tiene datos de ejemplo,
-  no la lista real de GSEG-L-001 — reemplazable sin tocar código.
-- La ventana de 12h del token "blando" (ADR-7) es lógica de cliente PMM, que
-  todavía no existe.
 - El esquema de columnas de `ReporteCierre` es genérico, no el de los 4
   Excel reales — completar contra el encabezado real de cada categoría.
-- Reconciliar la cola offline del PMM cuando el JWT ya expiró al reconectar
-  no está resuelto (el backend valida el JWT de cada request sin excepción)
-  — ver `FRONTEND-SPEC.md` sección 6.4.
 
 ## Historial de migraciones posteriores a la verificación inicial
 

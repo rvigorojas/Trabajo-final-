@@ -6,8 +6,13 @@ from app.models.usuario import Rol
 from tests.conftest import ahora_iso, auth_headers, crear_usuario_y_login
 
 
-async def test_activacion_aeronautica_alerta_iii_auto_convoca_jefe_de_rescate(client: AsyncClient):
+async def test_activacion_aeronautica_alerta_iii_auto_convoca_matriz_real(client: AsyncClient):
     token = await crear_usuario_y_login(client, Rol.JEFE_RESCATE, "jefe.rescate")
+    # Solo se convoca a usuarios que ya existen con ese rol (auto_convocar
+    # cruza RolConvocatoria contra Usuario.rol) — se crean acá para poder
+    # observar la matriz real, sin usar sus tokens.
+    await crear_usuario_y_login(client, Rol.SUPERVISOR_GRAL_RESCATE, "sup.gral.rescate")
+    await crear_usuario_y_login(client, Rol.GERENTE_LOGISTICA, "gerente.logistica")
 
     resp = await client.post(
         "/activaciones",
@@ -24,7 +29,15 @@ async def test_activacion_aeronautica_alerta_iii_auto_convoca_jefe_de_rescate(cl
     data = resp.json()
     assert data["nivel_alerta"] == "III"
     roles_convocados = {m["rol"] for m in data["convocatoria"]}
-    assert Rol.JEFE_RESCATE.value in roles_convocados
+    # Matriz real GSEG-L-001 § 4.2.2: Supervisor Gral. de Rescate está en Alerta
+    # II y III; Gerente de Logística solo se suma en la Activación General
+    # (Alerta III) — confirma que la escalación de matriz funciona, no solo que
+    # hay convocatoria.
+    assert Rol.SUPERVISOR_GRAL_RESCATE.value in roles_convocados
+    assert Rol.GERENTE_LOGISTICA.value in roles_convocados
+    # El Jefe de Rescate es el Comandante de Incidente que activa, no un
+    # "convocado" adicional del plan.
+    assert Rol.JEFE_RESCATE.value not in roles_convocados
 
 
 async def test_activacion_epidemiologica_deriva_nivel_alerta_desde_triaje(client: AsyncClient):

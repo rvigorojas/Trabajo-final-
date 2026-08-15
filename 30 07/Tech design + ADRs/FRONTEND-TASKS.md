@@ -97,5 +97,9 @@ Rescate) o de un hueco de backend (`FRONTEND-SPEC.md`, sección 6) — no empeza
 - [ ] Confirmación de Renzo: mecanismo de sync con token vencido (hueco 6.4).
 - [ ] Levantamiento/georreferenciación real del mapa cuadriculado (prerrequisito externo al
       software, TECH-DESIGN.md § Riesgos técnicos abiertos).
-- [ ] Matriz real de convocatoria (`rol_convocatoria`, hoy con datos de ejemplo) contra GSEG-L-001.
+- [x] Matriz real de convocatoria (`rol_convocatoria`) contra GSEG-L-001 — **resuelto 2026-08-15**:
+      sembrada con la lista real de § 4.2.2 para Aeronáutica (única categoría que el plan detalla);
+      extendida a las otras 3 categorías por decisión de Renzo, ya que el plan no define una matriz
+      propia para ellas — supuesto explícito, a confirmar con el Jefe de Rescate si cambia. Ver
+      `backend/app/services/seed.py`.
 - [ ] Esquema real de columnas de `ReporteCierre` por categoría, contra los 4 Excel actuales.

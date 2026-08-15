@@ -18,6 +18,15 @@ export type Rol =
   | "sgo"
   | "bombero_aeronautico"
   | "servicio_medico"
+  | "supervisor_gral_seguridad_patrimonial"
+  | "supervisor_gral_seguridad_aviacion"
+  | "supervisor_gral_terminales"
+  | "supervisor_gral_cca"
+  | "ingeniero_turno"
+  | "supervisor_gral_operaciones_lado_aire"
+  | "gerente_reputacion"
+  | "gerente_rrhh"
+  | "gerente_logistica"
 
 // backend/app/models/usuario.py — InstanciaPrincipal
 export type InstanciaPrincipal = "coe" | "pmm"
