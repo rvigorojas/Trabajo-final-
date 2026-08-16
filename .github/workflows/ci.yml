@@ -74,6 +74,49 @@ jobs:
         working-directory: frontend
         run: npm run build --workspaces --if-present
 
+  deploy-backend:
+    name: Deploy backend a Cloud Run (pce-jorge-chavez)
+    needs: backend
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        name: Autenticar via Workload Identity Federation (sin clave JSON)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/276453531381/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-deployer@pce-jorge-chavez.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configurar Docker para Artifact Registry
+        run: gcloud auth configure-docker southamerica-west1-docker.pkg.dev --quiet
+
+      - name: Build y push de la imagen
+        working-directory: backend
+        env:
+          IMAGE: southamerica-west1-docker.pkg.dev/pce-jorge-chavez/pce-backend/pce-backend:${{ github.sha }}
+        run: |
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+
+      # alembic upgrade head corre sola al arrancar el contenedor (docker-entrypoint.sh) —
+      # no hace falta un paso de migracion aparte acá tampoco.
+      - name: Desplegar a Cloud Run
+        env:
+          IMAGE: southamerica-west1-docker.pkg.dev/pce-jorge-chavez/pce-backend/pce-backend:${{ github.sha }}
+        run: |
+          gcloud run deploy pce-backend \
+            --image="$IMAGE" \
+            --region=southamerica-west1 \
+            --project=pce-jorge-chavez \
+            --quiet
+
   docker-compose:
     name: docker-compose (smoke test contra un deploy limpio)
     runs-on: ubuntu-latest

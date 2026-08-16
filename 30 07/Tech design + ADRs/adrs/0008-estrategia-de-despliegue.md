@@ -37,3 +37,25 @@ automático de instancias caídas y el escalado, sin que el equipo administre se
   parcial), y si una fase futura necesita conexiones persistentes de larga duración (ej. WebSocket
   para posición en vivo de unidades, hoy fuera de alcance v1 según PRD sección 6), habrá que validar
   que la plataforma managed elegida las soporte bien antes de comprometerse a esa dirección.
+
+## Proveedor elegido y despliegue real (2026-08-15/16)
+
+Google Cloud Platform, proyecto `pce-jorge-chavez` (región `southamerica-west1`, Santiago — la más
+cercana a Lima):
+
+- **Cloud Run** (servicio `pce-backend`): backend containerizado, autoscaling, migraciones
+  (`alembic upgrade head`) corriendo solas al arrancar el contenedor (`docker-entrypoint.sh`).
+- **Cloud SQL** (`pce-db`): Postgres 16, tier `db-f1-micro`, edición Enterprise.
+- **Secret Manager**: `pce-jwt-secret` y `pce-database-url`, inyectados como variables de entorno
+  del servicio Cloud Run; solo la service account de ejecución del servicio (default compute SA)
+  tiene `roles/secretmanager.secretAccessor` — nunca se vieron en texto plano.
+- **Artifact Registry** (`pce-backend`, Docker): repositorio de imágenes del backend.
+- **CD automático** (`.github/workflows/ci.yml`, job `deploy-backend`, agregado 2026-08-16): build
+  + push de la imagen + `gcloud run deploy` en cada push a `main`, autenticado vía **Workload
+  Identity Federation** (sin clave JSON de larga duración — decisión explícita por ser un sistema
+  que eventualmente maneja emergencias reales). Service account `github-deployer@pce-jorge-chavez
+  .iam.gserviceaccount.com`, con `roles/run.admin`, `roles/artifactregistry.writer` y
+  `roles/iam.serviceAccountUser` sobre el proyecto, y `roles/iam.workloadIdentityUser` acotado por
+  `attribute-condition` al repo `rvigorojas/Trabajo-final-` (ningún otro repo puede asumir esta
+  identidad). El frontend no tiene despliegue automatizado todavía — sigue como trabajo local/build
+  manual.

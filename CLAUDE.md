@@ -187,6 +187,27 @@ antes de reinstalar (evita drift de versión).
 - Verificación de migraciones: `alembic upgrade head` / `downgrade -1` / `upgrade head` sin
   error, contra PostgreSQL 16 real, no SQLite.
 
+## Despliegue (GCP, `pce-jorge-chavez`)
+
+Decidido y desplegado 2026-08-15/16 (ver ADR-8, actualizado): backend en **Cloud Run** (servicio
+`pce-backend`, región `southamerica-west1`) contra **Cloud SQL** Postgres 16 (`pce-db`), secretos
+en **Secret Manager** (`pce-jwt-secret`, `pce-database-url`), imágenes en **Artifact Registry**
+(`pce-backend`). URL: `https://pce-backend-276453531381.southamerica-west1.run.app`.
+
+**CD automático** (`.github/workflows/ci.yml`, job `deploy-backend`, agregado 2026-08-16): cada
+push a `main` que pasa los tests del job `backend` hace build+push de la imagen y
+`gcloud run deploy`, autenticado vía Workload Identity Federation (sin clave JSON) — service
+account `github-deployer@pce-jorge-chavez.iam.gserviceaccount.com`, acotada por
+`attribute-condition` al repo `rvigorojas/Trabajo-final-`. El frontend no tiene deploy
+automatizado todavía.
+
+Migraciones (`alembic upgrade head`) corren solas al arrancar el contenedor
+(`backend/docker-entrypoint.sh`) — no hace falta un paso de migración aparte en el deploy.
+
+**Gotcha real de esta sesión**: `gcloud` invocado desde Bash (Git Bash) falla con un error confuso
+de "no se encontró Python" — la CLI de gcloud en esta máquina solo funciona invocada desde
+PowerShell.
+
 ## Pendientes externos
 
 No quedan pendientes externos abiertos. Los 3 `[Propuesto]` históricos ya están confirmados:
