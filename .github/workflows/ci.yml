@@ -73,3 +73,28 @@ jobs:
       - name: Build
         working-directory: frontend
         run: npm run build --workspaces --if-present
+
+  docker-compose:
+    name: docker-compose (smoke test contra un deploy limpio)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Levantar el stack
+        run: |
+          cp .env.example .env
+          docker compose up -d --build
+
+      # Hallazgo real (2026-08-16): sin el entrypoint que corre `alembic upgrade
+      # head` (backend/docker-entrypoint.sh), este paso fallaba — el contenedor
+      # arrancaba contra una base sin tablas y el lifespan de app/main.py crasheaba.
+      - name: Esperar a que el backend responda
+        run: timeout 60 bash -c 'until curl -sf http://localhost:8000/salud; do sleep 2; done'
+
+      - name: Logs si algo falla
+        if: failure()
+        run: docker compose logs
+
+      - name: Bajar el stack
+        if: always()
+        run: docker compose down -v

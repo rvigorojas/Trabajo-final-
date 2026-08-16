@@ -50,6 +50,16 @@ Con el backend arriba, `GET http://localhost:8000/docs` da la Swagger UI:
 3. Usar el JWT (botón "Authorize" en Swagger) para probar `POST /activaciones`
    y confirmar que la convocatoria se genera sola en Alerta II/III.
 
+**Verificado 2026-08-16** (esta sección nunca se había probado — el resto del
+README sí, pero `docker compose up` con la imagen del backend, no). Hallazgo
+real: el contenedor de `backend` arrancaba `uvicorn` directo, sin correr
+migraciones, así que el `lifespan` de `app/main.py` (siembra de
+`rol_convocatoria`) crasheaba contra una base recién creada sin tablas.
+Arreglado con `backend/docker-entrypoint.sh` (`alembic upgrade head` antes de
+`exec "$@"`) — con eso, este paso ya no necesita el paso 2 aparte, las
+migraciones corren solas al levantar el contenedor. El paso 2 sigue haciendo
+falta solo para correr el backend nativo (`uvicorn` directo, sin Docker).
+
 ## Pendiente conocido (no bloqueante, documentado en el plan aprobado)
 
 - El esquema de columnas de `ReporteCierre` es genérico, no el de los 4
