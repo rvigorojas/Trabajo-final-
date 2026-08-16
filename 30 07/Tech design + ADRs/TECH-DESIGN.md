@@ -200,9 +200,14 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
 
 ## Riesgos técnicos abiertos
 
-- El levantamiento/georreferenciación en campo del mapa cuadriculado (PRD, sección 8) es un
-  prerrequisito externo al desarrollo del software: sin coordenadas georreferenciables reales, el
-  `MarcadorIncidente` no puede ubicarse sobre un mapa real, solo sobre la cuadrícula lógica.
+- **Decidido con Renzo (2026-08-16)**: en vez de esperar el levantamiento/georreferenciación en
+  campo del mapa cuadriculado en papel (PRD, sección 8), los marcadores nuevos capturan la
+  posición directamente por GPS de la tablet GETAC (hardware ya pago y sin explotar, PRD sección
+  3) al registrar el `MarcadorIncidente` — con un input manual de respaldo si el GPS falla o no
+  hay señal (ej. interior de un edificio). Esto resuelve el riesgo para marcadores nuevos sin
+  necesitar el levantamiento físico del mapa en papel; ver `frontend/apps/pmm/src/screens/
+  MarcadorIncidenteScreen.tsx`. El levantamiento del mapa cuadriculado en sí sigue sin hacerse —
+  solo deja de ser un bloqueante para registrar marcadores.
 - No se definió aún el proveedor cloud concreto para el despliegue managed/serverless (ADR 8) ni el
   motor de base de datos relacional específico (ADR 2) — quedan como decisiones de implementación a
   cerrar antes de empezar a construir.

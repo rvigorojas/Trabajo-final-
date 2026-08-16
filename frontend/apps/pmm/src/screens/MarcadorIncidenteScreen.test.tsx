@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
@@ -18,8 +18,44 @@ const activacionActiva = {
   convocatoria: [],
 }
 
+function mockGeolocationExitoso() {
+  vi.stubGlobal("navigator", {
+    ...navigator,
+    geolocation: {
+      getCurrentPosition: (success: PositionCallback) => {
+        success({
+          coords: { latitude: -12.021806, longitude: -77.114611 },
+        } as GeolocationPosition)
+      },
+    },
+  })
+}
+
+function mockGeolocationFallido() {
+  vi.stubGlobal("navigator", {
+    ...navigator,
+    geolocation: {
+      getCurrentPosition: (
+        _success: PositionCallback,
+        error: PositionErrorCallback,
+      ) => {
+        error({} as GeolocationPositionError)
+      },
+    },
+  })
+}
+
 describe("MarcadorIncidenteScreen", () => {
-  it("muestra el badge mientras el POST está en vuelo y lo oculta al confirmarse", async () => {
+  beforeEach(() => {
+    server.use(http.get(`${BASE_URL}/activaciones`, () => HttpResponse.json([activacionActiva])))
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it("captura la posición por GPS y la envía en el marcador", async () => {
+    mockGeolocationExitoso()
     const user = userEvent.setup()
     let cuerpoRecibido: unknown = null
     let liberarRespuesta: () => void = () => {}
@@ -28,7 +64,6 @@ describe("MarcadorIncidenteScreen", () => {
     })
 
     server.use(
-      http.get(`${BASE_URL}/activaciones`, () => HttpResponse.json([activacionActiva])),
       http.post(`${BASE_URL}/marcadores-incidente`, async ({ request }) => {
         cuerpoRecibido = await request.json()
         await respuestaControlada
@@ -38,7 +73,10 @@ describe("MarcadorIncidenteScreen", () => {
 
     render(<MarcadorIncidenteScreen />)
 
-    await user.type(await screen.findByLabelText("Coordenada de cuadrícula"), "C4")
+    expect(await screen.findByTestId("ubicacion-gps")).toHaveTextContent(
+      "Posición GPS: -12.021806,-77.114611",
+    )
+
     await user.type(screen.getByLabelText("Tipo de incidente"), "fuego focalizado")
     await user.click(screen.getByRole("button", { name: "Registrar marcador" }))
 
@@ -52,9 +90,42 @@ describe("MarcadorIncidenteScreen", () => {
     expect(await screen.findByText("Marcador registrado.")).toBeInTheDocument()
     expect(cuerpoRecibido).toMatchObject({
       activacion_id: "a1",
-      coordenada_cuadricula: "C4",
+      coordenada_cuadricula: "-12.021806,-77.114611",
       tipo_incidente: "fuego focalizado",
       capa: "incidente",
+    })
+  })
+
+  it("si el GPS falla, permite ingresar la coordenada de cuadrícula a mano", async () => {
+    mockGeolocationFallido()
+    const user = userEvent.setup()
+    let cuerpoRecibido: unknown = null
+
+    server.use(
+      http.post(`${BASE_URL}/marcadores-incidente`, async ({ request }) => {
+        cuerpoRecibido = await request.json()
+        return HttpResponse.json({ id: "m1", ...(cuerpoRecibido as object) }, { status: 201 })
+      }),
+    )
+
+    render(<MarcadorIncidenteScreen />)
+
+    expect(
+      await screen.findByText(
+        "No se pudo obtener la posición GPS. Reintentá o ingresala manualmente.",
+      ),
+    ).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText("Coordenada de cuadrícula (manual)"), "C4")
+    await user.type(screen.getByLabelText("Tipo de incidente"), "fuego focalizado")
+    await user.click(screen.getByRole("button", { name: "Registrar marcador" }))
+
+    await waitFor(() => {
+      expect(cuerpoRecibido).toMatchObject({
+        activacion_id: "a1",
+        coordenada_cuadricula: "C4",
+        tipo_incidente: "fuego focalizado",
+      })
     })
   })
 })
