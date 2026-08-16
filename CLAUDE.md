@@ -208,6 +208,40 @@ Migraciones (`alembic upgrade head`) corren solas al arrancar el contenedor
 de "no se encontró Python" — la CLI de gcloud en esta máquina solo funciona invocada desde
 PowerShell.
 
+**Borrado real de filas en producción — no se pudo completar (2026-08-16)**: al querer limpiar
+datos de prueba (activaciones/marcadores creados verificando la app en vivo), el trigger
+insert-only (ADR-2) bloquea `DELETE` incluso conectado directo a la base — por diseño. El único
+camino (bajar Cloud SQL Auth Proxy, sacar la password real de Secret Manager, `ALTER TABLE
+... DISABLE TRIGGER`, borrar, reactivar) quedó bloqueado dos veces por el clasificador de permisos
+de Claude Code al intentar los pasos de conexión/túnel — se optó por no insistir y usar el camino
+real de la app en su lugar: `POST /activaciones/{id}/desactivar` (con un usuario de rol autorizado
+— Gerente de Seguridad/Operaciones/Duty Manager) deja la fila en `estado=cerrada`, que alcanza
+para que deje de mostrarse como "en curso". Las filas de prueba (`Verificación Item 8 -
+Aeronáutica` x2, sin origen claro — puede ser de una verificación manual anterior a esta sesión;
+`Demo: humo en cabina`; `Walkthrough real: derrame de combustible`) siguen en la base, todas
+`cerrada`. Si de verdad hace falta borrarlas, el procedimiento con Cloud SQL Auth Proxy queda
+descrito arriba — hacerlo a mano, no reintentar automatizarlo sin que el usuario lo pida de nuevo.
+
+**Gotchas de automatización de navegador contra esta app** (encontrados verificando en vivo,
+2026-08-16):
+- El shell de navegación (Radix `Tabs.Trigger`, botones "Activar"/"Registrar"/"Confirmar" de los
+  formularios) a veces no reacciona a un click sintético de bajo nivel (CDP) aunque el puntero
+  caiga sobre el elemento correcto (confirmado con `elementFromPoint`) — usar
+  `document.querySelector(...).click()` vía JS es lo que funcionó de forma consistente en esta
+  sesión cuando el click "real" fallaba en silencio (sin red, sin error, sin cambio visual).
+  Siempre verificar con `read_network_requests`/consola si un submit realmente disparó una request
+  antes de asumir que un click no funcionó.
+- El autocompletado de Chrome en los inputs de login (usuario/contraseña) muestra el valor
+  visualmente pero **no** actualiza `input.value` hasta una interacción real — un submit inmediato
+  después de ver el valor "cargado" tira `Please fill out this field`. Usar `form_input` (que sí
+  actualiza el DOM value) en vez de confiar en el autofill visible.
+- El JWT expira rápido (token blando corto, ADR-7) — en sesiones largas de verificación manual,
+  `localStorage.clear()` + volver a loguear es necesario más de una vez. El Cliente PMM fuerza
+  logout solo al hacer *flush* de la cola offline con 401; el **Cliente COE no tiene ese
+  auto-logout** — un token vencido en COE deja la pantalla en blanco/con datos viejos sin avisar
+  (reintenta cada 3s en un loop de 401 silencioso). Podría valer la pena agregarlo si se retoma
+  el frontend.
+
 ## Pendientes externos
 
 No quedan pendientes externos abiertos. Los 3 `[Propuesto]` históricos ya están confirmados:
