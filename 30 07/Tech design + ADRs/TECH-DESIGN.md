@@ -208,9 +208,12 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
   necesitar el levantamiento físico del mapa en papel; ver `frontend/apps/pmm/src/screens/
   MarcadorIncidenteScreen.tsx`. El levantamiento del mapa cuadriculado en sí sigue sin hacerse —
   solo deja de ser un bloqueante para registrar marcadores.
-- No se definió aún el proveedor cloud concreto para el despliegue managed/serverless (ADR 8) ni el
-  motor de base de datos relacional específico (ADR 2) — quedan como decisiones de implementación a
-  cerrar antes de empezar a construir.
+- **Resuelto**: el motor de base de datos relacional (ADR 2) es **PostgreSQL 16**, concreto desde
+  la implementación del backend (2026-07-28) y verificado contra una instancia real (no SQLite) en
+  cada corrida de migraciones. El proveedor cloud para el despliegue managed/serverless (ADR 8) es
+  **Google Cloud Platform** (Cloud Run + Cloud SQL), decidido y desplegado 2026-08-15/16, con CD
+  automático vía GitHub Actions + Workload Identity Federation agregado el 2026-08-16 — ver ADR 8
+  para el detalle completo.
 - **Confirmado con Renzo (2026-08-12)**: la ventana máxima de sesión offline del token "blando"
   (ADR 7) es de 24 horas. Al superarla, exigir relogin antes de encolar acciones nuevas (las ya
   encoladas dentro de la ventana no se pierden).

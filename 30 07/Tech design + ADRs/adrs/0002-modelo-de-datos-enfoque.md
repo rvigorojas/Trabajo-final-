@@ -35,10 +35,12 @@ orden real de los eventos en el log de auditoría.
 **Mecanismo de "sin edición retroactiva" (resuelve hueco detectado en revisión adversarial,
 2026-07-21):** se aplica en dos capas — (1) capa de aplicación: la API REST no expone ningún
 endpoint UPDATE/DELETE sobre registros ya confirmados de Activacion, EvaluacionInicial, RelevoMando
-o MarcadorIncidente, solo POST de inserción; (2) respaldo a nivel de base de datos: una vez elegido
-el motor relacional (ver "Riesgos técnicos abiertos" del TDD), agregar un trigger o regla a nivel de
-tabla que rechace UPDATE/DELETE directos sobre esas mismas tablas, como defensa adicional si algo
-además de la API llega a tocar la base (ej. un script de mantenimiento mal escrito).
+o MarcadorIncidente, solo POST de inserción; (2) respaldo a nivel de base de datos: un trigger o
+regla a nivel de tabla que rechace UPDATE/DELETE directos sobre esas mismas tablas, como defensa
+adicional si algo además de la API llega a tocar la base (ej. un script de mantenimiento mal
+escrito). El motor relacional es **PostgreSQL 16** (concreto desde la implementación del backend,
+2026-07-28; desplegado en Cloud SQL — ver ADR 8), y el trigger ya está implementado (migraciones
+Alembic, verificado contra una instancia real).
 
 **Excepción puntual para el cierre de Activacion (agregada 2026-07-30, migración
 `0003_relevo_activacion_y_cierre`):** el trigger de `activacion` no es un bloqueo absoluto como en
