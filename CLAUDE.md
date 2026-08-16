@@ -81,8 +81,21 @@ Detalle completo en `tasks/item-11-endurecimiento/todo.md`.
 
 **Backlog completo: los 11 ítems de `BACKLOG.md` cerrados el 2026-08-14.** Frontend (Cliente COE +
 Cliente PMM) y backend verificados end-to-end contra PostgreSQL/backend reales, con offline-first
-y token blando funcionando. Queda un único pendiente externo (Fase 5 de `FRONTEND-TASKS.md`, no
-bloquea el software): georreferenciación real del mapa cuadriculado (levantamiento físico/GIS).
+y token blando funcionando.
+
+**Georreferenciación resuelta por decisión — Camino 2 (Renzo, 2026-08-16)**: en vez de esperar el
+levantamiento/georreferenciación del mapa cuadriculado en papel, los marcadores nuevos capturan la
+posición directamente por GPS de la tablet GETAC al registrarse (`MarcadorIncidenteScreen.tsx`,
+Cliente PMM, `navigator.geolocation`), con input manual de respaldo si el GPS falla o no hay
+señal. `MapaScreen.tsx` (Cliente COE) ya ubicaba sobre la foto satelital del AIJC cualquier
+marcador con `coordenada_cuadricula` en lat/lon (workaround del 2026-08-15,
+`georreferenciacion.ts`) — con la captura por GPS, los marcadores nuevos quedan georreferenciados
+de punta a punta sin depender del levantamiento físico del mapa en papel (que en sí no se hace).
+PRD actualizado a `PRD_PCE_JorgeChavez.4` (.md+.docx, reemplaza las menciones de "marcado manual"
+en secciones 4/6/8; `.3` queda de referencia histórica). Confirmado también el mismo día: la
+tablet GETAC se usa **sin guantes**, así que el tap target de 48px (WCAG 2.2 AA) ya aplicado en el
+ítem #11 es suficiente, sin cambios de código. Con esto, **no quedan pendientes abiertos en
+`FRONTEND-TASKS.md`** (antes: Fase 5, georreferenciación + guantes).
 
 **Esquema real de columnas de `ReporteCierre` resuelto 2026-08-15**: se encontraron y descargaron
 los 4 "Cuadro Estadístico de Emergencias..." reales del Drive LAP (carpeta "Excel atenciones") y

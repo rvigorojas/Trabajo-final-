@@ -105,8 +105,9 @@ verificación de cada ítem vive en `tasks/item-NN-<nombre>/todo.md` (raíz del 
 - [x] Accesibilidad básica: contraste, tamaño de tap targets. **Cerrado 2026-08-14**: contraste
       WCAG 2.2 AA ≥7.71:1 en todos los pares texto/fondo en uso; 6 componentes de formularios
       corregidos al token de 48px de tap target (solo los botones lo tenían).
-- [ ] Confirmar con Renzo si el uso de guantes con la tablet GETAC exige un tap target mayor al
-      estándar WCAG ya aplicado — no confirmado en el PRD, sigue abierto.
+- [x] Confirmar con Renzo si el uso de guantes con la tablet GETAC exige un tap target mayor al
+      estándar WCAG ya aplicado. **Confirmado 2026-08-16**: la tablet se usa sin guantes — el
+      tap target de 48px (WCAG 2.2 AA) ya aplicado es suficiente, sin cambios de código.
 - [x] Prueba de pérdida de conectividad real en el Cliente PMM (no solo simulada en devtools): cortar
       red, completar los 4 flujos offline, reconectar, confirmar sincronización sin duplicados.
       **Cerrado 2026-08-13**, ítem #10 (repetido con JWT vencido firmado a mano).
