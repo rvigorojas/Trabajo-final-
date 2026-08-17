@@ -118,6 +118,26 @@ un exportador real a Excel/CSV (no construido) debe iterar esa lista, no las cla
 renderizaba `datos` de forma genérica (`Object.entries`), sin cambios de fondo — solo se ajustó
 `valorLegible` para mostrar "—" en vez del literal "null" en las columnas sin autocompletar.
 
+**Exportador real a `.xlsx` agregado 2026-08-17**: hasta esta fecha `ReporteCierre.datos` solo
+vivía como JSON en Postgres, visible en pantalla — no había forma de producir un archivo real
+para reemplazar el "Cuadro Estadístico de Emergencias..." que hoy arma Rescate a mano (huella de
+esto pendiente identificado al analizar qué falta para poder cortar los 4 Excel actuales).
+`construir_workbook_reportes_cierre` (`app/services/reporte_cierre.py`, usa `openpyxl` —
+dependencia nueva en `pyproject.toml`) arma un `.xlsx` con hoja "Base de Datos", iterando
+`COLUMNAS_REPORTE_CIERRE` (no las claves del JSONB, que no garantiza orden) y una fila por
+`ReporteCierre` ya generado. Nuevo endpoint `GET /reportes-cierre/exportar?tipo_emergencia=...`
+(`app/routers/reportes_cierre.py`, declarado **antes** de `GET /{reporte_id}` para que
+"exportar" no se intente parsear como UUID) devuelve el archivo vía `StreamingResponse` con
+`Content-Disposition: attachment`. Junta **todos** los reportes de cierre ya generados de esa
+categoría — pensado para que Rescate lo baje periódicamente y reemplace el Excel que hoy
+mantiene a mano. 1 test nuevo (`test_exportar_reportes_cierre_arma_xlsx_con_columnas_reales`,
+18/18 en total), verifica encabezado real + una fila con datos reales via `openpyxl.load_workbook`
+sobre la respuesta. Este exportador resuelve el bloqueador técnico más concreto del análisis de
+corte de Excel; sigue sin resolver el hueco de fondo (la mayoría de columnas reales quedan en
+`None`, detalle operativo fuera de alcance del PCE v1 — ver el bloque anterior) ni los pendientes
+no técnicos (matriz de convocatoria de las 3 categorías no aeronáuticas sin confirmar con el
+Jefe de Rescate, módulo Comunicaciones placeholder).
+
 **Matriz real de convocatoria (GSEG-L-001) resuelta 2026-08-15**: se encontró el PDF real del Plan
 de Emergencia en el Drive LAP (`RESC-L-028-GSEG-L-001...pdf`, v.001) y se extrajo la lista real de
 "Miembros del COE/PMM" por nivel de alerta (§ 4.2.2 — Alerta II activación parcial, Alerta III

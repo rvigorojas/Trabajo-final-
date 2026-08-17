@@ -1,4 +1,7 @@
+from io import BytesIO
+
 from httpx import AsyncClient
+from openpyxl import load_workbook
 
 from app.models.usuario import Rol
 from app.services.reporte_cierre import COLUMNAS_REPORTE_CIERRE
@@ -112,3 +115,41 @@ async def test_reporte_cierre_es_idempotente_por_activacion(client: AsyncClient)
     assert primera.status_code == 201
     assert segunda.status_code == 201
     assert primera.json()["id"] == segunda.json()["id"]
+
+
+async def test_exportar_reportes_cierre_arma_xlsx_con_columnas_reales(client: AsyncClient):
+    token = await crear_usuario_y_login(client, Rol.DUTY_MANAGER, "duty.reporte4")
+    resp_activacion = await client.post(
+        "/activaciones",
+        json={
+            "tipo_emergencia": "matpel",
+            "clasificacion_origen": "Clase 3",
+            "tipo_incidente": "Derrame de combustible",
+            "hora_evento": "2026-08-17T09:00:00Z",
+        },
+        headers=auth_headers(token),
+    )
+    activacion_id = resp_activacion.json()["id"]
+    await client.post(
+        "/reportes-cierre", json={"activacion_id": activacion_id}, headers=auth_headers(token)
+    )
+
+    resp = await client.get(
+        "/reportes-cierre/exportar",
+        params={"tipo_emergencia": "matpel"},
+        headers=auth_headers(token),
+    )
+    assert resp.status_code == 200
+    assert resp.headers["content-type"] == (
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    assert 'filename="cuadro-estadistico-matpel.xlsx"' in resp.headers["content-disposition"]
+
+    libro = load_workbook(BytesIO(resp.content))
+    hoja = libro["Base de Datos"]
+    encabezado = [celda.value for celda in next(hoja.iter_rows(min_row=1, max_row=1))]
+    assert encabezado == COLUMNAS_REPORTE_CIERRE["matpel"]
+
+    columna_descripcion = encabezado.index("Descripción de la emergencia")
+    filas = list(hoja.iter_rows(min_row=2, values_only=True))
+    assert any(fila[columna_descripcion] == "Derrame de combustible" for fila in filas)

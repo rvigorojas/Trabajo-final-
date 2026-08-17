@@ -24,13 +24,17 @@ exportador real a Excel/CSV (no construido todavía) debe iterar
 no asumir el orden en que Postgres devuelve las claves del JSONB.
 """
 
+import io
 import uuid
 from collections.abc import Iterable
+
+from openpyxl import Workbook
 
 from app.models.activacion import Activacion, TipoEmergencia
 from app.models.convocatoria_miembro import ConvocatoriaMiembro
 from app.models.evaluacion_inicial import EvaluacionInicial
 from app.models.marcador_incidente import MarcadorIncidente
+from app.models.reporte_cierre import ReporteCierre
 from app.models.usuario import Rol
 
 COLUMNAS_REPORTE_CIERRE: dict[TipoEmergencia, list[str]] = {
@@ -274,3 +278,26 @@ def construir_datos_reporte_cierre(
         datos["Observaciones"] = texto_evaluacion
 
     return datos
+
+
+def construir_workbook_reportes_cierre(
+    tipo_emergencia: TipoEmergencia, reportes: Iterable[ReporteCierre]
+) -> bytes:
+    """Arma el `.xlsx` real de una categoría (mismas columnas y orden que el Excel del Drive LAP).
+
+    Reemplaza al "Cuadro Estadístico de Emergencias..." que hoy mantiene Rescate a mano: una
+    hoja "Base de Datos" con encabezado real y una fila por `ReporteCierre` ya generado. Itera
+    `COLUMNAS_REPORTE_CIERRE`, no las claves de `datos` (JSONB no garantiza su orden).
+    """
+    columnas = COLUMNAS_REPORTE_CIERRE[tipo_emergencia]
+
+    libro = Workbook()
+    hoja = libro.active
+    hoja.title = "Base de Datos"
+    hoja.append(columnas)
+    for reporte in reportes:
+        hoja.append([reporte.datos.get(columna) for columna in columnas])
+
+    buffer = io.BytesIO()
+    libro.save(buffer)
+    return buffer.getvalue()
