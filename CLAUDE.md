@@ -167,6 +167,18 @@ descubrimiento de skills de proyecto depende de la raíz real de la sesión, rei
 arregla. En ese caso, seguir el mismo proceso a mano (Specify→Plan→Tasks→Implement, con el mismo
 gate humano entre fases) en vez de forzar la invocación del skill — así se hizo en el ítem #4.
 
+**Auto-logout del Cliente COE agregado 2026-08-17**: el gotcha documentado más abajo ("un token
+vencido en COE deja la pantalla en blanco/con datos viejos sin avisar, reintenta cada 3s en un
+loop de 401 silencioso") ya no aplica. `ApiClientConfig` (`packages/api-client/src/client.ts`)
+gana un `onUnauthorized?: () => void`, disparado en `apiFetch` en cualquier 401 antes de lanzar
+el `ApiError` — el Cliente PMM no lo usa (ya maneja el 401 explícitamente al hacer flush de la
+cola offline, `offline/colaOffline.ts`); `apps/coe/src/apiClient.ts` sí lo conecta:
+`logout()` + `window.location.reload()`, con una guarda de módulo (`sesionVencidaNotificada`)
+para no disparar el reload una vez por cada llamada en paralelo que reciba el 401 (el polling de
+`usePolling`, ADR-5, dispara varias por tick). 2 tests nuevos en `client.test.ts` (12/12 en
+`api-client`). Verificado con build + suites completas: COE 35/35, PMM 30/30, sin cambios de
+comportamiento en PMM.
+
 **Gotcha de React Router 8 (data router) + jsdom** (encontrado en `verify` del ítem #2): cualquier
 `navigate()` con `RouterProvider`/`createMemoryRouter` sobre `jsdom` tira `TypeError: RequestInit:
 Expected signal ("AbortSignal {}") to be an instance of AbortSignal` — jsdom instala su propia

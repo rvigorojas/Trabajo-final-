@@ -39,6 +39,34 @@ describe("createApiClient", () => {
     })
   })
 
+  it("dispara onUnauthorized en un 401 antes de lanzar el ApiError", async () => {
+    let llamado = false
+    const client = createApiClient({
+      baseUrl: BASE_URL,
+      getToken: () => "token-vencido",
+      onUnauthorized: () => {
+        llamado = true
+      },
+    })
+
+    await expect(client.apiFetch("/activaciones/expired")).rejects.toBeInstanceOf(ApiError)
+    expect(llamado).toBe(true)
+  })
+
+  it("no dispara onUnauthorized en un 403", async () => {
+    let llamado = false
+    const client = createApiClient({
+      baseUrl: BASE_URL,
+      getToken: () => "token-valido",
+      onUnauthorized: () => {
+        llamado = true
+      },
+    })
+
+    await expect(client.apiFetch("/activaciones/forbidden")).rejects.toBeInstanceOf(ApiError)
+    expect(llamado).toBe(false)
+  })
+
   it("inyecta el Authorization header desde getToken", async () => {
     let capturedAuth: string | null = null
     server.use(

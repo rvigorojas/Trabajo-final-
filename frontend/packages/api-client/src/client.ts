@@ -22,6 +22,15 @@ export class ApiError extends Error {
 export interface ApiClientConfig {
   baseUrl: string
   getToken: () => string | null
+  /*
+   * Se dispara en cualquier 401, antes de lanzar el ApiError — pensado para forzar
+   * logout+relogin desde un solo lugar en vez de que cada pantalla maneje el caso. El Cliente
+   * PMM no lo usa (ya maneja el 401 explícitamente al hacer flush de la cola offline, ver
+   * offline/colaOffline.ts); el Cliente COE sí, porque su polling (usePolling, ADR-5) no tenía
+   * ningún manejo de error y un token vencido dejaba la pantalla con datos viejos reintentando
+   * en un loop de 401 silencioso (gotcha documentado en CLAUDE.md).
+   */
+  onUnauthorized?: () => void
 }
 
 export interface ApiClient {
@@ -44,6 +53,9 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     if (!response.ok) {
       const message = await readErrorMessage(response)
       const kind = errorKindForStatus(response.status)
+      if (kind === "unauthorized") {
+        config.onUnauthorized?.()
+      }
       throw new ApiError(kind, response.status, message)
     }
 
