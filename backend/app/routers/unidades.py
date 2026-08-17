@@ -13,7 +13,7 @@ router = APIRouter(prefix="/unidades", tags=["unidades"])
 async def listar_unidades(
     db: AsyncSession = Depends(get_db), _=Depends(get_current_usuario)
 ) -> list[Unidad]:
-    return (await db.execute(select(Unidad))).scalars().all()
+    return (await db.execute(select(Unidad).order_by(Unidad.identificador))).scalars().all()
 
 
 @router.put("/{identificador}", response_model=UnidadRead)
