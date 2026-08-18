@@ -7,11 +7,9 @@ Chávez", v.001 (29/04/2025), § 4.2.2 "Alerta y activación del COE" (listas
 solo define esta lista de miembros para emergencias **aeronáuticas**.
 Epidemiológica, Estructural/Incidentes y MATPEL no tienen una matriz de
 convocatoria propia en el plan (sus secciones — 4.2.6/4.2.7 — describen
-acciones de respuesta, no listas de convocados); por decisión de Renzo
-(2026-08-15), se aplica la misma matriz aeronáutica a las 4 categorías hasta
-que el Jefe de Rescate confirme un criterio distinto — supuesto explícito,
-no dato real, igual que ya ocurre con la escala de activación de esas 3
-categorías (ver PRD sección 8).
+acciones de respuesta, no listas de convocados). Aplicado inicialmente como
+supuesto de Renzo (2026-08-15) y **confirmado por el Jefe de Rescate el
+2026-08-17**: se usa la misma matriz aeronáutica para las 4 categorías.
 
 No incluye los roles de mando (Coordinador del Plan de Emergencia y sus
 suplentes — Gerente de Seguridad/Gerente de Operaciones Aeroportuarias/Duty

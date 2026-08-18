@@ -149,8 +149,8 @@ Gerente de Reputación/RRHH/Logística), decisión de Renzo. `backend/app/servic
 `rol_convocatoria` con esa matriz real para Aeronáutica; el plan **no** define una matriz de
 convocatoria propia para Epidemiológica/Estructural/MATPEL (esas secciones describen acciones de
 respuesta, no listas de convocados), así que por decisión de Renzo se aplica la misma matriz
-aeronáutica a las 4 categorías — supuesto explícito documentado en el docstring de `seed.py`, a
-confirmar con el Jefe de Rescate si cambia. El Jefe de Rescate/Coordinador del Plan y sus
+aeronáutica a las 4 categorías — supuesto explícito documentado en el docstring de `seed.py`,
+**confirmado por el Jefe de Rescate el 2026-08-17** (ya no es un supuesto pendiente). El Jefe de Rescate/Coordinador del Plan y sus
 suplentes quedan fuera de la matriz (lideran la activación, no son "convocados"). Migraciones
 regeneradas limpias (`alembic downgrade base && upgrade head` contra Postgres real, sin
 `ALTER TYPE` — la 0001 deriva el esquema de `Base.metadata` en cada corrida). Un test dependía de
@@ -286,3 +286,8 @@ No quedan pendientes externos abiertos. Los 3 `[Propuesto]` históricos ya está
   el backend.
 
 Esto desbloquea el ítem #10 del `BACKLOG.md` (Cliente PMM — Cola offline y token blando).
+
+Un cuarto supuesto, detectado el 2026-08-17 al analizar qué falta para poder cortar los 4 Excel
+actuales, también quedó confirmado: la matriz de convocatoria aeronáutica (GSEG-L-001) aplicada
+por igual a Epidemiológica/Estructural/MATPEL — **confirmado por el Jefe de Rescate el
+2026-08-17** (ver `backend/app/services/seed.py`).
