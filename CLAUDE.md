@@ -138,6 +138,18 @@ corte de Excel; sigue sin resolver el hueco de fondo (la mayoría de columnas re
 no técnicos (matriz de convocatoria de las 3 categorías no aeronáuticas sin confirmar con el
 Jefe de Rescate, módulo Comunicaciones placeholder).
 
+**Generación automática del `ReporteCierre` al desactivar, 2026-08-18**: hasta esta fecha el
+`ReporteCierre` de una activación cerrada requería un click manual aparte en `ReportesScreen`
+(botón "Ver reporte" → `POST /reportes-cierre`) — una activación se podía cerrar sin que nadie
+generara nunca su fila del `.xlsx` acumulado. Se extrajo `generar_reporte_cierre` (idempotente
+por `activacion_id`, sin `commit` propio — lo decide el caller) a `app/services/reporte_cierre.py`,
+reutilizada por `POST /activaciones/{id}/desactivar` (`app/routers/activaciones.py`, misma
+transacción que el cambio de estado) y por `POST /reportes-cierre` (`app/routers/
+reportes_cierre.py`, que ahora solo sirve para consulta/reintento manual — el frontend no cambió,
+sigue llamando el mismo endpoint, que ahora casi siempre encuentra el reporte ya generado en vez
+de crearlo). 1 test nuevo (`test_desactivar_genera_el_reporte_de_cierre_sola`,
+`test_desactivar_activacion.py`, 19/19 en total).
+
 **Matriz real de convocatoria (GSEG-L-001) resuelta 2026-08-15**: se encontró el PDF real del Plan
 de Emergencia en el Drive LAP (`RESC-L-028-GSEG-L-001...pdf`, v.001) y se extrajo la lista real de
 "Miembros del COE/PMM" por nivel de alerta (§ 4.2.2 — Alerta II activación parcial, Alerta III

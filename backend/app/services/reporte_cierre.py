@@ -29,13 +29,15 @@ import uuid
 from collections.abc import Iterable
 
 from openpyxl import Workbook
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.activacion import Activacion, TipoEmergencia
 from app.models.convocatoria_miembro import ConvocatoriaMiembro
 from app.models.evaluacion_inicial import EvaluacionInicial
 from app.models.marcador_incidente import MarcadorIncidente
 from app.models.reporte_cierre import ReporteCierre
-from app.models.usuario import Rol
+from app.models.usuario import Rol, Usuario
 
 COLUMNAS_REPORTE_CIERRE: dict[TipoEmergencia, list[str]] = {
     TipoEmergencia.AERONAUTICA: [
@@ -278,6 +280,58 @@ def construir_datos_reporte_cierre(
         datos["Observaciones"] = texto_evaluacion
 
     return datos
+
+
+async def generar_reporte_cierre(db: AsyncSession, activacion: Activacion) -> ReporteCierre:
+    """Genera (o devuelve, si ya existe) el `ReporteCierre` de una activación.
+
+    Idempotente por `activacion_id` — llamado tanto automáticamente al
+    desactivar una activación (`POST /activaciones/{id}/desactivar`) como,
+    para reintentos o consulta directa, desde `POST /reportes-cierre`. No
+    hace `commit`; el caller decide la transacción.
+    """
+    existente = (
+        await db.execute(select(ReporteCierre).where(ReporteCierre.activacion_id == activacion.id))
+    ).scalar_one_or_none()
+    if existente is not None:
+        return existente
+
+    evaluaciones = (
+        (
+            await db.execute(
+                select(EvaluacionInicial).where(EvaluacionInicial.activacion_id == activacion.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    marcadores = (
+        (
+            await db.execute(
+                select(MarcadorIncidente).where(MarcadorIncidente.activacion_id == activacion.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    convocatoria = activacion.convocatoria
+    usuarios = (
+        (await db.execute(select(Usuario).where(Usuario.id.in_([m.usuario_id for m in convocatoria]))))
+        .scalars()
+        .all()
+    )
+    nombres_por_usuario_id = {u.id: u.nombre for u in usuarios}
+
+    datos = construir_datos_reporte_cierre(
+        activacion, evaluaciones, marcadores, convocatoria, nombres_por_usuario_id
+    )
+
+    reporte = ReporteCierre(
+        activacion_id=activacion.id, tipo_emergencia=activacion.tipo_emergencia, datos=datos
+    )
+    db.add(reporte)
+    await db.flush()
+    return reporte
 
 
 def construir_workbook_reportes_cierre(

@@ -20,6 +20,7 @@ from app.schemas.activacion import ActivacionConConvocatoria, ActivacionCreate, 
 from app.schemas.convocatoria_miembro import ConvocatoriaMiembroRead
 from app.services.clasificacion import derivar_nivel_alerta
 from app.services.convocatoria import auto_convocar
+from app.services.reporte_cierre import generar_reporte_cierre
 
 router = APIRouter(prefix="/activaciones", tags=["activaciones"])
 
@@ -107,12 +108,19 @@ async def desactivar_activacion(
     trigger de DB de la migración 0003 (que solo permite este cambio puntual
     de `estado`, ningún otro campo). Idempotente: desactivar una activación ya
     cerrada no falla, simplemente devuelve el estado actual.
+
+    Genera el `ReporteCierre` en la misma transacción (antes requería un
+    click manual aparte en `ReportesScreen` vía `POST /reportes-cierre`, que
+    ahora solo sirve para consulta/reintento) — así ninguna activación cerrada
+    queda sin su fila en el `.xlsx` acumulado que arma `GET
+    /reportes-cierre/exportar`.
     """
     activacion = await get_or_404(db, Activacion, activacion_id, "Activación no encontrada")
     if activacion.estado == EstadoActivacion.CERRADA:
         return activacion
     activacion.estado = EstadoActivacion.CERRADA
     activacion._audit_usuario_id = usuario.id
+    await generar_reporte_cierre(db, activacion)
     await db.commit()
     await db.refresh(activacion)
     return activacion
