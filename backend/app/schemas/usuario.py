@@ -1,6 +1,6 @@
 import uuid
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.usuario import InstanciaPrincipal, Rol
 
@@ -8,7 +8,9 @@ from app.models.usuario import InstanciaPrincipal, Rol
 class UsuarioCreate(BaseModel):
     nombre: str
     username: str
-    password: str
+    # security-pass 2026-08-19, SEC-04: sin mínimo, se aceptaba cualquier string
+    # (incluida cadena vacía) como contraseña.
+    password: str = Field(min_length=8)
     rol: Rol
     instancia_principal: InstanciaPrincipal
     contacto: str | None = None

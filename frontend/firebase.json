@@ -4,13 +4,35 @@
       "target": "coe",
       "public": "apps/coe/dist",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [{ "source": "**", "destination": "/index.html" }]
+      "rewrites": [{ "source": "**", "destination": "/index.html" }],
+      "headers": [
+        {
+          "source": "**",
+          "headers": [
+            {
+              "key": "Content-Security-Policy",
+              "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://pce-backend-276453531381.southamerica-west1.run.app; frame-ancestors 'none'"
+            }
+          ]
+        }
+      ]
     },
     {
       "target": "pmm",
       "public": "apps/pmm/dist",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [{ "source": "**", "destination": "/index.html" }]
+      "rewrites": [{ "source": "**", "destination": "/index.html" }],
+      "headers": [
+        {
+          "source": "**",
+          "headers": [
+            {
+              "key": "Content-Security-Policy",
+              "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://pce-backend-276453531381.southamerica-west1.run.app; frame-ancestors 'none'"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

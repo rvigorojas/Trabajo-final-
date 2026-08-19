@@ -1,12 +1,27 @@
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+JWT_SECRET_POR_DEFECTO = "cambiar-en-produccion"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    # security-pass 2026-08-19, SEC-05: distingue local/test de cualquier despliegue
+    # real — Cloud Run debe fijar ENTORNO=production (ver ci.yml).
+    entorno: str = "local"
     database_url: str = "postgresql+asyncpg://pce:pce@localhost:5432/pce"
-    jwt_secret: str = "cambiar-en-produccion"
+    jwt_secret: str = JWT_SECRET_POR_DEFECTO
     jwt_algorithm: str = "HS256"
+
+    @model_validator(mode="after")
+    def _fail_safe_secreto_por_defecto(self) -> "Settings":
+        if self.entorno not in ("local", "test") and self.jwt_secret == JWT_SECRET_POR_DEFECTO:
+            raise ValueError(
+                "jwt_secret sigue en su valor por defecto fuera de local/test — "
+                "revisar la inyección del secreto (Secret Manager) antes de arrancar."
+            )
+        return self
     # ADR-7: expiración corta — el token "blando" para offline prolongado es lógica
     # de cliente (PMM), no implementada en esta fase por no existir aún ese cliente.
     jwt_expire_minutes: int = 30

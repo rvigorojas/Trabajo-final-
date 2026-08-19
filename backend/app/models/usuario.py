@@ -19,6 +19,10 @@ class Rol(str, enum.Enum):
     supervisores de COE fuera de esa cadena. Ver app/services/seed.py.
     """
 
+    # Agregado 2026-08-19 (security-pass, SEC-01): rol técnico de administración de
+    # cuentas, sin equivalente en el Plan de Emergencia — no participa en convocatoria
+    # ni en ninguna matriz operativa, solo en la creación/gestión de usuarios del PCE.
+    ADMIN = "admin"
     GERENTE_SEGURIDAD = "gerente_seguridad"
     GERENTE_OPERACIONES_AEROPORTUARIAS = "gerente_operaciones_aeroportuarias"
     DUTY_MANAGER = "duty_manager"

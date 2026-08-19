@@ -25,6 +25,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
+      ENTORNO: test
       DATABASE_URL: postgresql+asyncpg://pce:pce@localhost:5432/pce
       JWT_SECRET: ci-test-secret
     steps:
@@ -115,6 +116,7 @@ jobs:
             --image="$IMAGE" \
             --region=southamerica-west1 \
             --project=pce-jorge-chavez \
+            --set-env-vars=ENTORNO=production \
             --quiet
 
   deploy-frontend:

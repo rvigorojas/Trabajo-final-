@@ -68,6 +68,11 @@ ROLES_DESACTIVACION = [
     Rol.DUTY_MANAGER,
 ]
 
+# security-pass 2026-08-19, SEC-06: GET /usuarios exponía nombre/rol/contacto de toda
+# la nómina a cualquier rol autenticado. Se restringe al mismo grupo que ya puede
+# desactivar activaciones, más el rol admin nuevo (SEC-01).
+ROLES_GESTION_USUARIOS = [Rol.ADMIN, *ROLES_DESACTIVACION]
+
 
 def require_role(roles_permitidos: list[Rol]) -> Callable:
     async def _checker(usuario: UsuarioActual = Depends(get_current_usuario)) -> UsuarioActual:
