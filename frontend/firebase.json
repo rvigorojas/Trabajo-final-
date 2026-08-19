@@ -1,0 +1,16 @@
+{
+  "hosting": [
+    {
+      "target": "coe",
+      "public": "apps/coe/dist",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [{ "source": "**", "destination": "/index.html" }]
+    },
+    {
+      "target": "pmm",
+      "public": "apps/pmm/dist",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [{ "source": "**", "destination": "/index.html" }]
+    }
+  ]
+}

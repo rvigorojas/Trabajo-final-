@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "default": "pce-jorge-chavez"
+  },
+  "targets": {
+    "pce-jorge-chavez": {
+      "hosting": {
+        "coe": ["pce-jorge-chavez"],
+        "pmm": ["pce-jorge-chavez-pmm"]
+      }
+    }
+  }
+}
