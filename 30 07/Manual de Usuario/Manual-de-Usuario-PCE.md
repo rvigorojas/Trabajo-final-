@@ -125,12 +125,11 @@ sistema pudo completar automáticamente a partir de lo registrado durante la act
 > y varias columnas son detalle operativo que el PCE todavía no captura (quedan en blanco,
 > a completar a mano).
 
-**Descargar el Excel consolidado**: existe un exportador que arma un `.xlsx` con todos los
-reportes de cierre ya generados de una categoría (Aeronáutica, Epidemiológica,
-Estructural/Incidentes o MATPEL) — pensado para reemplazar el Excel que Rescate arma a
-mano. Todavía no tiene un botón en esta pantalla; hoy lo baja alguien del equipo técnico
-con acceso al backend (`GET /reportes-cierre/exportar?tipo_emergencia=...`, requiere sesión
-autenticada). Si esto se usa seguido, vale la pena pedir que se agregue un botón acá.
+**Descargar el Excel consolidado**: arriba de la lista hay un selector de categoría
+(Aeronáutica, Epidemiológica, Estructural/Incidentes o MATPEL) y un botón **Descargar** —
+arma y baja un `.xlsx` con todos los reportes de cierre ya generados de esa categoría,
+pensado para reemplazar el Excel que Rescate arma a mano. No hace falta elegir un reporte
+puntual primero: junta todos los que ya existan de la categoría elegida.
 
 ### 3.8. Relevo de mando (botón flotante)
 
