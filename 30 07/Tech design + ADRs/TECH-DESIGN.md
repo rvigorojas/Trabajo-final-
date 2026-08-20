@@ -77,11 +77,13 @@ Entidades principales, derivadas de `Design.md` (ADR 2):
   suficiente historial real de incidentes MATPEL para justificar una escala diferenciada.
 - **Usuario** — persona con cuenta en el sistema: nombre, rol (uno de los roles del Plan de
   Emergencia listados en PRD sección 5: Gerente de Seguridad, Gerente Operaciones Aeroportuarias,
-  Duty Manager, Jefe de Rescate, Sup. Gral. de Rescate, Supervisor de Rescate, M4, M7, SGO, etc.),
-  instancia principal (COE / PMM), contacto, credenciales de acceso, estado (activo/inactivo).
-  Entidad requerida por ADR-7 (login/JWT) y por la convocatoria automática de Flujo A (el sistema
-  necesita saber quién ocupa cada rol para convocarlo) — no estaba modelada en una versión anterior
-  de este documento.
+  Duty Manager, Jefe de Rescate, Sup. Gral. de Rescate, Supervisor de Rescate, M4, M7, SGO, etc.,
+  **más `ADMIN`, agregado 2026-08-19 — rol técnico de administración de cuentas sin equivalente en
+  el Plan de Emergencia, no participa en ninguna matriz de convocatoria, ver ADR-7 "Nota de
+  cambio"**), instancia principal (COE / PMM), contacto, credenciales de acceso, estado
+  (activo/inactivo). Entidad requerida por ADR-7 (login/JWT) y por la convocatoria automática de
+  Flujo A (el sistema necesita saber quién ocupa cada rol para convocarlo) — no estaba modelada en
+  una versión anterior de este documento.
 - **ConvocatoriaMiembro** — miembro convocado (COE o PMM), referencia al `Usuario` convocado, rol,
   activación asociada, hora de confirmación.
 - **EvaluacionInicial** — magnitud, riesgos secundarios, activación asociada, registrada por el CI.

@@ -62,3 +62,31 @@ en cada request, sin cambios.
   antes de la revocación puede seguir encolando acciones válidas hasta reconectar o hasta agotar
   esa ventana. Se acepta explícitamente frente a la alternativa (bloquear al CI en pleno
   incidente), pero es un trade-off de seguridad real, no gratuito.
+
+## Nota de cambio (2026-08-19) — rol ADMIN y rate limiting en login
+
+Un security-pass sobre el sistema ya desplegado encontró dos huecos reales en el control de
+acceso que este ADR no cubría, con `POST /usuarios` expuesto sin protección en el backend
+público de Cloud Run (`SECURITY-REPORT.md`, hallazgos SEC-01 y SEC-02):
+
+- **Quién puede crear usuarios (SEC-01)**: `POST /usuarios` no exigía autenticación y aceptaba
+  cualquier rol elegido libremente por el caller — un atacante externo podía crearse una cuenta
+  con rol `gerente_seguridad`/`duty_manager` y desactivar activaciones reales. El PRD/TDD nunca
+  definieron un concepto de "quién da de alta cuentas legítimas" porque el Plan de Emergencia no
+  tiene ese rol — todos sus roles son operativos (Rescate, Seguridad, Gerencia), no
+  administrativos del sistema. Decisión adoptada: se agrega **`ADMIN`**, un rol técnico nuevo sin
+  equivalente en el Plan de Emergencia (`app/models/usuario.py`, no participa en ninguna matriz de
+  convocatoria) — solo un usuario `ADMIN` puede crear otros usuarios (`POST /usuarios`, cualquier
+  rol) o listar la nómina completa (`GET /usuarios`, antes abierto a cualquier rol autenticado,
+  ver SEC-06). Bootstrap: el primer usuario del sistema (tabla vacía) se crea sin auth, pero solo
+  puede ser `ADMIN` — nunca un rol operativo directo. Se descartó explícitamente integrar un IdP
+  externo para esto (la alternativa que este ADR ya había descartado arriba) — sigue sin haber
+  justificación de equipo/escala para esa dependencia adicional.
+- **Rate limiting en `/auth/login` (SEC-02)**: el login no tenía ningún control de fuerza bruta.
+  Se agrega un contador en memoria por proceso, clave IP+username, 5 intentos fallidos → bloqueo
+  de 60s (`app/routers/auth.py`). Limitación conocida y aceptada: si Cloud Run escala a más de una
+  instancia, cada una cuenta por su cuenta — no es una garantía dura entre instancias, es una
+  primera barrera real contra un atacante golpeando una sola conexión.
+
+Detalle completo de los 6 hallazgos (incluidos 2 que no tocan este ADR — CSP y validación de
+password) en `SECURITY-REPORT.md`, raíz del repo.
