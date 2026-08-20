@@ -1,9 +1,16 @@
 # Backend PCE — verificación local
 
-Este backend se escribió sin poder correrlo en esta máquina (sin Docker/WSL2
-instalados al momento de escribirlo). Los imports, la colección de tests con
-pytest y `alembic history` ya se validaron sin necesitar una base real; lo
-que sigue es la verificación de punta a punta contra Postgres.
+**Nota (2026-08-19): este README describe el flujo original de verificación con
+Docker, de cuando el backend se escribió sin poder correrlo en esta máquina. Ya
+está verificado de punta a punta, tanto localmente (Postgres 16 nativo, sin
+Docker Desktop/WSL2 — no están instalados en esta máquina, ver `CLAUDE.md`) como
+en producción real (Cloud Run + Cloud SQL). `CLAUDE.md` (raíz del repo) es la
+fuente autoritativa del estado actual del backend y del proyecto — este archivo
+queda como guía de los pasos originales, no como estado vigente.**
+
+Los imports, la colección de tests con pytest y `alembic history` ya se
+validaron sin necesitar una base real; lo que sigue es la verificación de
+punta a punta contra Postgres.
 
 ## 1. Levantar Postgres
 
@@ -33,9 +40,11 @@ pytest
 ```
 
 Cubre: creación de cada recurso, auto-convocatoria en Alerta II/III con la
-matriz de ejemplo (`app/services/seed.py`, `[Propuesto]`), idempotencia de
-reintento por id (ADR-6), rechazo de `PUT`/`DELETE` (405) y del trigger de DB
-(excepción) sobre las tablas insert-only, y last-write-wins de `Unidad`.
+matriz real de convocatoria (`app/services/seed.py`, GSEG-L-001, confirmada por
+el Jefe de Rescate el 2026-08-15/17 — ya no es una matriz de ejemplo),
+idempotencia de reintento por id (ADR-6), rechazo de `PUT`/`DELETE` (405) y del
+trigger de DB (excepción) sobre las tablas insert-only, y last-write-wins de
+`Unidad`.
 
 ## 4. Levantar todo y probar manualmente
 
@@ -60,10 +69,13 @@ Arreglado con `backend/docker-entrypoint.sh` (`alembic upgrade head` antes de
 migraciones corren solas al levantar el contenedor. El paso 2 sigue haciendo
 falta solo para correr el backend nativo (`uvicorn` directo, sin Docker).
 
-## Pendiente conocido (no bloqueante, documentado en el plan aprobado)
+## Pendiente conocido — resuelto 2026-08-15/17
 
-- El esquema de columnas de `ReporteCierre` es genérico, no el de los 4
-  Excel reales — completar contra el encabezado real de cada categoría.
+- ~~El esquema de columnas de `ReporteCierre` es genérico, no el de los 4
+  Excel reales~~ — resuelto: `app/services/reporte_cierre.py` usa las columnas
+  reales de los 4 "Cuadro Estadístico de Emergencias..." del Drive LAP
+  (extraídas con openpyxl), con exportador real a `.xlsx`
+  (`GET /reportes-cierre/exportar`) agregado el 2026-08-17. Ver `CLAUDE.md`.
 
 ## Historial de migraciones posteriores a la verificación inicial
 
