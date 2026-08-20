@@ -11,9 +11,8 @@ Alcance revisado:
   y `frontend/` completo (`packages/api-client`, `apps/coe`, `apps/pmm`, `firebase.json`,
   `.github/workflows/ci.yml`).
 - **Tests** — `backend/tests/` completo (8 archivos), `conftest.py`.
-- **Omitido por falta de herramienta, no por falta de material**: no se corrió `npm audit` /
-  `pip-audit` / escaneo de dependencias conocidas-vulnerables (sin acceso a red de paquetes desde
-  este pase). Recomendado como pase aparte.
+- **Auditoría de dependencias — corrida el 2026-08-19** (pase aparte, ver sección dedicada más
+  abajo): `npm audit` (frontend) y `pip-audit` (backend), ya no pendiente.
 
 ## Resumen ejecutivo
 
@@ -294,9 +293,14 @@ Todos los `CODE FIX` se implementaron y se verificaron con 29/29 tests pasando
 - **SEC-02** — resuelto: contador en memoria por IP+username, 5 intentos → bloqueo de
   60s (`app/routers/auth.py`). Limitación aceptada: no coordina entre instancias si
   Cloud Run escala a más de una.
-- **SEC-03** — resuelto: CSP agregada a `frontend/firebase.json` en los 2 sitios. Sin
-  verificar en un build real desplegado — revisar que `style-src 'unsafe-inline'` sea
-  suficiente para lo que Tailwind/Vite generan, o si hace falta ajustar.
+- **SEC-03** — resuelto y **verificado contra los 2 sitios reales de Firebase Hosting
+  el 2026-08-19**: el header `Content-Security-Policy` llega tal cual se configuró
+  (`Invoke-WebRequest` contra `pce-jorge-chavez.web.app` y
+  `pce-jorge-chavez-pmm.web.app`). Se abrieron ambos sitios en un navegador real, se
+  hizo login completo contra el backend real en el Cliente COE (Resumen → Cadena de
+  mando) y no apareció ningún error de consola ni violación de CSP —
+  `style-src 'unsafe-inline'` alcanza para lo que genera Tailwind/Vite, y
+  `connect-src` no bloquea las llamadas reales al backend de Cloud Run.
 - **SEC-04** — resuelto: `password: str = Field(min_length=8)`.
 - **SEC-05** — resuelto: `Settings` falla al arrancar si `jwt_secret` sigue en su valor
   por defecto y `entorno` no es `local`/`test`. `ci.yml` actualizado: `ENTORNO=test` en
@@ -304,17 +308,35 @@ Todos los `CODE FIX` se implementaron y se verificaron con 29/29 tests pasando
 - **SEC-06** — resuelto: `GET /usuarios` restringido a `ROLES_GESTION_USUARIOS`
   (`Rol.ADMIN` + `ROLES_DESACTIVACION`).
 
-### Pendiente operativo antes de producción (no es código)
+### Pendiente operativo antes de producción (no es código) — resuelto 2026-08-19
 
-El backend real en Cloud Run **ya tiene usuarios creados** (de sesiones de verificación
-anteriores) — el mecanismo de bootstrap ("tabla vacía = primer admin sin auth") **no se
-va a disparar ahí**, porque la tabla ya no está vacía. Sin una intervención manual, este
-fix dejaría a todo el mundo sin poder crear cuentas nuevas en producción real (correcto
-desde seguridad, pero inutilizable). Antes de o inmediatamente después de este deploy,
-alguien con acceso a Cloud SQL tiene que insertar directamente un primer usuario con
-`rol=admin` (mismo procedimiento de acceso ya usado para
-`backend/scripts/limpiar_datos_prueba_cloud_sql.sql` — Cloud SQL Auth Proxy + password
-real de Secret Manager). Esto no se ejecutó en esta sesión.
+El backend real en Cloud Run **ya tenía usuarios creados** (de sesiones de verificación
+anteriores) — el mecanismo de bootstrap ("tabla vacía = primer admin sin auth") no se
+disparaba ahí, porque la tabla ya no estaba vacía. Además, el enum `rol` de Cloud SQL
+real no tenía el valor `ADMIN` (las migraciones 0001-0003 ya estaban aplicadas antes de
+que ese rol existiera en el modelo) — se agregó la migración `0004_add_admin_rol.py`
+(`ALTER TYPE rol ADD VALUE IF NOT EXISTS 'ADMIN'`), commiteada y desplegada. Con el enum
+corregido, se insertó directamente en Cloud SQL real (vía Cloud SQL Auth Proxy + Python/
+asyncpg, con el hash bcrypt generado localmente, nunca en texto plano) el primer usuario
+`admin` (`username=admin`, `rol=ADMIN`). Verificado end-to-end contra el backend y el
+frontend reales: login exitoso (`POST /auth/login`), `GET /usuarios` autorizado, y la app
+completa (Cliente COE) funcionando en el navegador con esa sesión.
+
+## Auditoría de dependencias (2026-08-19)
+
+Pase aparte, pendiente en la versión original de este reporte, corrido después de resolver
+el admin real:
+
+- **`npm audit`** (`frontend/`, `394` deps de prod + `206` dev + `120` optional): **0
+  vulnerabilidades** en las 4 severidades (critical/high/moderate/low/info).
+- **`pip-audit`** (`backend/`, venv completo): **6 CVEs encontrados, las 6 en `pip`
+  25.2 mismo** (el instalador de paquetes, ej. `PYSEC-2026-196`) — **ninguna** en una
+  dependencia real de la app (FastAPI, SQLAlchemy, asyncpg, passlib, bcrypt, PyJWT, etc.).
+  Impacto real: bajo. `pip` queda en la imagen Docker final porque `backend/Dockerfile` es
+  single-stage (`FROM python:3.12-slim`, sin build separado) — pero no se invoca nunca en
+  runtime al servir requests, no es parte de la superficie de ataque expuesta a un
+  atacante externo. Mejora de defensa en profundidad, no urgente: pasar a un build
+  multi-stage para no dejar herramientas de build en la imagen final.
 
 ## Gobernanza / Decisión requerida
 
