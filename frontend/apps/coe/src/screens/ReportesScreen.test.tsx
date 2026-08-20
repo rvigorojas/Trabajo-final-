@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { createMemoryRouter, RouterProvider } from "react-router"
@@ -65,5 +65,28 @@ describe("ReportesScreen", () => {
     const reporte = await screen.findByTestId("reporte-a1")
     expect(reporte).toHaveTextContent("nivel_alerta")
     expect(reporte).toHaveTextContent("II")
+  })
+
+  it("el botón Descargar pide el .xlsx de la categoría elegida", async () => {
+    const user = userEvent.setup()
+    server.use(http.get(`${BASE_URL}/activaciones`, () => HttpResponse.json([])))
+
+    let urlPedida: string | null = null
+    server.use(
+      http.get(`${BASE_URL}/reportes-cierre/exportar`, ({ request }) => {
+        urlPedida = request.url
+        return HttpResponse.arrayBuffer(new ArrayBuffer(8), {
+          headers: { "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+        })
+      }),
+    )
+
+    renderAt("/reportes")
+
+    await user.selectOptions(screen.getByLabelText("Descargar Excel consolidado"), "matpel")
+    await user.click(screen.getByText("Descargar"))
+
+    await waitFor(() => expect(urlPedida).not.toBeNull())
+    expect(urlPedida).toContain("tipo_emergencia=matpel")
   })
 })

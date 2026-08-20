@@ -1,6 +1,41 @@
 import { useEffect, useState } from "react"
-import type { ActivacionConConvocatoria, ReporteCierre } from "@pce/api-client"
+import type { ActivacionConConvocatoria, ReporteCierre, TipoEmergencia } from "@pce/api-client"
+import { getToken } from "@pce/api-client"
 import { apiClient } from "../apiClient"
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000"
+
+const CATEGORIAS_EXPORTAR: { valor: TipoEmergencia; etiqueta: string }[] = [
+  { valor: "aeronautica", etiqueta: "Aeronáutica" },
+  { valor: "epidemiologica", etiqueta: "Epidemiológica" },
+  { valor: "estructural_incidentes", etiqueta: "Estructural / Incidentes" },
+  { valor: "matpel", etiqueta: "MATPEL" },
+]
+
+// GET /reportes-cierre/exportar devuelve un archivo binario (.xlsx), no JSON — no puede
+// pasar por apiClient.apiFetch (siempre hace response.json()). Fetch aparte, mismo patrón
+// de Authorization que createApiClient pero leyendo el body como blob.
+async function descargarReporteExcel(tipoEmergencia: TipoEmergencia): Promise<void> {
+  const token = getToken()
+  const headers = new Headers()
+  if (token) headers.set("Authorization", `Bearer ${token}`)
+
+  const response = await fetch(
+    `${BASE_URL}/reportes-cierre/exportar?tipo_emergencia=${tipoEmergencia}`,
+    { headers },
+  )
+  if (!response.ok) return
+
+  const blob = await response.blob()
+  const url = URL.createObjectURL(blob)
+  const enlace = document.createElement("a")
+  enlace.href = url
+  enlace.download = `cuadro-estadistico-${tipoEmergencia}.xlsx`
+  document.body.appendChild(enlace)
+  enlace.click()
+  enlace.remove()
+  URL.revokeObjectURL(url)
+}
 
 function valorLegible(valor: unknown): string {
   // La mayoría de las columnas reales de ReporteCierre.datos quedan en null:
@@ -15,6 +50,7 @@ function valorLegible(valor: unknown): string {
 export function ReportesScreen() {
   const [activaciones, setActivaciones] = useState<ActivacionConConvocatoria[]>([])
   const [reportes, setReportes] = useState<Record<string, ReporteCierre>>({})
+  const [categoriaExportar, setCategoriaExportar] = useState<TipoEmergencia>("aeronautica")
 
   useEffect(() => {
     let cancelado = false
@@ -39,6 +75,33 @@ export function ReportesScreen() {
   return (
     <div className="p-4">
       <h1 className="text-headline-md font-headline">Reportes</h1>
+
+      <div className="mt-4 flex items-end gap-2">
+        <div className="flex flex-col gap-1">
+          <label className="text-body-md" htmlFor="categoria-exportar">
+            Descargar Excel consolidado
+          </label>
+          <select
+            id="categoria-exportar"
+            value={categoriaExportar}
+            onChange={(event) => setCategoriaExportar(event.target.value as TipoEmergencia)}
+            className="min-h-touch-target-min rounded-DEFAULT border border-outline bg-surface-container-low px-3 text-on-surface"
+          >
+            {CATEGORIAS_EXPORTAR.map(({ valor, etiqueta }) => (
+              <option key={valor} value={valor}>
+                {etiqueta}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button
+          type="button"
+          className="min-h-touch-target-min rounded-DEFAULT bg-secondary px-4 text-on-secondary"
+          onClick={() => descargarReporteExcel(categoriaExportar)}
+        >
+          Descargar
+        </button>
+      </div>
 
       <ul className="mt-4 flex flex-col gap-4">
         {cerradas.map((activacion) => {
