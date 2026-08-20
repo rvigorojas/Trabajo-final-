@@ -36,8 +36,11 @@ bloqueado si la respuesta cambia su alcance.
 Orden sugerido por dependencias: 1 → 2 → (3, 4, 5, 6 en paralelo) → 7 → 8 → 9 → 10 → 11. El
 ítem 1 es el único prerrequisito duro de todo lo demás.
 
-**Backlog completo — los 11 ítems cerrados el 2026-08-14.** Lo que sigue fuera de este backlog es
-un único pendiente externo de la Fase 5 de `FRONTEND-TASKS.md`: la georreferenciación real del
-mapa cuadriculado (levantamiento físico/GIS, no resoluble desde el repo) — no bloquea el software,
-sí el cierre operativo del proyecto. La matriz real de convocatoria contra GSEG-L-001 y el esquema
-real de columnas de `ReporteCierre` se resolvieron el 2026-08-15 (ver `CLAUDE.md`).
+**Backlog completo — los 11 ítems cerrados el 2026-08-14.** La Fase 5 de `FRONTEND-TASKS.md`
+(pendientes externos) también quedó cerrada: la georreferenciación real del mapa cuadriculado se
+resolvió por decisión de Renzo el 2026-08-16 ("Camino 2" — captura por GPS de la tablet GETAC al
+registrar un marcador, con input manual de respaldo; ver PRD `.4` y `CLAUDE.md`), y la confirmación
+sobre guantes en la tablet (no se usan, el tap target WCAG ya aplicado alcanza) el mismo día. La
+matriz real de convocatoria contra GSEG-L-001 y el esquema real de columnas de `ReporteCierre` se
+resolvieron el 2026-08-15 (ver `CLAUDE.md`). **No queda ningún pendiente abierto en este backlog
+ni en `FRONTEND-TASKS.md`.**
