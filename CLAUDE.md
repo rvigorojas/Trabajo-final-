@@ -303,3 +303,15 @@ Un cuarto supuesto, detectado el 2026-08-17 al analizar qué falta para poder co
 actuales, también quedó confirmado: la matriz de convocatoria aeronáutica (GSEG-L-001) aplicada
 por igual a Epidemiológica/Estructural/MATPEL — **confirmado por el Jefe de Rescate el
 2026-08-17** (ver `backend/app/services/seed.py`).
+
+## Validaciones con stakeholders (confirmado con Renzo, 2026-08-19)
+
+Los 3 puntos no técnicos que quedaban antes de pasar de "producción técnica" (desplegada y
+funcionando) a "producción operativa real" ya están resueltos o con fecha:
+
+- **Sign-off del Jefe de Rescate y Gerencia de Seguridad**: la reunión ya se tuvo; queda un
+  seguimiento agendado (sin fecha registrada acá — preguntarle a Renzo si hace falta el detalle).
+- **Fecha de corte de los 4 Excel actuales** (que Rescate deje de llevarlos a mano y pase al
+  exportador `.xlsx` del PCE, `GET /reportes-cierre/exportar`): **1 de septiembre de 2026**.
+- **Alcance de Comunicaciones**: confirmado fuera de alcance de esta v1 del PCE, sin plan de
+  retomarlo por ahora (sigue como placeholder en el frontend, sin entidad de datos definida).
