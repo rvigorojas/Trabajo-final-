@@ -33,6 +33,11 @@ class Activacion(ClientIdMixin, DobleTimestampMixin, TimestampMixin, Base):
     """Sin UPDATE/DELETE (ADR-2): solo POST de inserción + trigger de DB."""
 
     __tablename__ = "activacion"
+    # Índice único parcial "como máximo una fila ACTIVA a la vez" agregado en
+    # la migración 0005 (raw SQL, ver su docstring) — no representado acá
+    # porque SQLAlchemy no deriva bien un índice sobre una expresión
+    # constante vía Base.metadata; mismo criterio que los triggers de las
+    # migraciones 0002/0003.
 
     tipo_emergencia: Mapped[TipoEmergencia] = mapped_column(
         Enum(TipoEmergencia, name="tipo_emergencia"), nullable=False

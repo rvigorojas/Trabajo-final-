@@ -315,3 +315,45 @@ funcionando) a "producción operativa real" ya están resueltos o con fecha:
   exportador `.xlsx` del PCE, `GET /reportes-cierre/exportar`): **1 de septiembre de 2026**.
 - **Alcance de Comunicaciones**: confirmado fuera de alcance de esta v1 del PCE, sin plan de
   retomarlo por ahora (sigue como placeholder en el frontend, sin entidad de datos definida).
+
+## Walkthrough real 2026-08-19 — 3 hallazgos, 1 corregido
+
+Se levantó el sistema completo en local (Postgres nativo, backend + ambos clientes en `vite dev`)
+y se ejercitó el flujo completo con usuarios de prueba reales — no solo lectura contra producción.
+Encontró 3 problemas reales, ninguno corregido ese día:
+
+1. **Dos activaciones simultáneas dejaban una huérfana e imposible de cerrar** — **corregido
+   2026-08-21**. El backend no impedía crear una 2da `Nueva activación` mientras ya había una
+   `ACTIVA`; la más vieja desaparecía de toda la UI (Resumen, Cadena de mando, Reportes, que solo
+   resuelven "la activación en curso" como la más reciente) pero quedaba `ACTIVA` en la base para
+   siempre, sin ningún botón que la alcance. Fix: migración `0005_una_activacion_activa` agrega
+   `uq_activacion_unica_activa`, un índice único parcial (`WHERE estado = 'ACTIVA'`) — igual que
+   los triggers de las migraciones 0002/0003, no representado en `app/models/activacion.py` vía
+   `Base.metadata` porque SQLAlchemy no deriva bien un índice sobre una expresión constante.
+   `POST /activaciones` (`app/routers/activaciones.py`) captura el `IntegrityError` y devuelve 409
+   con mensaje claro; `NuevaActivacionScreen.tsx` (antes sin try/catch alrededor de
+   `enviarOEncolar` — un error de la API quedaba sin manejar) ahora lo muestra en pantalla. 1 test
+   nuevo en `test_activaciones.py` (30/30 backend) y 1 en `NuevaActivacionScreen.test.tsx`
+   (31/31 `pmm`); `test_relevos_mando.py::test_listar_relevos_mando_filtra_por_activacion` creaba
+   2 activaciones seguidas para probar el filtro — ajustado para desactivar la primera antes de
+   crear la segunda, igual que haría la app real. Build+lint de `pmm` limpios.
+   **Gotcha real encontrado al aplicar la migración**: la base local de esta máquina ya tenía 2
+   filas `ACTIVA` a la vez (`QA walkthrough - ACTIVACION VIEJA`/`NUEVA`, restos del walkthrough
+   del 19/08 nunca cerrados) — la migración se detiene con una excepción clara si detecta esto en
+   vez de cerrar filas en silencio (cerrar sin pasar por el endpoint real nunca genera el
+   `ReporteCierre`). Se cerraron a mano llamando al mismo `generar_reporte_cierre` que usa el
+   router, no con un `UPDATE` directo. Mismo gotcha ya documentado en 0001: el id de revisión
+   original (35 caracteres) no entraba en `alembic_version.version_num` (`VARCHAR(32)`), acortado
+   antes de aplicar la migración en cualquier entorno. **Pendiente real**: esta migración todavía
+   no se aplicó contra Cloud SQL real ni se desplegó — el fix vive solo en este repo/local hasta
+   el próximo push a `main` (dispara el CD del backend) y `alembic upgrade head` en producción.
+2. **Los botones flotantes (Relevo/Desactivar, `FloatingActions.tsx` en `coe`) usan
+   `position: absolute` con `bottom-20`** — en una ventana de ~450px de alto tapan contenido real
+   (confirmado tapando el nombre del responsable entrante en Cadena de mando). No se probó nunca a
+   esa altura de viewport durante el endurecimiento del ítem #11 (que probó contraste/tap-targets,
+   no overlap de contenido). **Sin corregir todavía.**
+3. **No hay forma de crear las Unidades (R1, R2, R8-R13, CR9) desde la app.** El backend sí
+   soporta upsert (`PUT /unidades/{id}` crea la fila si no existe), pero `UnidadesScreen.tsx` solo
+   lista/edita filas que ya existen, nunca ofrece un campo para escribir un identificador nuevo;
+   `seed.py` tampoco siembra esa lista fija. Por eso Unidades está vacía tanto en producción real
+   como en cualquier entorno nuevo. **Sin corregir todavía.**

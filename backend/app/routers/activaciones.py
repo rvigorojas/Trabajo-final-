@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -61,7 +62,16 @@ async def crear_activacion(
     )
     activacion._audit_usuario_id = usuario.id
     db.add(activacion)
-    await db.flush()  # asigna hora_recepcion antes de la auto-convocatoria
+    try:
+        await db.flush()  # asigna hora_recepcion antes de la auto-convocatoria
+    except IntegrityError:
+        # uq_activacion_unica_activa (migración 0005): ya hay una activación
+        # ACTIVA — el modelo de negocio no permite dos a la vez.
+        await db.rollback()
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "Ya hay una activación en curso; hay que desactivarla antes de crear una nueva",
+        ) from None
 
     miembros = await auto_convocar(db, activacion)
     for miembro in miembros:

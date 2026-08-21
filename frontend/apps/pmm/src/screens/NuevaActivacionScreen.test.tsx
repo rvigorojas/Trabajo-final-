@@ -90,4 +90,26 @@ describe("NuevaActivacionScreen", () => {
     expect(cuerpoRecibido).not.toHaveProperty("tipo_alerta")
     expect(await screen.findByText("Convocados: 0")).toBeInTheDocument()
   })
+
+  it("si ya hay una activación en curso (409), muestra el error del backend en vez de crashear", async () => {
+    const user = userEvent.setup()
+
+    server.use(
+      http.post(`${BASE_URL}/activaciones`, () =>
+        HttpResponse.json(
+          { detail: "Ya hay una activación en curso; hay que desactivarla antes de crear una nueva" },
+          { status: 409 },
+        ),
+      ),
+    )
+
+    render(<NuevaActivacionScreen />)
+
+    await user.type(screen.getByLabelText("Tipo de incidente"), "incendio en pista")
+    await user.click(screen.getByRole("button", { name: "Activar" }))
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Ya hay una activación en curso; hay que desactivarla antes de crear una nueva",
+    )
+  })
 })

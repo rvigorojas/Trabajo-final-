@@ -40,7 +40,11 @@ async def test_relevo_mando_requiere_activacion_id(client: AsyncClient):
 
 async def test_listar_relevos_mando_filtra_por_activacion(client: AsyncClient):
     token = await crear_usuario_y_login(client, Rol.JEFE_RESCATE, "jefe.relevo2")
+    duty_token = await crear_usuario_y_login(client, Rol.DUTY_MANAGER, "duty.relevo2")
     activacion_a = await _crear_activacion(client, token, "Incidente A")
+    # No puede haber 2 activaciones ACTIVA a la vez (migración 0005) — se
+    # desactiva la primera antes de crear la segunda, igual que haría la app real.
+    await client.post(f"/activaciones/{activacion_a}/desactivar", headers=auth_headers(duty_token))
     activacion_b = await _crear_activacion(client, token, "Incidente B")
 
     for activacion_id, saliente in ((activacion_a, "A-saliente"), (activacion_b, "B-saliente")):

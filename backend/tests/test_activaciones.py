@@ -98,3 +98,54 @@ async def test_reintentar_post_con_mismo_id_es_idempotente(client: AsyncClient):
     listado = await client.get("/activaciones", headers=auth_headers(token))
     ids = [a["id"] for a in listado.json()]
     assert ids.count(activacion_id) == 1
+
+
+async def test_no_permite_dos_activaciones_activas_a_la_vez(client: AsyncClient):
+    """Walkthrough real 2026-08-19: sin esta restricción, la 2da activación
+    "gana" la UI y la 1ra queda ACTIVA en la base para siempre, sin ningún
+    botón que la alcance (migración 0005, uq_activacion_unica_activa)."""
+    token = await crear_usuario_y_login(client, Rol.DUTY_MANAGER, "duty.manager3")
+
+    primera = await client.post(
+        "/activaciones",
+        json={
+            "tipo_emergencia": "aeronautica",
+            "nivel_alerta": "I",
+            "tipo_alerta": 1,
+            "tipo_incidente": "Primera activación",
+            "hora_evento": ahora_iso(),
+        },
+        headers=auth_headers(token),
+    )
+    assert primera.status_code == 201, primera.text
+
+    segunda = await client.post(
+        "/activaciones",
+        json={
+            "tipo_emergencia": "aeronautica",
+            "nivel_alerta": "I",
+            "tipo_alerta": 2,
+            "tipo_incidente": "Segunda activación",
+            "hora_evento": ahora_iso(),
+        },
+        headers=auth_headers(token),
+    )
+    assert segunda.status_code == 409, segunda.text
+
+    # Tras desactivar la primera, sí se puede crear una nueva.
+    await client.post(
+        f"/activaciones/{primera.json()['id']}/desactivar",
+        headers=auth_headers(token),
+    )
+    tercera = await client.post(
+        "/activaciones",
+        json={
+            "tipo_emergencia": "aeronautica",
+            "nivel_alerta": "I",
+            "tipo_alerta": 3,
+            "tipo_incidente": "Tercera activación",
+            "hora_evento": ahora_iso(),
+        },
+        headers=auth_headers(token),
+    )
+    assert tercera.status_code == 201, tercera.text

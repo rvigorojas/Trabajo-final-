@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react"
-import type { ActivacionConConvocatoria, NivelAlerta, TipoEmergencia } from "@pce/api-client"
+import { ApiError, type ActivacionConConvocatoria, type NivelAlerta, type TipoEmergencia } from "@pce/api-client"
 import { payloadActivacion } from "../lib/payloadActivacion"
 import { enviarOEncolar } from "../offline/colaOffline"
 
@@ -25,10 +25,12 @@ export function NuevaActivacionScreen() {
   const [enviando, setEnviando] = useState(false)
   const [creada, setCreada] = useState<ActivacionConConvocatoria | null>(null)
   const [encolada, setEncolada] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function enviar(event: FormEvent) {
     event.preventDefault()
     setEnviando(true)
+    setError(null)
     const body = payloadActivacion({
       id: crypto.randomUUID(),
       categoria,
@@ -38,12 +40,19 @@ export function NuevaActivacionScreen() {
       tipoAlerta: categoria === "aeronautica" ? tipoAlerta : undefined,
       clasificacionOrigen: categoria !== "aeronautica" ? clasificacionOrigen : undefined,
     })
-    const respuesta = await enviarOEncolar<ActivacionConConvocatoria>("/activaciones", body)
-    setEnviando(false)
-    if (respuesta) {
-      setCreada(respuesta)
-    } else {
-      setEncolada(true)
+    try {
+      const respuesta = await enviarOEncolar<ActivacionConConvocatoria>("/activaciones", body)
+      if (respuesta) {
+        setCreada(respuesta)
+      } else {
+        setEncolada(true)
+      }
+    } catch (err) {
+      // 409 real (migración 0005): ya hay una activación en curso. Cualquier otro ApiError
+      // (422, etc.) usa el mismo mensaje del backend — no hay más de un caso que distinguir hoy.
+      setError(err instanceof ApiError ? err.message : "No se pudo crear la activación")
+    } finally {
+      setEnviando(false)
     }
   }
 
@@ -165,6 +174,12 @@ export function NuevaActivacionScreen() {
       <p className="text-body-md mt-2">
         La convocatoria de COE y PMM se genera automáticamente al enviar.
       </p>
+
+      {error ? (
+        <p role="alert" className="text-body-md mt-2 text-error">
+          {error}
+        </p>
+      ) : null}
 
       <button
         type="submit"
