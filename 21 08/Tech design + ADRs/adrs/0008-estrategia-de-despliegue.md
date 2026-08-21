@@ -57,5 +57,12 @@ cercana a Lima):
   .iam.gserviceaccount.com`, con `roles/run.admin`, `roles/artifactregistry.writer` y
   `roles/iam.serviceAccountUser` sobre el proyecto, y `roles/iam.workloadIdentityUser` acotado por
   `attribute-condition` al repo `rvigorojas/Trabajo-final-` (ningún otro repo puede asumir esta
-  identidad). El frontend no tiene despliegue automatizado todavía — sigue como trabajo local/build
-  manual.
+  identidad).
+- **CD del frontend** (job `deploy-frontend`, agregado 2026-08-18): build de ambas apps + `firebase
+  deploy --only hosting` a los 2 sitios de Firebase Hosting (`pce-jorge-chavez` para el Cliente COE,
+  `pce-jorge-chavez-pmm` para el Cliente PMM), con la misma autenticación por Workload Identity
+  Federation y `needs: frontend` como gate. *(Corregido 2026-08-21: este ADR decía que el frontend
+  no tenía despliegue automatizado — quedó desactualizado desde el 18/08.)*
+
+El protocolo completo de despliegue (build, artifact, secrets, gates, verify, recovery) vive en
+`DEPLOY-PLAN.md` en la raíz del repo. Este ADR registra la decisión; ese documento, la operación.

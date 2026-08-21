@@ -242,15 +242,26 @@ en **Secret Manager** (`pce-jwt-secret`, `pce-database-url`), imágenes en **Art
 push a `main` que pasa los tests del job `backend` hace build+push de la imagen y
 `gcloud run deploy`, autenticado vía Workload Identity Federation (sin clave JSON) — service
 account `github-deployer@pce-jorge-chavez.iam.gserviceaccount.com`, acotada por
-`attribute-condition` al repo `rvigorojas/Trabajo-final-`. El frontend no tiene deploy
-automatizado todavía.
+`attribute-condition` al repo `rvigorojas/Trabajo-final-`. El frontend **sí** tiene CD desde el
+2026-08-18 (job `deploy-frontend`: build + `firebase deploy --only hosting` a los 2 sitios, misma
+autenticación por WIF) — la frase anterior "el frontend no tiene deploy automatizado" quedó
+desactualizada y se corrigió el 2026-08-21, acá y en ADR-8.
 
 Migraciones (`alembic upgrade head`) corren solas al arrancar el contenedor
 (`backend/docker-entrypoint.sh`) — no hace falta un paso de migración aparte en el deploy.
 
 **Gotcha real de esta sesión**: `gcloud` invocado desde Bash (Git Bash) falla con un error confuso
 de "no se encontró Python" — la CLI de gcloud en esta máquina solo funciona invocada desde
-PowerShell.
+PowerShell. **Ampliado 2026-08-21**: desde PowerShell tampoco funciona ya — la Execution Policy de
+Windows bloquea `gcloud.ps1` (`UnauthorizedAccess`, `PSSecurityException`). El único camino que
+funciona hoy es `gcloud.cmd` desde `cmd`, con `cd` previo al directorio del SDK:
+`cd /d "C:\Users\ASUS\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin" && gcloud.cmd ...`
+(la ruta con espacios rompe la invocación directa desde `cmd` sin el `cd`).
+
+**Protocolo de despliegue documentado**: `DEPLOY-PLAN.md` en la raíz (2026-08-21) — build,
+artifact, secrets, infraestructura, release strategy, gates, verify & observe, recovery, más el
+registro de verificación real contra producción y 6 pendientes abiertos. Es el documento operativo;
+ADR-8 sigue siendo el registro de la decisión.
 
 **Borrado real de filas en producción — no se pudo completar (2026-08-16)**: al querer limpiar
 datos de prueba (activaciones/marcadores creados verificando la app en vivo), el trigger
@@ -344,9 +355,11 @@ Encontró 3 problemas reales, ninguno corregido ese día:
    `ReporteCierre`). Se cerraron a mano llamando al mismo `generar_reporte_cierre` que usa el
    router, no con un `UPDATE` directo. Mismo gotcha ya documentado en 0001: el id de revisión
    original (35 caracteres) no entraba en `alembic_version.version_num` (`VARCHAR(32)`), acortado
-   antes de aplicar la migración en cualquier entorno. **Pendiente real**: esta migración todavía
-   no se aplicó contra Cloud SQL real ni se desplegó — el fix vive solo en este repo/local hasta
-   el próximo push a `main` (dispara el CD del backend) y `alembic upgrade head` en producción.
+   antes de aplicar la migración en cualquier entorno. **Desplegado y verificado 2026-08-21**: el
+   log de la revisión `pce-backend-00022-zdn` (21:49 UTC) muestra `Running upgrade
+   0004_add_admin_rol -> 0005_una_activacion_activa` sin error — el índice único parcial está
+   activo en Cloud SQL real, y la guarda de la migración confirmó que producción no tenía dos filas
+   `ACTIVA` simultáneas. Evidencia completa en `DEPLOY-PLAN.md` sección 13.
 2. **Los botones flotantes (Relevo/Desactivar, `FloatingActions.tsx` en `coe`) usan
    `position: absolute` con `bottom-20`** — en una ventana de ~450px de alto tapan contenido real
    (confirmado tapando el nombre del responsable entrante en Cadena de mando). No se probó nunca a
@@ -366,7 +379,9 @@ Encontró 3 problemas reales, ninguno corregido ese día:
    cerrado y conocido del PRD/TECH-DESIGN, no algo que un operador deba tipear, así que no se
    agregó un formulario de alta libre (evita unidades fantasma por typo). 2 tests nuevos
    (`test_seed_unidades.py`, 32/32 backend). Verificado end-to-end contra Postgres real: los 9
-   identificadores aparecen sembrados tras levantar `uvicorn`. **Pendiente real**: igual que el
-   hallazgo #1, el fix recién llega a Cloud SQL con el próximo push a `main` (dispara el CD del
-   backend, que corre `alembic upgrade head` — acá no hay migración nueva, solo el seed en el
-   lifespan de la app).
+   identificadores aparecen sembrados tras levantar `uvicorn`. **Código desplegado 2026-08-21**: la
+   revisión activa de Cloud Run (`pce-backend-00025-9qm`) corre la imagen taggeada con el SHA del
+   último commit de `main`, así que el seed está en producción y corre en el `lifespan`.
+   **Pendiente menor**: `seed_unidades()` no escribe nada en los logs, así que la confirmación de
+   que las 9 filas existen en Cloud SQL requiere un `GET /unidades` con token real — no verificado
+   todavía (ver `DEPLOY-PLAN.md` sección 11, pendiente #1).
