@@ -25,10 +25,13 @@ export interface ApiClientConfig {
   /*
    * Se dispara en cualquier 401, antes de lanzar el ApiError — pensado para forzar
    * logout+relogin desde un solo lugar en vez de que cada pantalla maneje el caso. El Cliente
-   * PMM no lo usa (ya maneja el 401 explícitamente al hacer flush de la cola offline, ver
-   * offline/colaOffline.ts); el Cliente COE sí, porque su polling (usePolling, ADR-5) no tenía
-   * ningún manejo de error y un token vencido dejaba la pantalla con datos viejos reintentando
-   * en un loop de 401 silencioso (gotcha documentado en CLAUDE.md).
+   * COE lo usa porque su polling (usePolling, ADR-5) no tenía ningún manejo de error y un token
+   * vencido dejaba la pantalla con datos viejos reintentando en un loop de 401 silencioso
+   * (gotcha documentado en CLAUDE.md). El Cliente PMM también lo usa (agregado 2026-08-21,
+   * walkthrough en producción): colaOffline.ts ya forzaba relogin en el 401 de
+   * flushColaOffline(), pero eso no cubre el envío interactivo online (enviarOEncolar rethrows
+   * el ApiError tal cual) — sin esto, un JWT vencido mostraba un error crudo del backend sin
+   * ninguna forma de volver al Login desde la UI.
    */
   onUnauthorized?: () => void
 }
