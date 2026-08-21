@@ -23,7 +23,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.activacion import NivelAlerta, TipoEmergencia
 from app.models.rol_convocatoria import RolConvocatoria
+from app.models.unidad import EstadoUnidad, Unidad
 from app.models.usuario import Rol
+
+# Flota fija SSEI del PRD/TECH-DESIGN (PRD_PCE_JorgeChavez.4, sección 4;
+# TECH-DESIGN.md, Modelo de datos → Unidad): R1/R2/R8-R13/CR9. Es un conjunto
+# cerrado de vehículos reales, no algo que un operador deba dar de alta desde
+# la app — de ahí que se siembre acá y no vía un formulario de "crear unidad"
+# (hallazgo #3 del walkthrough 19/08: sin esto, Unidades queda vacía en
+# cualquier entorno nuevo, incluida la producción real).
+_UNIDADES_FIJAS = ["R1", "R2", "R8", "R9", "R10", "R11", "R12", "R13", "CR9"]
 
 # GSEG-L-001 § 4.2.2.b — "Miembros del COE en la Activación Parcial" +
 # "Miembros del PMM en la Activación Parcial" (unión, sin duplicar
@@ -69,4 +78,16 @@ async def seed_rol_convocatoria(db: AsyncSession) -> None:
         for rol in _ROLES_ALERTA_III
     ]
     db.add_all(filas)
+    await db.commit()
+
+
+async def seed_unidades(db: AsyncSession) -> None:
+    ya_sembrado = (await db.execute(select(Unidad.identificador).limit(1))).first()
+    if ya_sembrado is not None:
+        return
+
+    db.add_all(
+        Unidad(identificador=identificador, estado=EstadoUnidad.OK)
+        for identificador in _UNIDADES_FIJAS
+    )
     await db.commit()

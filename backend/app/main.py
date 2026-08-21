@@ -17,7 +17,7 @@ from app.routers import (
     unidades,
     usuarios,
 )
-from app.services.seed import seed_rol_convocatoria
+from app.services.seed import seed_rol_convocatoria, seed_unidades
 
 
 @asynccontextmanager
@@ -25,6 +25,7 @@ async def lifespan(app: FastAPI):
     registrar_listeners_auditoria()
     async with SessionLocal() as db:
         await seed_rol_convocatoria(db)
+        await seed_unidades(db)
     yield
 
 
