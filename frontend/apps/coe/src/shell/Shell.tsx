@@ -13,7 +13,7 @@ export function Shell() {
       <header className="flex justify-end border-b border-outline-variant p-2">
         <MenuAparte />
       </header>
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto pb-52">
         <Outlet />
       </main>
       <FloatingActions />
