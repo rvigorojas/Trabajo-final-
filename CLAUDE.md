@@ -316,7 +316,7 @@ funcionando) a "producción operativa real" ya están resueltos o con fecha:
 - **Alcance de Comunicaciones**: confirmado fuera de alcance de esta v1 del PCE, sin plan de
   retomarlo por ahora (sigue como placeholder en el frontend, sin entidad de datos definida).
 
-## Walkthrough real 2026-08-19 — 3 hallazgos, 1 corregido
+## Walkthrough real 2026-08-19 — 3 hallazgos, los 3 corregidos
 
 Se levantó el sistema completo en local (Postgres nativo, backend + ambos clientes en `vite dev`)
 y se ejercitó el flujo completo con usuarios de prueba reales — no solo lectura contra producción.
@@ -351,9 +351,22 @@ Encontró 3 problemas reales, ninguno corregido ese día:
    `position: absolute` con `bottom-20`** — en una ventana de ~450px de alto tapan contenido real
    (confirmado tapando el nombre del responsable entrante en Cadena de mando). No se probó nunca a
    esa altura de viewport durante el endurecimiento del ítem #11 (que probó contraste/tap-targets,
-   no overlap de contenido). **Sin corregir todavía.**
+   no overlap de contenido). **Corregido 2026-08-21**: `Shell.tsx` reserva `pb-52` (208px) en el
+   `<main>` scrolleable — cubre `bottom-20` + el cluster de hasta 2 botones (48px c/u + gap) con
+   margen, así el scroll real siempre puede subir el último contenido por encima del overlay. Sin
+   cambios en `FloatingActions.tsx`/`TabBar.tsx`. Verificado con build (la clase se genera) y
+   36/36 tests + lint limpios en `coe`.
 3. **No hay forma de crear las Unidades (R1, R2, R8-R13, CR9) desde la app.** El backend sí
    soporta upsert (`PUT /unidades/{id}` crea la fila si no existe), pero `UnidadesScreen.tsx` solo
    lista/edita filas que ya existen, nunca ofrece un campo para escribir un identificador nuevo;
    `seed.py` tampoco siembra esa lista fija. Por eso Unidades está vacía tanto en producción real
-   como en cualquier entorno nuevo. **Sin corregir todavía.**
+   como en cualquier entorno nuevo. **Corregido 2026-08-21**: `seed_unidades()`
+   (`app/services/seed.py`) siembra los 9 identificadores fijos en estado `OK` al arrancar (mismo
+   patrón idempotente que `seed_rol_convocatoria`, llamado desde `app/main.py`) — es un conjunto
+   cerrado y conocido del PRD/TECH-DESIGN, no algo que un operador deba tipear, así que no se
+   agregó un formulario de alta libre (evita unidades fantasma por typo). 2 tests nuevos
+   (`test_seed_unidades.py`, 32/32 backend). Verificado end-to-end contra Postgres real: los 9
+   identificadores aparecen sembrados tras levantar `uvicorn`. **Pendiente real**: igual que el
+   hallazgo #1, el fix recién llega a Cloud SQL con el próximo push a `main` (dispara el CD del
+   backend, que corre `alembic upgrade head` — acá no hay migración nueva, solo el seed en el
+   lifespan de la app).
