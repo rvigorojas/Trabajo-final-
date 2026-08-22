@@ -332,7 +332,7 @@ Ordenados por riesgo. Ninguno se da por resuelto.
 
 | # | Pendiente | Riesgo | Acción |
 |---|---|---|---|
-| 0 | **SEC-07 (CRITICAL, abierto): la contraseña del `admin` de producción está en claro en un comentario de `backend/scripts/crear_admin_cloud_sql.sql`, en un repo público.** Explotación confirmada en vivo el 2026-08-21. | **Máximo** — acceso administrativo total al sistema desde internet | **Rotar la contraseña en Cloud SQL** (borrar la línea no alcanza: queda en el historial de git), limpiar el comentario, y decidir si el repo sigue público. Ver `SECURITY-REPORT.md` |
+| 0 | **SEC-07 (CRITICAL): contraseña del `admin` de producción publicada. Riesgo aceptado hasta el 2026-09-01**, decisión de Renzo — el sistema no está en uso operativo y los datos son de verificación. | **Máximo a partir del 2026-09-01** (fecha de corte de los Excel). Hasta entonces: acotado a datos de prueba | **Rotar antes del corte.** Procedimiento listo en `backend/scripts/rotar_password_admin_cloud_sql.sql`. Reevaluar de inmediato si se registra una emergencia real antes de esa fecha. Ver `SECURITY-REPORT.md` |
 | 1 | ~~Verificar que la migración `0005` llegó a Cloud SQL y que `seed_unidades()` sembró la flota~~ → **RESUELTO Y VERIFICADO 2026-08-21** (sección 13): migración aplicada, 9 unidades en producción, login y lectura funcionando. | — | Cerrado |
 | 2 | **Sin alertas de monitoreo.** Una caída se detecta cuando alguien la nota. | Alto contra el objetivo de 99.9% del PRD | Crear 2 alertas de Cloud Monitoring (5xx y conexiones de Cloud SQL) |
 | 3 | ~~ADR-8 decía que el frontend no tenía deploy automatizado~~ → **CORREGIDO 2026-08-21** en ADR-8 y en `CLAUDE.md`. | — | Cerrado |

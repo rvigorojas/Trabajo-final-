@@ -403,9 +403,41 @@ el admin real:
   inmediata) + **CODE FIX** (limpiar el comentario) + **PRODUCT / POLICY DECISION** (visibilidad
   del repositorio, política de contraseñas de cuentas administrativas).
 
-**Estado: PARCIALMENTE REMEDIADO — la parte que corta el acceso sigue ABIERTA.**
+**Estado: RIESGO ACEPTADO CON FECHA DE VENCIMIENTO — decisión de Renzo, 2026-08-21.**
 
 Encontrado el 2026-08-21 al verificar el despliegue para `DEPLOY-PLAN.md`.
+
+### Decisión de triage: RISK ACCEPTED (temporal)
+
+Se decidió **no rotar la credencial por ahora** y **mantener el repositorio público**. No es un
+descuido: es una aceptación de riesgo explícita, con estas razones y estos límites.
+
+**Por qué es aceptable hoy:**
+
+- El sistema **no está en uso operativo real todavía**. La fecha de corte de los 4 Excel — el día
+  en que Rescate deja de llevarlos a mano y pasa a depender del PCE — es el **1 de septiembre de
+  2026** (confirmada con Renzo el 2026-08-19).
+- Los datos en producción son de verificación, no emergencias reales: 5 activaciones, todas
+  cerradas, creadas en walkthroughs (`Verificación Item 8`, `Demo: humo en cabina`,
+  `Walkthrough real: derrame de combustible`, `QA walkthrough`).
+- El repositorio público tiene valor propio como entregable académico y portfolio del proceso.
+- El peor caso hoy es la corrupción de datos de prueba en un sistema que nadie usa para operar,
+  no la interferencia con una emergencia real.
+
+**Por qué deja de ser aceptable, y cuándo:**
+
+- **Antes del 1 de septiembre de 2026** este hallazgo debe cerrarse. A partir de esa fecha, una
+  cuenta administrativa con contraseña publicada permitiría a cualquiera desactivar una emergencia
+  aeroportuaria en curso o crear activaciones falsas que desvíen recursos de rescate. Ese ya no es
+  un riesgo académico.
+- El procedimiento de rotación está escrito y listo (`backend/scripts/
+  rotar_password_admin_cloud_sql.sql` + `generar_hash_password.py`): ejecutarlo son unos minutos.
+- Recordatorio técnico: rotar es la **única** remediación. El valor quedó en el historial de git y
+  seguirá siendo recuperable aunque el repositorio pase a privado más adelante.
+
+**Condición de reevaluación inmediata** (no esperar al 1 de septiembre): si el sistema empieza a
+registrar cualquier emergencia real antes de esa fecha, o si se detecta un login de `admin` que no
+sea propio.
 
 | Acción | Estado |
 |---|---|
@@ -413,8 +445,8 @@ Encontrado el 2026-08-21 al verificar el despliegue para `DEPLOY-PLAN.md`.
 | `scripts/generar_hash_password.py` — genera el hash sin que la contraseña toque un archivo | ✅ Agregado |
 | `scripts/rotar_password_admin_cloud_sql.sql` — procedimiento de rotación listo | ✅ Agregado |
 | Regla dura en `CLAUDE.md` para que no se repita | ✅ Agregada |
-| **Rotar la contraseña en Cloud SQL (OPERATIONAL FIX)** | ❌ **Pendiente — es lo único que corta el acceso** |
-| Decidir la visibilidad del repositorio | ❌ Pendiente (decisión de producto) |
+| **Rotar la contraseña en Cloud SQL (OPERATIONAL FIX)** | ⏸ **Riesgo aceptado hasta el 2026-09-01** — es lo único que corta el acceso |
+| Visibilidad del repositorio | ✅ Decidido: **se mantiene público** (entregable académico) |
 
 Mientras la rotación no se ejecute, la contraseña original sigue siendo válida contra el backend
 de producción y sigue siendo recuperable del historial de git de un repositorio público. El code
