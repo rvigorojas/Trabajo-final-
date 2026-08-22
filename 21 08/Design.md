@@ -4,6 +4,12 @@ Basado en `wireflame 0.1.pptx` (borrador para revisión, 17 de julio 2026 — "e
 final"). De las 3 variantes exploradas por flujo, se documenta acá solo la variante elegida por
 Renzo para cada uno, como el diseño de referencia para la implementación.
 
+**Procedencia de los wireframes:** las variantes se exploraron en **Claude Design**, tomando como
+input el PRD ya pulido, y se volcaron a `wireflame 0.1.pptx` para revisión. Este documento es el
+paso siguiente: fija cuál de las 3 variantes de cada flujo se implementa y resuelve los huecos de
+diseño que la exploración dejó abiertos. La estructura de pantallas de la tablet PMM está además
+en `Tablet_app_structures.pptx`, de donde salió el hueco del Flujo A resuelto el 2026-07-30.
+
 ## Flujo A — Activación de emergencia (Alerta I/II/III)
 
 **Variante elegida: 1c — Panel dividido COE / PMM**

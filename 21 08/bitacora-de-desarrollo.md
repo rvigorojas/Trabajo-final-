@@ -21,6 +21,18 @@ mismo día **8 preguntas abiertas**: offline en pista, control de acceso, trazab
 clics, escalas diferenciadas por categoría no aeronáutica, mapa sin coordenadas georreferenciables,
 no migración de histórico Excel, y los 3 criterios de éxito restantes.
 
+> **Nota de trazabilidad, agregada el 2026-08-21.** No quedó registrado en su momento con qué skill
+> se generó el primer PRD. Lo que sí se puede verificar hoy: su estructura de 10 secciones
+> numeradas (Información general, Resumen ejecutivo, Problema y contexto operacional, Objetivos y
+> criterios de éxito, Usuarios y stakeholders, Alcance, Requisitos no funcionales, Riesgos y
+> supuestos, Glosario, Datos existentes y transición, con autoevaluación de confianza por sección)
+> **no coincide** con la plantilla de 8 secciones de `generar-prd` ni de
+> `generar-prd-conversacional` — las dos skills de PRD instaladas a nivel de usuario. Contraste
+> útil: el PRD del otro proyecto de clase (Alwa) sí sigue el formato exacto de `generar-prd`, con
+> sus marcas `<!-- REVISAR: ... -->`. La conclusión honesta es que este PRD se construyó
+> conversando sobre fuentes primarias reales y se refinó en seis versiones sucesivas
+> (v0.2 → v0.3 → v0.7 → v0.8 → `.3` → `.4`), no en una sola pasada de skill.
+
 Un hallazgo central de esta ronda: la escala numérica "hasta Alerta 10" observada en los Excel de
 registro **no es la misma** que la escala oficial I/II/III del Plan de Emergencia — son dos sistemas
 paralelos. Se resolvió analizando `Cuadro Estadístico de Emergencia Aeronáutica 2026.xlsx`: la
@@ -28,6 +40,12 @@ escala 1-10 es el campo `Tipo de Alerta`, exclusivo de Aeronáutica, y debe coex
 I/II/III oficial, no reemplazarla.
 
 ## Paso 2 — Wireframes y Design.md (2026-07-17 / 2026-07-21)
+
+**Herramienta usada: Claude Design** (confirmado por Renzo el 2026-08-21; no estaba registrado
+antes). Las variantes de wireframe se exploraron ahí tomando el PRD ya pulido como input — el
+puente PRD → Design.md que plantea la sesión 6 del curso — y el resultado se volcó a
+`wireflame 0.1.pptx` para revisión. `Design.md` es el paso siguiente: fija cuál de las 3 variantes
+de cada flujo se implementa y cierra los huecos que la exploración dejó abiertos.
 
 Se generó `wireflame 0.1.pptx` (17/07/2026, "estructura, no estilo final") con 4 flujos —
 Activación, Vista COE, Mapa geoespacial, Relevo de mando — cada uno con 3 variantes exploradas.
