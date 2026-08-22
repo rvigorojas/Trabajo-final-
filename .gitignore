@@ -1,6 +1,20 @@
+# Contexto de agentes.
+#
+# skills-lock.json SÍ se versiona (2026-08-21): es el registro de qué skills usó este
+# proyecto y con qué hash — la sesión 8 lo introduce justamente para evitar drift de
+# versión, y sirve de evidencia de proceso. Tenerlo ignorado anulaba su propósito.
+#
+# .claude/settings.json y .claude/hooks/ también se versionan: son los guardrails del
+# proyecto (hook PreToolUse contra comandos destructivos de BD, hook SessionStart de
+# commits sin pushear). No contienen secretos.
+#
+# Las skills en sí (.agents/skills/, .claude/skills/) quedan ignoradas: son copias de
+# skills de terceros, reinstalables con `npx skills add` a partir de skills-lock.json.
+# La única skill propia (gotchas-testing-review) vive versionada en harnesses/.
 .agents/
-.claude/
-skills-lock.json
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
 
 # Backend (Python/FastAPI)
 backend/.venv/

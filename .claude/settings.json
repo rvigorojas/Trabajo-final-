@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "grep -Eiq 'disable[[:space:]]+trigger|delete[[:space:]]+from|gcloud[[:space:]]+sql[[:space:]]+(instances|databases)[[:space:]]+delete|gcloud[[:space:]]+sql[[:space:]]+instances[[:space:]]+patch' && printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"Comando potencialmente destructivo contra la base de datos (DISABLE TRIGGER / DELETE FROM / gcloud sql delete o patch) -- requiere confirmacion explicita, ver CLAUDE.md seccion Despliegue y el procedimiento de backend/scripts/limpiar_datos_prueba_cloud_sql.sql.\"}}' || true",
+            "statusMessage": "Chequeando si el comando toca la base de datos de forma destructiva..."
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-unpushed.sh\"",
+            "statusMessage": "Revisando commits locales sin pushear..."
+          }
+        ]
+      }
+    ]
+  }
+}

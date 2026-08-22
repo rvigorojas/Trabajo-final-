@@ -162,6 +162,25 @@ de Vite) + los 2 dominios de Firebase (`.web.app` y `.firebaseapp.com`). No es w
 
 ---
 
+## 5.1 ENTORNOS
+
+| Entorno | Dónde corre | Base de datos | Qué cambia |
+|---|---|---|---|
+| **local** | `uvicorn` + `vite dev`, o `docker compose` | PostgreSQL 16 local | `ENTORNO=local` — el fail-safe del JWT no aplica; `.env` local |
+| **test** (CI) | GitHub Actions, service container | PostgreSQL 16 efímero | `ENTORNO=test`, `JWT_SECRET=ci-test-secret`; la base se crea y destruye por corrida |
+| **producción** | Cloud Run + Firebase Hosting | Cloud SQL `pce-db` | `ENTORNO=production`, secretos desde Secret Manager |
+
+**Lo único que cambia entre entornos es configuración y secretos — nunca código.** La misma imagen
+que pasa el CI es la que se despliega, identificada por el SHA del commit.
+
+**No hay staging.** Es una decisión consciente, no un olvido: con 1-3 personas operando y un
+backend único, mantener un cuarto entorno cuesta más de lo que aporta hoy. El riesgo que eso deja
+abierto está declarado en la sección 11 (pendiente #4) — un cambio que pasa los tests va directo a
+producción, sin un paso intermedio contra datos realistas. Revisar esta decisión antes del corte
+operativo del 2026-09-01.
+
+---
+
 ## 6. RELEASE STRATEGY
 
 **Trigger:** push a `main`. No hay despliegue manual como camino normal.
@@ -185,8 +204,46 @@ el corte del 2026-09-01.
 | `deploy-backend` | solo push a `main` | `backend` | Build + push de imagen + `gcloud run deploy` |
 | `deploy-frontend` | solo push a `main` | `frontend` | `npm run build` + `firebase deploy --only hosting` |
 
-> **Corrección documental pendiente:** ADR-8 dice *"El frontend no tiene despliegue automatizado
-> todavía"*. Es falso desde que se agregó el job `deploy-frontend`. Actualizar ADR-8.
+> **Corregido el 2026-08-21:** ADR-8 decía *"El frontend no tiene despliegue automatizado todavía"*,
+> falso desde que se agregó el job `deploy-frontend` el 18/08. Actualizado en ADR-8 y en `CLAUDE.md`.
+
+---
+
+## 6.1 DATA & MIGRATIONS
+
+El punto más delicado del sistema, porque las tablas son **insert-only** (ADR-2).
+
+**Cómo corren las migraciones:** `alembic upgrade head` en el `ENTRYPOINT` del contenedor, no como
+paso del pipeline. Cada instancia nueva de Cloud Run la ejecuta al arrancar; es idempotente.
+
+**Consecuencia de esa elección:** una migración que falla **no rompe el deploy a mitad de camino —
+impide que la revisión arranque**. Cloud Run no le pasa tráfico y la revisión anterior sigue
+sirviendo. Es un modo de falla seguro, pero significa que una migración rota se manifiesta como
+"la revisión nueva nunca queda sana", no como un error de pipeline.
+
+**Compatibilidad hacia atrás — regla del proyecto:** toda migración debe ser compatible con la
+versión de código inmediatamente anterior. Razón concreta: durante el rolling replace conviven
+instancias viejas y nuevas contra el **mismo** esquema. Una migración que renombre o elimine una
+columna en uso rompe las instancias viejas mientras el tráfico se reparte.
+
+**Orden seguro para un cambio de esquema destructivo** (expand → migrate → contract), en tres
+despliegues separados:
+
+1. Agregar la columna/tabla nueva, sin quitar nada. Desplegar.
+2. Migrar los datos y pasar el código a usar lo nuevo. Desplegar.
+3. Recién entonces eliminar lo viejo. Desplegar.
+
+**Migraciones que se detienen en vez de adivinar:** `0005_una_activacion_activa` aborta con una
+excepción clara si encuentra más de una fila `ACTIVA` al aplicarse, en vez de cerrar filas en
+silencio — cerrar sin pasar por el endpoint real nunca generaría el `ReporteCierre`. Es el patrón a
+seguir: ante datos inconsistentes, parar y que decida una persona.
+
+**Un rollback de código NO es un rollback de datos.** Ver sección 9 — el entrypoint solo hace
+`upgrade`, nunca `downgrade`. Revertir la imagen deja código viejo contra un esquema nuevo, que es
+exactamente por qué la regla de compatibilidad hacia atrás no es opcional.
+
+**Trampa conocida:** el id de revisión de Alembic no puede pasar de 32 caracteres —
+`alembic_version.version_num` es `VARCHAR(32)`. Ya rompió una vez (migración 0001).
 
 ---
 
@@ -203,6 +260,17 @@ Un cambio llega a producción solo si pasa, en orden:
 4. **Gate de arranque (runtime)** — `alembic upgrade head` en el entrypoint + el fail-safe de
    `JWT_SECRET`. Si la migración falla o falta el secreto, la revisión no queda sana y Cloud Run
    no le pasa tráfico.
+
+### ¿Son gates reales o solo checks informativos?
+
+Criterio de `deploy-pass`: *un check de CI que corre en paralelo al auto-deploy nativo de la
+plataforma no es un gate* — un check en rojo y un deploy en vivo pueden coexistir.
+
+**Acá sí son gates reales.** Ni Cloud Run ni Firebase Hosting despliegan por su cuenta al detectar
+un push: el deploy lo dispara el propio workflow (`gcloud run deploy` / `firebase deploy`) desde un
+job que declara `needs:` sobre el job de tests. Si los tests fallan, el job de deploy no se ejecuta
+— no hay un camino paralelo por el que el código llegue a producción. No hay auto-deploy-on-push
+que desactivar porque nunca se activó.
 
 ### Guardrail de agente (no de CI)
 
@@ -427,3 +495,56 @@ cd /d "C:\Users\ASUS\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin" && gcl
 
 Esto amplía el gotcha ya documentado en `CLAUDE.md` (*"gcloud desde Git Bash falla con un error
 confuso de Python; solo funciona desde PowerShell"*) — hoy tampoco funcionó desde PowerShell.
+
+---
+
+## 14. AUTORIZACIONES PENDIENTES
+
+Acciones que tocan infraestructura, secretos o producción y **todavía requieren aprobación
+explícita, una por una**. Ninguna se marca aprobada de antemano.
+
+| Acción | Toca | Estado |
+|---|---|---|
+| Rotar la contraseña del `admin` en Cloud SQL (SEC-07) | Producción + credencial | ⏸ Riesgo aceptado hasta el 2026-09-01 — decisión de Renzo |
+| Crear las 2 alertas de Cloud Monitoring | Infraestructura | ⏳ No solicitada todavía |
+| Verificar/rotar el `pce-jwt-secret` si mide menos de 32 bytes (N-01) | Secreto de producción | ⏳ No verificada todavía |
+| Crear una revisión de Cloud Run sin tráfico como pre-producción | Infraestructura | ⏳ No decidida (pendiente #4) |
+| Limpiar las 5 activaciones de prueba de Cloud SQL | Datos de producción | ⏳ No solicitada — requiere el procedimiento manual con `DISABLE TRIGGER` |
+
+Acciones ya ejecutadas en esta sesión, con la autorización correspondiente:
+
+| Acción | Autorización | Resultado |
+|---|---|---|
+| `git push origin main` (6 commits) | Explícita, 2026-08-21 | OK — CI run #29 |
+| Lectura de estado de producción (login + `GET /unidades`, `/activaciones`) | Explícita | OK — 9 unidades, 5 activaciones |
+| Consulta de revisiones, imágenes y logs de Cloud Run | Implícita en la verificación del plan — solo lectura | OK |
+
+Ninguna acción destructiva ni de escritura se ejecutó contra producción.
+
+---
+
+## 15. TRAZABILIDAD DEL PROCESO
+
+Este plan se escribió el 2026-08-21 leyendo la infraestructura real del proyecto, **antes** de
+instalar la skill `deploy-pass` — el sistema de deployment ya estaba desplegado y operativo desde
+el 15/08, así que no había nada que diseñar desde cero.
+
+La skill se instaló después (`npx skills add adminoryslabs/Armory --skill deploy-pass`, registrada
+en `skills-lock.json`) y el plan se **reconcilió contra su plantilla oficial**. De esa comparación
+salieron tres bloques que faltaban y hoy están incorporados:
+
+| Bloque de la plantilla de `deploy-pass` | Estado |
+|---|---|
+| Build · Artifact · Config & Secrets · Infraestructura | Ya estaban (secciones 2-5) |
+| **Entornos** | Agregado — sección 5.1 |
+| Estrategia de release | Ya estaba (sección 6) |
+| **Data & Migrations** | Agregado — sección 6.1 |
+| Deploy gates | Ya estaba; refinado con el criterio gate-real-vs-check-informativo |
+| Verify & Observe · Recovery | Ya estaban (secciones 8-9) |
+| **Autorizaciones pendientes** | Agregado — sección 14 |
+| Registro de ejecución y verificación | Ya estaba (sección 13) |
+
+Se respetaron las reglas no negociables de la skill: nada de infraestructura, secretos, permisos de
+producción ni estrategia de release se asumió por defecto; ninguna acción irreversible se ejecutó
+sin autorización explícita para esa acción concreta; y el plan existió y se mostró antes de tocar
+nada.

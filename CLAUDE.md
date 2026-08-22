@@ -222,10 +222,20 @@ El mapa completo de documentos está en `README.md`.
 |---|---|---|
 | `generar-tech-design` | `adminoryslabs/Skills` | Generar el TECH-DESIGN.md + ADRs (formato MADR) entrevistando decisión por decisión a partir del PRD y el Design.md. Ya usada para producir el TDD y los 8 ADRs actuales. |
 | `revision-adversarial` | `adminoryslabs/Skills` | Revisar con contexto fresco un TECH-DESIGN.md/ADRs existente, buscando activamente huecos y riesgos en vez de validarlos. Ya usada: encontró y resolvió 4 críticos, 6 advertencias, 2 sugerencias en el TDD actual. Requiere conversación nueva, sin el historial de cómo se llegó a esas decisiones. |
-| `spec-driven-development` | `addyosmani/agent-skills` | Escribir spec antes de codear cuando un requisito es ambiguo o no existe todavía (4 fases propias: Specify→Plan→Tasks→Implement, con gate de validación humana entre cada una — no confundir con "gentle-ai" de las infografías del curso, que es solo el nombre narrativo de ejemplo; esta es la misma skill exacta, verificado contra `skills-lock.json` de la carpeta de ejemplo de Clase 8). `BACKLOG.md` (raíz) tiene los 11 ítems del frontend; cada ciclo SDD vive en su propia subcarpeta `tasks/item-NN-<nombre>/` (spec.md+plan.md+todo.md) — ítems #1 y #2 cerrados. Próximo: ítem #3 (Cliente COE — Resumen y Cadena de mando) — nuevo ciclo Specify→Plan→Tasks→Implement en `tasks/item-03-<nombre>/`. |
+| `spec-driven-development` | `addyosmani/agent-skills` | Escribir spec antes de codear cuando un requisito es ambiguo o no existe todavía (4 fases propias: Specify→Plan→Tasks→Implement, con gate de validación humana entre cada una — no confundir con "gentle-ai" de las infografías del curso, que es solo el nombre narrativo de ejemplo; esta es la misma skill exacta, verificado contra `skills-lock.json` de la carpeta de ejemplo de Clase 8). `BACKLOG.md` (raíz) tiene los 11 ítems del frontend; cada ciclo SDD vive en su propia subcarpeta `tasks/item-NN-<nombre>/` (spec.md+plan.md+todo.md). **Los 11 ítems están cerrados desde el 2026-08-14** — usar esta skill para cualquier requisito nuevo que se sume al backlog. |
+| `create-harness` | `adminoryslabs/Armory` | Armar un harness propio de un solo propósito (skill + regla + hook, según lo que la tarea necesite), más liviano que un ciclo SDD completo. Ya usada el 2026-08-19 para producir `harnesses/gotchas-testing/`. Correrla de nuevo, una vez por concern, si hace falta otro harness (deploy, bug-fixing). |
+| `security-pass` | `adminoryslabs/Skills` | Pase de seguridad sobre el proyecto con 5 lentes (PRD, Diseño+ADRs, Specs+Tasks, Código, Review), con evidencia y escenario de ataque por finding. Ya usada el 2026-08-19: produjo `SECURITY-REPORT.md` con 6 findings; el 7º (SEC-07) se encontró después, verificando el deploy. |
+| `deploy-pass` | `adminoryslabs/Armory` | Diseñar y operar el sistema de deployment del proyecto (DISCOVER→DESIGN→GENERATE→EXECUTE→VERIFY→DOCUMENT), sin asumir infraestructura ni ejecutar nada irreversible sin autorización por acción. Instalada el 2026-08-21; `DEPLOY-PLAN.md` se reconcilió contra su plantilla oficial (ver su sección 15). |
 
 Instalación: `npx skills add <fuente> --skill <nombre>`. Verificar contra `skills-lock.json`
 antes de reinstalar (evita drift de versión).
+
+**`skills-lock.json` se versiona desde el 2026-08-21.** Antes estaba en `.gitignore` junto con
+`.claude/` y `.agents/`, así que quien clonara el repo no veía ninguna skill ni los hooks — toda la
+evidencia del proceso AI-first vivía solo en esta máquina. Ahora se versionan el lock, el
+`.claude/settings.json` (hooks) y `.claude/hooks/`; las copias de skills de terceros siguen
+ignoradas porque el lock permite reinstalarlas, y la única skill propia
+(`gotchas-testing-review`) ya vive versionada en `harnesses/gotchas-testing/`.
 
 ## Reglas de seguridad del repo (endurecidas a partir de hallazgos reales)
 

@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "create-harness": {
+      "source": "adminoryslabs/Armory",
+      "sourceType": "github",
+      "skillPath": "skills/create-harness/SKILL.md",
+      "computedHash": "f1ae272beac675822b3bcc5fe8f2024fa4e1a52bbd1764c9742c93cc885077bb"
+    },
+    "deploy-pass": {
+      "source": "adminoryslabs/Armory",
+      "sourceType": "github",
+      "skillPath": "skills/deploy-pass/SKILL.md",
+      "computedHash": "add0137d1686ed3ec8c5ded67b49da7a35bdb8fdb073bc5d92844027a56f8383"
+    },
+    "generar-tech-design": {
+      "source": "adminoryslabs/Skills",
+      "sourceType": "github",
+      "skillPath": "skills/generar-tech-design/SKILL.md",
+      "computedHash": "77dae8eb9f76d2297ec120ef2d53b445186865c791d33b33ab342af1a6a8d68c"
+    },
+    "revision-adversarial": {
+      "source": "adminoryslabs/Skills",
+      "sourceType": "github",
+      "skillPath": "skills/revision-adversarial/SKILL.md",
+      "computedHash": "665292baf3d60cab35610557052d21b2aebedd483cd5f82dad4924e2a988cb07"
+    },
+    "security-pass": {
+      "source": "adminoryslabs/Skills",
+      "sourceType": "github",
+      "skillPath": "skills/security-pass/SKILL.md",
+      "computedHash": "f2443bf5b3505b8bb1ef023127541b815b94541c747b8fd552ba2101de2a3eb5"
+    },
+    "spec-driven-development": {
+      "source": "addyosmani/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/spec-driven-development/SKILL.md",
+      "computedHash": "2dee9aa940633b7b5e0f45be34839ab31c0de98d482e16772c5cd350f4b91b4b"
+    }
+  }
+}
