@@ -23,9 +23,16 @@ SELECT id, username, rol, activo FROM usuario WHERE rol = 'ADMIN';
 -- falta — escribir ROLLBACK; y avisar. Si la lista vino vacía, seguir pegando
 -- desde acá para abajo en la misma sesión de psql.
 
--- 2) Insertar el primer admin. UUID y hash de password (bcrypt de "admin1234",
--- confirmado con el usuario) generados localmente con
--- app.core.security.hash_password el 2026-08-19 — nunca en texto plano.
+-- 2) Insertar el primer admin. El UUID y el hash bcrypt se generan localmente con
+-- `python scripts/generar_hash_password.py` (pide la contraseña por consola y solo
+-- imprime el hash). La contraseña en sí no se escribe acá ni en ningún archivo del
+-- repo — tampoco en un comentario.
+--
+-- ⚠️ SEC-07 (2026-08-21): la versión anterior de este comentario incluía la contraseña
+-- literal del admin de producción, y este repositorio es público. El valor sigue en el
+-- historial de git, así que la remediación real fue rotar la credencial
+-- (`rotar_password_admin_cloud_sql.sql`), no borrar esta línea. Ver SECURITY-REPORT.md
+-- y la sección "Reglas de seguridad del repo" de CLAUDE.md.
 INSERT INTO usuario (id, nombre, username, rol, instancia_principal, contacto, password_hash, activo)
 VALUES (
     '1d5fed0f-8907-43bc-9b10-a3fa5cf789be',

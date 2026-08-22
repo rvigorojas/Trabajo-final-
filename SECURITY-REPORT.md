@@ -403,9 +403,22 @@ el admin real:
   inmediata) + **CODE FIX** (limpiar el comentario) + **PRODUCT / POLICY DECISION** (visibilidad
   del repositorio, política de contraseñas de cuentas administrativas).
 
-**Estado: ABIERTO.** Encontrado el 2026-08-21 al verificar el despliegue para `DEPLOY-PLAN.md`.
-No se rotó la credencial en esta sesión — es una acción sobre producción y requiere decisión y
-ejecución del dueño del proyecto.
+**Estado: PARCIALMENTE REMEDIADO — la parte que corta el acceso sigue ABIERTA.**
+
+Encontrado el 2026-08-21 al verificar el despliegue para `DEPLOY-PLAN.md`.
+
+| Acción | Estado |
+|---|---|
+| Limpiar el comentario del script (CODE FIX) | ✅ Hecho 2026-08-21 |
+| `scripts/generar_hash_password.py` — genera el hash sin que la contraseña toque un archivo | ✅ Agregado |
+| `scripts/rotar_password_admin_cloud_sql.sql` — procedimiento de rotación listo | ✅ Agregado |
+| Regla dura en `CLAUDE.md` para que no se repita | ✅ Agregada |
+| **Rotar la contraseña en Cloud SQL (OPERATIONAL FIX)** | ❌ **Pendiente — es lo único que corta el acceso** |
+| Decidir la visibilidad del repositorio | ❌ Pendiente (decisión de producto) |
+
+Mientras la rotación no se ejecute, la contraseña original sigue siendo válida contra el backend
+de producción y sigue siendo recuperable del historial de git de un repositorio público. El code
+fix **no** reduce el riesgo por sí solo.
 
 ### Lección para el harness / las reglas
 
