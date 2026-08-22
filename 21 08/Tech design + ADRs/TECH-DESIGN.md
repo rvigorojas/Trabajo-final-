@@ -53,6 +53,7 @@ Cliente COE (online, polling)─┘
 | [ADR-0006](adrs/0006-resiliencia-sync-offline.md) | Registros offline solo por inserción, nunca update | Aceptado |
 | [ADR-0007](adrs/0007-autenticacion-y-control-de-acceso.md) | JWT de expiración corta para auth/RBAC offline-capable | Aceptado |
 | [ADR-0008](adrs/0008-estrategia-de-despliegue.md) | Despliegue managed/serverless con autoscaling | Aceptado |
+| [ADR-0009](adrs/0009-monorepo-vs-multirepo.md) | Un solo repositorio para los tres componentes | Aceptado |
 
 ## Modelo de datos
 

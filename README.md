@@ -91,7 +91,7 @@ El pipeline documental, en el orden en que se construyó — cada documento resp
 | [`21 08/PRD_PCE_JorgeChavez.4.md`](21%2008/PRD_PCE_JorgeChavez.4.md) | **PRD vigente.** Problema, usuarios, alcance, criterios de éxito medibles |
 | [`21 08/Design.md`](21%2008/Design.md) | Los 4 flujos de UX con la variante elegida y sus huecos resueltos |
 | [`21 08/Tech design + ADRs/TECH-DESIGN.md`](21%2008/Tech%20design%20+%20ADRs/TECH-DESIGN.md) | Diseño técnico: componentes, modelo de datos, resiliencia offline |
-| [`21 08/Tech design + ADRs/adrs/`](21%2008/Tech%20design%20+%20ADRs/adrs/) | 8 ADRs en formato MADR, con alternativas descartadas y por qué |
+| [`21 08/Tech design + ADRs/adrs/`](21%2008/Tech%20design%20+%20ADRs/adrs/) | 9 ADRs en formato MADR, con alternativas descartadas y por qué |
 | [`BACKLOG.md`](BACKLOG.md) | Los 11 ítems del frontend — **todos cerrados** |
 | [`tasks/item-NN-*/`](tasks/) | Un ciclo SDD por ítem: `spec.md` + `plan.md` + `todo.md` |
 | [`SECURITY-REPORT.md`](SECURITY-REPORT.md) | Security pass: 7 findings con evidencia, triage y estado de remediación |
