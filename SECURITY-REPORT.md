@@ -352,3 +352,66 @@ el admin real:
 - **SEC-03** (mover el JWT fuera de `localStorage`, si se quisiera ir más allá de la mitigación con
   CSP) requeriría revisitar ADR-7, porque el diseño offline-first actual depende de que el cliente
   pueda leer los claims del token sin llamar al backend.
+
+
+---
+
+## Hallazgo posterior — 2026-08-21
+
+### CRITICAL
+
+**SEC-07 — Contraseña del usuario `admin` de producción en texto plano en un repositorio público**
+
+- Severity: **CRITICAL**
+- Confidence: **HIGH — explotación confirmada en vivo, no teórica**
+- Category: Hardcoded credential / secret exposure / broken access control
+- Affected artifact: `backend/scripts/crear_admin_cloud_sql.sql`, comentario del paso 2
+- Location: el comentario que documenta el origen del hash bcrypt incluye la contraseña literal
+  del usuario `admin` (rol `ADMIN`) de la base de producción. El archivo está versionado y el
+  repositorio `github.com/rvigorojas/Trabajo-final-` es **público** (verificado el 2026-08-21:
+  `repository_public: true`).
+- Description: el fix de SEC-01 restringió `POST /usuarios` a rol `ADMIN`, y el admin real se
+  insertó a mano en Cloud SQL con este script. El script nunca contuvo la password en el `INSERT`
+  (usa el hash, correcto), pero el comentario que explica de dónde salió el hash sí la escribe en
+  claro. El resultado neto anula el fix de SEC-01: la barrera existe, y la llave está publicada al
+  lado.
+- Evidence: el 2026-08-21, desde fuera de la red del proyecto y sin ninguna credencial previa, se
+  hizo `POST /auth/login` contra el backend público con el usuario `admin` y la contraseña tomada
+  de ese comentario. Resultado: `200` con un JWT válido de rol `ADMIN`, con el que se listaron
+  `GET /unidades` (9 filas) y `GET /activaciones` (5 filas) de producción real.
+- Attack scenario: cualquier persona que encuentre el repositorio público lee el archivo, se loguea
+  como `admin` y obtiene control total: crear usuarios con cualquier rol (`POST /usuarios` ahora
+  acepta a un `ADMIN`), desactivar una emergencia real en curso, crear activaciones falsas, listar
+  la nómina completa de usuarios operativos.
+- Potential impact: idéntico al de SEC-01 — el escenario de mayor impacto posible para este sistema
+  — con el agravante de que el vector es más simple (no hace falta ni construir un request: son
+  usuario y contraseña).
+- Existing mitigation: ninguna. El rate limiting de SEC-02 no aplica: las credenciales son
+  correctas, no hay intentos fallidos que contar.
+- Recommended remediation, en este orden:
+  1. **Rotar la contraseña del usuario `admin` en Cloud SQL** — es la única acción que corta el
+     acceso. Borrar la línea del archivo no alcanza: el valor queda en el historial de git y el
+     repo ya estuvo público.
+  2. Reemplazar el comentario por una referencia al procedimiento (ej. "hash generado localmente
+     con `app.core.security.hash_password`; la contraseña se transmite fuera de banda"), sin el
+     valor.
+  3. Evaluar si el repositorio debe seguir siendo público. Es un sistema de gestión de emergencias
+     aeroportuarias con URL de producción publicada en la documentación.
+  4. Considerar forzar un cambio de contraseña en el primer login del admin.
+- Suggested verification: reintentar el login con la contraseña vieja y confirmar `401`.
+- Required change type: **OPERATIONAL FIX** (rotar la credencial en producción — prioridad
+  inmediata) + **CODE FIX** (limpiar el comentario) + **PRODUCT / POLICY DECISION** (visibilidad
+  del repositorio, política de contraseñas de cuentas administrativas).
+
+**Estado: ABIERTO.** Encontrado el 2026-08-21 al verificar el despliegue para `DEPLOY-PLAN.md`.
+No se rotó la credencial en esta sesión — es una acción sobre producción y requiere decisión y
+ejecución del dueño del proyecto.
+
+### Lección para el harness / las reglas
+
+Este hallazgo no lo habría encontrado un `security-pass` que solo mire el código de la aplicación:
+el archivo es un script operativo auxiliar, y el problema no es el `INSERT` sino un comentario.
+Regla derivada, a agregar a `CLAUDE.md`: **ningún archivo versionado puede contener una contraseña,
+token o clave en claro — tampoco dentro de un comentario, un docstring, un ejemplo de uso o un
+mensaje de commit.** Si un procedimiento necesita una credencial, se referencia dónde vive
+(Secret Manager), nunca su valor.

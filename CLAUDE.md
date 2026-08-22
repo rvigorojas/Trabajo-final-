@@ -221,6 +221,20 @@ Documentación vigente en `30 07/` (carpeta oficial desde 2026-07-30, reemplaza
 Instalación: `npx skills add <fuente> --skill <nombre>`. Verificar contra `skills-lock.json`
 antes de reinstalar (evita drift de versión).
 
+## Reglas de seguridad del repo (endurecidas a partir de hallazgos reales)
+
+- **Ningún archivo versionado puede contener una contraseña, token o clave en claro** — tampoco
+  dentro de un comentario, un docstring, un ejemplo de uso o un mensaje de commit. Si un
+  procedimiento necesita una credencial, se referencia dónde vive (Secret Manager), nunca su valor.
+  Origen: **SEC-07 (2026-08-21)** — la contraseña del `admin` de producción estaba escrita en un
+  comentario de `backend/scripts/crear_admin_cloud_sql.sql`, en un repositorio **público**; se
+  confirmó en vivo que permitía loguearse como `ADMIN` contra el backend real desde internet.
+- **Borrar el secreto del archivo no remedia nada por sí solo**: queda en el historial de git. La
+  remediación real es **rotar la credencial**.
+- Antes de versionar cualquier script operativo nuevo (`backend/scripts/`), releerlo buscando
+  valores literales — son archivos auxiliares que el security-pass sobre el código de la app no
+  necesariamente mira.
+
 ## Convenciones del backend
 
 - `Activacion` es insert-only (ADR-2): un trigger de DB permite únicamente la transición

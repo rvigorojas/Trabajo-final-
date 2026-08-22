@@ -237,9 +237,19 @@ Resultado de la corrida del **2026-08-21** (evidencia en la sección 13):
 
 - **Chequeos 1, 2, 7, 8: OK.**
 - **Chequeo 3: OK** — migración `0005` aplicada en Cloud SQL real, sin error.
-- **Chequeo 6: OK a nivel de esquema** — la constraint que lo garantiza está en producción; falta
-  ejercitarlo por HTTP.
-- **Chequeos 4 y 5: pendientes** — requieren un token real, ver sección 11.
+- **Chequeo 4: OK** — login real contra el backend de producción → `200` con JWT válido;
+  `GET /activaciones` → `200`, 5 activaciones, ninguna en estado `activa`.
+- **Chequeo 5: OK** — `GET /unidades` → **9 filas**, todas en estado `ok`: R1, R2, R8, R9, R10,
+  R11, R12, R13, CR9. `seed_unidades()` funcionó en Cloud SQL real.
+- **Chequeo 6: OK a nivel de esquema.** La constraint está aplicada en producción (log de la
+  migración). **No se ejercitó por HTTP a propósito**: hacerlo exige crear activaciones reales en
+  la base de producción, y las tablas son insert-only — quedarían para siempre. Se valida en la
+  suite de tests contra Postgres real, no contra producción.
+
+> ⚠️ **Este chequeo destapó un hallazgo CRITICAL de seguridad — SEC-07 en `SECURITY-REPORT.md`.**
+> La credencial usada para el login salió de un comentario en `backend/scripts/
+> crear_admin_cloud_sql.sql`, un archivo versionado en un repositorio **público**. Estado: abierto,
+> requiere rotar la contraseña del admin en producción.
 
 ### Observabilidad
 
@@ -322,9 +332,10 @@ Ordenados por riesgo. Ninguno se da por resuelto.
 
 | # | Pendiente | Riesgo | Acción |
 |---|---|---|---|
-| 1 | ~~Verificar que la migración `0005` llegó a Cloud SQL~~ → **RESUELTO 2026-08-21** (sección 13). Queda solo confirmar que `seed_unidades()` dejó las 9 filas: el código está desplegado, pero el seed no escribe nada en los logs. | Medio — si Unidades está vacía en producción, una pantalla no funciona | Login con el usuario `admin` → `GET /unidades` → contar 9 identificadores (chequeo 5). Requiere la credencial, que no está en el repo (correcto) |
+| 0 | **SEC-07 (CRITICAL, abierto): la contraseña del `admin` de producción está en claro en un comentario de `backend/scripts/crear_admin_cloud_sql.sql`, en un repo público.** Explotación confirmada en vivo el 2026-08-21. | **Máximo** — acceso administrativo total al sistema desde internet | **Rotar la contraseña en Cloud SQL** (borrar la línea no alcanza: queda en el historial de git), limpiar el comentario, y decidir si el repo sigue público. Ver `SECURITY-REPORT.md` |
+| 1 | ~~Verificar que la migración `0005` llegó a Cloud SQL y que `seed_unidades()` sembró la flota~~ → **RESUELTO Y VERIFICADO 2026-08-21** (sección 13): migración aplicada, 9 unidades en producción, login y lectura funcionando. | — | Cerrado |
 | 2 | **Sin alertas de monitoreo.** Una caída se detecta cuando alguien la nota. | Alto contra el objetivo de 99.9% del PRD | Crear 2 alertas de Cloud Monitoring (5xx y conexiones de Cloud SQL) |
-| 3 | **ADR-8 desactualizado** — dice que el frontend no tiene deploy automatizado; sí lo tiene. | Bajo, pero es una incoherencia documental visible | Actualizar la última sección de ADR-8 |
+| 3 | ~~ADR-8 decía que el frontend no tenía deploy automatizado~~ → **CORREGIDO 2026-08-21** en ADR-8 y en `CLAUDE.md`. | — | Cerrado |
 | 4 | **Sin entorno de staging.** Todo cambio que pasa los tests va directo a producción. | Medio | Evaluar una segunda revisión de Cloud Run sin tráfico como pre-producción |
 | 5 | **Build single-stage** deja `pip` en la imagen final (6 CVEs, ninguna explotable en runtime). | Bajo | Pasar a build multi-stage |
 | 6 | **Rate limiting en memoria** (SEC-02): el contador de intentos de login no coordina entre instancias si Cloud Run escala a más de una. | Medio | Mover a un store compartido si el tráfico justifica más de una instancia |
@@ -382,6 +393,17 @@ Corrió sin excepción → la base de producción no tenía ese problema.
 Búsqueda de `Traceback` / `Error` / `ValueError` en los logs del servicio `pce-backend` de las
 últimas 12 horas: **cero resultados**. Los arranques muestran `Application startup complete` y el
 `STARTUP TCP probe` pasando al primer intento.
+
+### Estado funcional de producción (con sesión autenticada)
+
+| Recurso | Resultado |
+|---|---|
+| `POST /auth/login` | `200`, JWT de rol `ADMIN` |
+| `GET /unidades` | `200` — **9 filas**: R1, R2, R8, R9, R10, R11, R12, R13, CR9, todas en estado `ok` |
+| `GET /activaciones` | `200` — 5 activaciones históricas, ninguna en estado `activa` |
+
+La flota de unidades **sí quedó sembrada en Cloud SQL**: el hallazgo #3 del walkthrough del 19/08
+("Unidades está vacía en producción") está resuelto y verificado contra el sistema real.
 
 ### Endpoints
 
