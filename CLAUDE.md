@@ -206,9 +206,15 @@ cualquier componente compartido se generan en 0 utilidades en el build real, aun
 compile y testee bien en aislamiento. Ya resuelto en `coe` y `pmm`; tenerlo presente si se agrega
 un tercer paquete de UI compartido.
 
-Documentación vigente en `30 07/` (carpeta oficial desde 2026-07-30, reemplaza
-`Documentacion 21 07/`): `PRD_PCE_JorgeChavez.3.md`, `Design.md`, `Tech design + ADRs/`
-(`TECH-DESIGN.md`, `FRONTEND-SPEC.md`, `FRONTEND-TASKS.md`, `adrs/`).
+Documentación vigente en `21 08/` (carpeta oficial, renombrada desde `30 07/` el 2026-08-21; antes
+`Documentacion 21 07/`): **`PRD_PCE_JorgeChavez.4.md` es el PRD vigente** (el `.3` queda como
+referencia histórica desde el cambio de georreferenciación del 2026-08-16), `Design.md`,
+`Tech design + ADRs/` (`TECH-DESIGN.md`, `FRONTEND-SPEC.md`, `FRONTEND-TASKS.md`, `adrs/`).
+
+Las copias sueltas del PRD que vivían en la raíz del repo (`PRD_PCE_JorgeChavez.md`/`.docx`, una
+versión anterior al `.3`) se quitaron el 2026-08-21: convivían con el `.3` y el `.4` sin ninguna
+marca de cuál era el bueno. Siguen recuperables del historial de git si hicieran falta.
+El mapa completo de documentos está en `README.md`.
 
 ## Skills instaladas (`skills-lock.json`)
 

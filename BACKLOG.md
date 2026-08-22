@@ -1,6 +1,6 @@
 # Backlog: Frontend PMM + COE — PCE Jorge Chávez
 
-Deriva de `30 07/Tech design + ADRs/FRONTEND-SPEC.md` y `FRONTEND-TASKS.md` (Fases 1-4; la Fase 0
+Deriva de `21 08/Tech design + ADRs/FRONTEND-SPEC.md` y `FRONTEND-TASKS.md` (Fases 1-4; la Fase 0
 de prerrequisitos ya está resuelta — la última pregunta abierta, la del ítem #10 (sync con token
 vencido/ventana del token blando), se confirmó con Renzo el 2026-08-12 — y la Fase 5 son pendientes
 externos que no bloquean, no un ítem de este backlog).

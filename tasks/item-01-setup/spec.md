@@ -1,6 +1,6 @@
 # Spec: Frontend PMM + COE (fase Specify de `spec-driven-development`)
 
-Complemento de `30 07/Tech design + ADRs/FRONTEND-SPEC.md` (296 líneas, ya cubre objetivo, contrato
+Complemento de `21 08/Tech design + ADRs/FRONTEND-SPEC.md` (296 líneas, ya cubre objetivo, contrato
 de API, pantallas y huecos) y `FRONTEND-TASKS.md` (ya desglosado en 5 fases). Este archivo llena
 solo las secciones del template de la skill que esos documentos no cubren — no los repite.
 

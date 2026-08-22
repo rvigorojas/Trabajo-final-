@@ -1,6 +1,6 @@
 # Spec: Shell de navegación Cliente COE — Opción 1A (ítem #2 del BACKLOG.md)
 
-Complemento de `30 07/Tech design + ADRs/FRONTEND-SPEC.md` sección 4 (pantallas del COE, agnóstico
+Complemento de `21 08/Tech design + ADRs/FRONTEND-SPEC.md` sección 4 (pantallas del COE, agnóstico
 al shell) y `FRONTEND-TASKS.md` Fase 2. Este archivo cubre solo el shell de navegación en sí — el
 contenido real de cada pantalla es de los ítems #3-#6 del backlog, no de este.
 

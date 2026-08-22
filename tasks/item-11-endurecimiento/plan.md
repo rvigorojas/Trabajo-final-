@@ -2,7 +2,7 @@
 
 Insumos: `tasks/item-11-endurecimiento/spec.md` (validado), `tasks/item-10-cola-offline-token-
 blando/todo.md` (evidencia de corte de conectividad real ya generada), PRD sección 7
-(`30 07/PRD_PCE_JorgeChavez.3.md`), `frontend/packages/api-client/src/design-tokens.css` (paleta
+(`21 08/PRD_PCE_JorgeChavez.3.md`), `frontend/packages/api-client/src/design-tokens.css` (paleta
 "Sentinel Command" y token de tap target), routers de `apps/coe` y `apps/pmm` (mapa de navegación
 real para el conteo de clics).
 

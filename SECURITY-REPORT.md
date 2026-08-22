@@ -3,8 +3,8 @@
 Fecha: 2026-08-19
 
 Alcance revisado:
-- **Producto/PRD** — `30 07/PRD_PCE_JorgeChavez.4.md`, sección 7 (roles y accesos).
-- **Arquitectura/Diseño+ADRs** — `30 07/Tech design + ADRs/TECH-DESIGN.md` y los 8 ADRs, en
+- **Producto/PRD** — `21 08/PRD_PCE_JorgeChavez.4.md`, sección 7 (roles y accesos).
+- **Arquitectura/Diseño+ADRs** — `21 08/Tech design + ADRs/TECH-DESIGN.md` y los 8 ADRs, en
   particular ADR-2 (insert-only), ADR-7 (autenticación y control de acceso), ADR-8 (despliegue).
 - **Specs/Tasks** — `BACKLOG.md` y `tasks/item-NN-*/` (revisados por muestreo, no ítem por ítem).
 - **Código** — `backend/app/` completo (routers, deps, core/security.py, core/config.py, schemas)
