@@ -85,6 +85,16 @@ Se creó el repo `https://github.com/rvigorojas/Trabajo-final-.git`. Primer comm
 `.claude/`, `.agents/` y `skills-lock.json` quedaron excluidos por `.gitignore` porque el symlink de
 instalación de skills usa ruta absoluta y se rompe al clonar el repo en otra máquina.
 
+> **Revisado el 2026-08-21.** La razón de arriba era correcta, pero se aplicó de más: el problema
+> del symlink afecta a `.claude/skills/` y `.agents/skills/` — no a `skills-lock.json`, que es un
+> JSON plano, ni a `.claude/settings.json`, que son los hooks del proyecto. El efecto colateral fue
+> que quien clonara el repo no veía **ninguna** skill instalada ni ningún guardrail: toda la
+> evidencia del proceso AI-first vivía solo en la máquina de Renzo, y la rúbrica evalúa el repo.
+> Desde esta fecha se versionan `skills-lock.json`, `.claude/settings.json` y `.claude/hooks/`; las
+> carpetas de skills siguen ignoradas, que es lo que la razón original justificaba. El hook de
+> `SessionStart` pasó de una ruta absoluta a `$CLAUDE_PROJECT_DIR` para poder versionarse sin
+> romperse en otro clon.
+
 ## Paso 6 — Instalación del skill `revision-adversarial`
 
 Se instaló vía `npx skills add adminoryslabs/Skills --skill revision-adversarial` (repositorio de
